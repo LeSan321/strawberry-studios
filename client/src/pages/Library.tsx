@@ -1,0 +1,356 @@
+import { useState, useRef } from "react";
+import { Link } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+
+const MOOD_LABELS: Record<string, string> = {
+  intimate_jazz: "Intimate Jazz",
+  high_energy: "High Energy",
+  noir_smoke: "Noir Smoke",
+  custom: "Custom",
+};
+
+const VISUAL_LABELS: Record<string, string> = {
+  shadow_and_smoke: "Shadow and Smoke",
+  golden_rim: "Golden Rim",
+  venetian_cage: "Venetian Cage",
+  match_flare: "Match Flare",
+  none: "None",
+};
+
+const STATUS_STYLES: Record<string, { label: string; color: string }> = {
+  draft: { label: "Draft", color: "oklch(0.55 0.03 60)" },
+  generating: { label: "Generating...", color: "oklch(0.62 0.14 55)" },
+  complete: { label: "Complete", color: "oklch(0.55 0.15 145)" },
+  failed: { label: "Failed", color: "oklch(0.52 0.22 18)" },
+};
+
+export default function Library() {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<"concerts" | "audio">("concerts");
+  const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [generatingId, setGeneratingId] = useState<number | null>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+
+  const utils = trpc.useUtils();
+
+  const { data: concerts, isLoading: concertsLoading } = trpc.concerts.list.useQuery(undefined, {
+    enabled: !!user,
+  });
+
+  const { data: audioTracks, isLoading: audioLoading } = trpc.audio.list.useQuery(undefined, {
+    enabled: !!user,
+  });
+
+  const generateMutation = trpc.concerts.generate.useMutation({
+    onSuccess: () => {
+      toast.success("Director's Package generated!");
+      setGeneratingId(null);
+      utils.concerts.list.invalidate();
+    },
+    onError: (err) => {
+      toast.error("Generation failed: " + err.message);
+      setGeneratingId(null);
+    },
+  });
+
+  const uploadAudioMutation = trpc.audio.upload.useMutation({
+    onSuccess: () => {
+      toast.success("Audio track saved!");
+      setUploadingAudio(false);
+      utils.audio.list.invalidate();
+    },
+    onError: (err) => {
+      toast.error("Upload failed: " + err.message);
+      setUploadingAudio(false);
+    },
+  });
+
+  const handleGenerate = async (concertId: number) => {
+    setGeneratingId(concertId);
+    await generateMutation.mutateAsync({ concertId });
+  };
+
+  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAudio(true);
+    try {
+      // Upload to S3 via fetch
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", file.name.replace(/\.[^.]+$/, ""));
+
+      const response = await fetch("/api/audio/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+      const { url, key } = await response.json();
+
+      await uploadAudioMutation.mutateAsync({
+        title: file.name.replace(/\.[^.]+$/, ""),
+        fileUrl: url,
+        fileKey: key,
+        mimeType: file.type,
+        fileSizeBytes: file.size,
+      });
+    } catch (err: any) {
+      toast.error("Upload failed: " + err.message);
+      setUploadingAudio(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="font-display text-2xl text-foreground mb-4">Sign In Required</p>
+          <p className="text-muted-foreground mb-8">Access your project library by signing in.</p>
+          <a href={getLoginUrl()} className="px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase">
+            Sign In
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Navigation */}
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-border/30">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="text-primary text-xl">✦</span>
+          <span className="font-display text-xs tracking-widest text-foreground/90 uppercase">Strawberry Studios</span>
+        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/venues" className="text-muted-foreground hover:text-foreground text-sm tracking-wider transition-colors uppercase font-light">Venues</Link>
+          <Link href="/create"
+            className="px-5 py-2 text-sm tracking-widest uppercase font-medium border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+            + New Concert
+          </Link>
+        </div>
+      </nav>
+
+      {/* Header */}
+      <div className="py-12 px-6 border-b border-border/30">
+        <div className="max-w-6xl mx-auto">
+          <p className="text-xs tracking-[0.4em] uppercase text-primary/70 mb-2 font-light">Your Productions</p>
+          <h1 className="font-display text-3xl text-foreground">Project Library</h1>
+          {user.name && (
+            <p className="text-muted-foreground font-serif mt-2">{user.name}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b border-border/30 px-6">
+        <div className="max-w-6xl mx-auto flex gap-8">
+          {(["concerts", "audio"] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`py-4 text-sm tracking-widest uppercase font-light border-b-2 transition-all duration-300 ${
+                activeTab === tab
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}>
+              {tab === "concerts" ? "Concerts" : "Audio Tracks"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-6xl mx-auto px-6 py-12">
+
+        {/* Concerts Tab */}
+        {activeTab === "concerts" && (
+          <div>
+            {concertsLoading ? (
+              <div className="text-center py-20 text-muted-foreground font-serif">Loading your concerts...</div>
+            ) : !concerts || concerts.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="text-6xl opacity-20 mb-6">🎷</div>
+                <p className="font-display text-xl text-foreground/60 mb-4">No concerts yet</p>
+                <p className="text-muted-foreground font-serif mb-8">Begin your first production at the Velvet Strawberry Jazz Club.</p>
+                <Link href="/create"
+                  className="px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase hover:bg-primary/90 transition-all">
+                  Start Producing
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {concerts.map(concert => {
+                  const statusStyle = STATUS_STYLES[concert.status] ?? STATUS_STYLES.draft;
+                  return (
+                    <div key={concert.id} className="noir-card p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-2 h-2 rounded-full" style={{ background: statusStyle.color }} />
+                            <span className="text-xs tracking-widest uppercase font-light" style={{ color: statusStyle.color }}>
+                              {statusStyle.label}
+                            </span>
+                          </div>
+                          <h3 className="font-display text-lg text-foreground mb-1 truncate">{concert.title}</h3>
+                          {concert.artistName && (
+                            <p className="text-muted-foreground font-serif text-sm mb-3">{concert.artistName}</p>
+                          )}
+                          <div className="flex flex-wrap gap-2">
+                            <span className="px-2 py-0.5 text-xs border border-border/30 text-muted-foreground/70 font-light">
+                              Velvet Strawberry Jazz Club
+                            </span>
+                            {concert.moodPreset && (
+                              <span className="px-2 py-0.5 text-xs border border-border/30 text-muted-foreground/70 font-light">
+                                {MOOD_LABELS[concert.moodPreset] ?? concert.moodPreset}
+                              </span>
+                            )}
+                            {concert.visualPreset && concert.visualPreset !== "none" && (
+                              <span className="px-2 py-0.5 text-xs border border-border/30 text-muted-foreground/70 font-light">
+                                {VISUAL_LABELS[concert.visualPreset] ?? concert.visualPreset}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2 flex-shrink-0">
+                          {concert.status === "draft" && (
+                            <button
+                              onClick={() => handleGenerate(concert.id)}
+                              disabled={generatingId === concert.id}
+                              className="px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase disabled:opacity-40">
+                              {generatingId === concert.id ? "Generating..." : "Generate Package"}
+                            </button>
+                          )}
+                          {concert.status === "complete" && concert.ticketSlug && (
+                            <Link href={`/concert/${concert.ticketSlug}`}
+                              className="px-4 py-2 border border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase text-center">
+                              View Ticket
+                            </Link>
+                          )}
+                          {concert.status === "complete" && concert.ticketSlug && (
+                            <button
+                              onClick={() => {
+                                const url = `${window.location.origin}/concert/${concert.ticketSlug}`;
+                                navigator.clipboard.writeText(url);
+                                toast.success("Concert link copied!");
+                              }}
+                              className="px-4 py-2 border border-border/40 text-muted-foreground hover:border-border hover:text-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase">
+                              Copy Link
+                            </button>
+                          )}
+                          {concert.status === "failed" && (
+                            <button
+                              onClick={() => handleGenerate(concert.id)}
+                              className="px-4 py-2 border border-primary/50 text-primary/70 hover:bg-primary/10 transition-all duration-300 font-display text-xs tracking-widest uppercase">
+                              Retry
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Director's Package preview */}
+                      {concert.status === "complete" && concert.cinematiquePrompt && (
+                        <div className="mt-4 pt-4 border-t border-border/20">
+                          <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground/60 mb-2 font-light">Cinématique Prompt Preview</p>
+                          <p className="text-sm text-muted-foreground font-serif italic leading-relaxed line-clamp-3">
+                            {concert.cinematiquePrompt}
+                          </p>
+                        </div>
+                      )}
+
+                      <p className="text-xs text-muted-foreground/40 font-light mt-3">
+                        Created {new Date(concert.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Audio Tracks Tab */}
+        {activeTab === "audio" && (
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <p className="text-muted-foreground font-serif">Upload M4A, MP3, or WAV tracks for your concerts.</p>
+              <button
+                onClick={() => audioInputRef.current?.click()}
+                disabled={uploadingAudio}
+                className="px-6 py-3 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-display text-sm tracking-widest uppercase disabled:opacity-40">
+                {uploadingAudio ? "Uploading..." : "+ Upload Track"}
+              </button>
+              <input
+                ref={audioInputRef}
+                type="file"
+                accept=".m4a,.mp3,.wav,.aac"
+                className="hidden"
+                onChange={handleAudioUpload}
+              />
+            </div>
+
+            {audioLoading ? (
+              <div className="text-center py-20 text-muted-foreground font-serif">Loading audio tracks...</div>
+            ) : !audioTracks || audioTracks.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="text-6xl opacity-20 mb-6">🎵</div>
+                <p className="font-display text-xl text-foreground/60 mb-4">No audio tracks yet</p>
+                <p className="text-muted-foreground font-serif mb-8">Upload your first track to attach it to a concert production.</p>
+                <button
+                  onClick={() => audioInputRef.current?.click()}
+                  className="px-8 py-3 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all font-display text-sm tracking-widest uppercase">
+                  Upload Track
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {audioTracks.map(track => (
+                  <div key={track.id} className="noir-card p-5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="w-10 h-10 flex items-center justify-center flex-shrink-0"
+                        style={{ background: "oklch(0.15 0.02 270)", border: "1px solid oklch(0.62 0.14 55 / 0.3)" }}>
+                        <span className="text-lg opacity-60">🎵</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-serif text-foreground truncate">{track.title}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          {track.mimeType && (
+                            <span className="text-xs text-muted-foreground/50 uppercase font-light">
+                              {track.mimeType.split("/")[1]}
+                            </span>
+                          )}
+                          {track.durationSeconds && (
+                            <span className="text-xs text-muted-foreground/50 font-light">
+                              {Math.floor(track.durationSeconds / 60)}:{String(track.durationSeconds % 60).padStart(2, "0")}
+                            </span>
+                          )}
+                          {track.fileSizeBytes && (
+                            <span className="text-xs text-muted-foreground/50 font-light">
+                              {(track.fileSizeBytes / 1024 / 1024).toFixed(1)} MB
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <a href={track.fileUrl} target="_blank" rel="noopener noreferrer"
+                        className="px-3 py-1.5 border border-border/40 text-muted-foreground hover:border-border hover:text-foreground transition-all font-display text-xs tracking-widest uppercase">
+                        Play
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
