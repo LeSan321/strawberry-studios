@@ -1085,3 +1085,443 @@ The corporate entities are associated with static, controlled, directional, cent
 *This document is the living production intelligence of Strawberry Studios. It is to be updated as the Velvet Strawberry series develops and as new knowledge is gathered.*
 
 *Current status: Chapters 1–7 complete. Ready for integration into the Expert Council system prompt.*
+
+---
+
+## CHAPTER EIGHT: ADVANCED ATMOSPHERIC PHYSICS AND AI PROMPT LANGUAGE
+
+> *"Light alone is geometry. Light interacting with particles is feeling."*
+
+---
+
+### 8.1 The Six-Layer Integrated Cinematic System
+
+Every cinematic image is built from six interacting layers. Change one and the emotional temperature shifts across all others. These are not independent variables — they are one organism.
+
+| Layer | What It Controls | Emotional Function |
+|---|---|---|
+| 1. Light spectrum | Color temperature + intensity | Warmth vs. authority |
+| 2. Air and particulate | Haze density, particle size, movement | Containment vs. freedom |
+| 3. Lens compression and depth | Focal length, depth of field | Intimacy vs. openness |
+| 4. Exposure and contrast curve | Tonal mapping, shadow retention | Judgment vs. compassion |
+| 5. Surface reflectance | Fabric and skin behavior | Visibility vs. absorption |
+| 6. Motion and time sampling | Blur, grain, shutter behavior | Control vs. release |
+
+**The rule:** Think in ecosystems, not ingredients. Prompt in bundles, not features.
+
+---
+
+### 8.2 Atmosphere Physics: The Full Spectrum
+
+**Smoke and haze under backlight** operate through Mie scattering. When light hits airborne particles, the beam becomes visible as a volumetric column. Without particles, light is invisible until it hits a surface. With particles, light becomes architecture.
+
+Under backlight, the performer becomes a semi-silhouette, the beam forms a halo edge, and smoke glows brightest at the body's edge. Micro eddies in air create movement in the beam. Light feels alive. Air feels thick. Time feels slowed.
+
+**Density calibration:**
+- Thin haze: beam visible but soft — romantic, controlled
+- Thick smoke: beam opaque, dramatic — can obscure face detail and flatten depth if overused
+- For Velvet Strawberry night chapters: use restrained haze. Presence, not fog machine chaos.
+
+**Dust motes in morning shafts** operate differently. Morning light is lower angle and warmer (3000–4000K). Natural dust particles catch light softly, do not create sharp beam columns, and create floating sparkle. The subtle downward drift (gravity-driven, not upward) creates calm. Unlike theatrical haze (intentional), dust feels accidental. That is why dawn feels honest.
+
+**The atmospheric liberation arc:**
+- Night: visible vertical beams through thin haze
+- Transition: soft haze, density reducing
+- Dawn: clean air with natural dust, no visible beam edges
+- Final frame: barely perceptible dust drift, almost imperceptible, just enough to confirm time exists
+
+**Air movement as ideology:**
+- Night club: stagnant air, slow swirls, controlled environment
+- Dawn room: window open, curtain movement, air exchange, particles drifting outward
+- Airflow direction subconsciously reads as freedom
+
+---
+
+### 8.3 Color Temperature as Ideology
+
+| Space | Temperature | Emotional Register |
+|---|---|---|
+| Night club practicals | 2700K tungsten | Warm but isolating |
+| Stage spotlight | 3200K incandescent | Dramatic, neutral-warm |
+| Corporate boardroom | 5000–6500K LED | Clinical, emotionless, metallic |
+| Dawn | 3500–4500K natural | Balanced, hopeful |
+
+**Temperature contrast = ideological contrast.** The boardroom above the stage is not just spatially elevated — it is chromatically cold. The artists exist in atmosphere. The controllers exist in clarity. That contrast is the ideology, encoded in Kelvin.
+
+**Skin tone response to gel changes:**
+- Under red gel (620nm): lighter skin tones glow intensely, mid-tones saturate, darker skin tones can lose contour unless rim-lit
+- Under blue gel (470nm): skin loses warmth, faces flatten, emotional distance increases
+- Under amber gel (590nm): all skin tones become luminous, contours soften, romantic tone increases
+- Dawn restores balanced white light: all skin tones become dimensional again — inclusion encoded in physics, without saying a word
+
+---
+
+### 8.4 Lens Language in AI Prompting
+
+AI models respond strongly to lens vocabulary. Include it explicitly.
+
+| Lens | Spatial Effect | In Haze | Emotional Read | Best For |
+|---|---|---|---|---|
+| 24–35mm (wide) | Expands space, exaggerates depth | Beams dramatic and extended, air expansive | Immersion, environment matters | Club architecture, multi-era crosscuts, final swell |
+| 50mm (medium) | Natural perspective, balanced | Beams visible but not exaggerated | Observational, honest, grounded | Bridge lens between night and dawn |
+| 85–135mm (telephoto) | Compresses depth, brings background forward | Air looks thicker, beams stack | Intimate, constrained, psychological | Fedora brim closeups, spotlight isolation, tension moments |
+
+**Prompt language:** "shot on 35mm lens," "shallow depth of field, 85mm portrait lens," "cinematic 50mm perspective"
+
+---
+
+### 8.5 Depth of Field and Floating Particles
+
+**Shallow DOF (f/1.4–f/2.0):** Only subject in focus. Background haze becomes creamy blur. Particles near focus plane sparkle. Particles outside focus become soft orbs. In night scenes, beams become abstract and dreamy. In dawn, dust becomes glitter-like. Emotional effect: isolation, romantic intensity, interior emotional state.
+
+**Deep DOF (f/8–f/16):** Room in focus. Air structure visible throughout. Architecture emphasized. Emotional effect: clarity, freedom, transparency. This is powerful for dawn liberation — you can literally increase depth of field as control dissolves.
+
+> **Advanced insight:** Shallow DOF makes air decorative. Deep DOF makes air structural. That difference matters philosophically in the myth.
+
+---
+
+### 8.6 Backlight Intensity Ratios and Silhouette Control
+
+| Ratio | Effect | Use |
+|---|---|---|
+| 1:1 balanced | Subject evenly lit, readable, human | Dawn participation, community |
+| 2:1 to 3:1 | Rim light forms, edges glow, face still readable | Romantic stage presence |
+| 5:1+ | Face darkens, silhouette strengthens, identity partially obscured | Mystery, control, authority imbalance |
+| Extreme backlight (no fill) | Subject becomes shape only — mythic, iconic, dehumanized | Early club chapters |
+
+**The arc:** Gradually reintroduce fill light as autonomy returns. Light ratio becomes emotional ratio.
+
+---
+
+### 8.7 Contrast Curves and Tonal Mapping
+
+**Hard contrast curve:** Deep blacks, fast drop into shadow, bright highlights, minimal midtone detail. Emotionally: judgment, hierarchy, authority, control. Perfect for night club, spotlight beam, velvet swallowing detail.
+
+**Soft filmic curve:** Gentle highlight roll-off, shadow detail retained, strong midtone richness. Emotionally: compassion, human presence, shared visibility. Perfect for dawn.
+
+**The moral read:** Same particles + hard contrast = dramatic beams. Same particles + soft curve = romantic glow. The physics is identical. The ideology is opposite.
+
+---
+
+### 8.8 Grain vs Digital Cleanliness
+
+**Digital-clean image:** Smooth gradients, no noise, hyper-real precision. Emotionally: modern, clinical, metallic, sometimes cold.
+
+**Film grain:** Micro texture, random luminance variation, organic instability. Emotionally: human, memory, warmth, embodied.
+
+**Layered with atmosphere:**
+- Haze + clean digital = sci-fi stage
+- Dust + subtle grain = memory-laden dawn
+- Night: grain in deep shadow feels smoky
+- Dawn: grain in midtones feels nostalgic
+
+---
+
+### 8.9 Motion Blur Physics
+
+**Fast shutter:** Crisp edges, fabric frozen, dust sharp. Emotionally: tension, control, precision. Velvet + fast shutter + hard spotlight = sculptural solidity.
+
+**Slow shutter:** Silk trails, dust streaks, light smears slightly. Emotionally: breath, release, dream state. Bias-cut silk + slow shutter + backlight = liquid trailing highlights.
+
+---
+
+### 8.10 Preventing AI Over-Bloom in Haze Scenes
+
+AI models associate "volumetric light" with fantasy glow and exaggerate bloom. Override this:
+
+**Avoid:** "glowing light beams," "ethereal glow," "dreamy haze"
+
+**Use instead:** "subtle volumetric light," "controlled highlight roll-off," "realistic dynamic range," "cinematic exposure balance," "no overexposed highlights," "preserved shadow detail," "soft highlight transitions," "filmic tonal response"
+
+---
+
+### 8.11 The Unified Night and Dawn Prompt Bundles
+
+**Night Bundle (use as a block):**
+> 85mm lens, shallow depth of field, thin theatrical haze with visible volumetric beams, strong backlight ratio 5:1, hard contrast curve, preserved highlight detail, minimal fill light, cinematic exposure, warm tungsten practicals at 2700K, controlled air space, high contrast shadow geometry
+
+**Dawn Bundle (use as a block):**
+> 35mm lens, deeper depth of field, warm horizontal sunlight at 4000K, floating dust particles in clean air, soft filmic tonal curve, balanced key-to-fill ratio, subtle organic grain, gentle motion blur in fabric, open window airflow, breathable atmosphere, ambient fill light
+
+**The full Night-to-Dawn transition arc:**
+
+| Phase | Lens | DOF | Contrast | Air | Light Ratio | Motion |
+|---|---|---|---|---|---|---|
+| Night (early) | 85mm | Shallow | Hard | Thin haze, vertical beams | 5:1 backlight | Fast shutter |
+| Pivot | 75mm | Moderate | Softening | Haze reducing | 3:1 | Slightly slower |
+| Dawn liberation | 35mm | Deep | Soft filmic | Clean air + dust | 1:1 balanced | Soft blur in fabric |
+
+---
+
+### 8.12 The Final Frame: Physics of Stillness
+
+**Camera locked. Air still moving. Note fading into silence.**
+
+This is the most technically precise moment in the entire series. Every variable must be calibrated:
+
+- Camera: locked, no micro drift
+- Lens: 35mm range — spatial presence, breathable
+- Depth of field: deep enough that dust exists in multiple planes
+- Air: very subtle downward drift, almost imperceptible — just enough to confirm time exists
+- Light: stable, no flicker, no shifting exposure
+- Contrast: soft filmic curve, shadows feel open not ominous
+- Grain: minimal but organic, image breathes microscopically
+
+**The neurological sequence:** Note fades → structure dissolves → no musical spine, no camera movement, no edit, no cue → only light, only air, only time → brain searches for a cue → finds none → settles → awareness of own breathing → participation.
+
+**The duration rule:** Long enough that they notice. Not long enough that they detach. That is instinctual timing — felt in editing, not calculated.
+
+**Frozen frame vs. still camera with moving air:**
+- Frozen frame: time stops, authorship seals, image becomes artifact — "This is the statement"
+- Still camera + moving air: time remains alive, responsibility transfers — "I'm no longer steering"
+
+The second is the correct choice. It is not "The End." It is an open door.
+
+**On personal screens:** Dust motes must be visible without being exaggerated. Silence must feel intentional very quickly — not loud, but grounded. The frame is smaller; micro-movement matters more. The silence competes with notifications, room noise, the impulse to scroll. Ground it immediately through stable light and barely perceptible air movement.
+
+---
+
+## CHAPTER NINE: THE COMPLETE PRODUCTION BIBLE — VELVET STRAWBERRY JAZZ CLUB
+
+> *"You are not building a location. You are building a physics system."*
+
+---
+
+### 9.1 The Ten Departments of a Production Bible
+
+A production bible is not logistics. It is ontology — it defines how the world behaves.
+
+| Department | What It Defines | Core Question |
+|---|---|---|
+| 1. Myth and Philosophy | What the venue means | Is it inevitable or seductive? |
+| 2. Architecture and Spatial Psychology | How space shapes behavior | What forces does this room exert on a body? |
+| 3. Lighting Doctrine | Rules of illumination | Where is darkness preserved intentionally? |
+| 4. Camera Language | How the venue is experienced | When does stillness occur? |
+| 5. Sound Ecology | How the room breathes | When does sound end? |
+| 6. Wardrobe and Textile Logic | How fabric interacts with light and ritual | What does cloth say about power? |
+| 7. Ritual and Behavior Protocol | How people act inside this world | Is applause explosive or absorbed? |
+| 8. Temporal Rules | How time behaves here | Does night feel endless? |
+| 9. Symbol System | Recurring motifs | What objects carry charge? |
+| 10. Brand Presence Philosophy | How identity manifests | When does the title appear? |
+
+---
+
+### 9.2 The Velvet Strawberry Jazz Club — Department Briefs
+
+**DEPARTMENT 1: MYTH AND PHILOSOPHY**
+
+The Velvet Strawberry is not a jazz club. It is a compression chamber. It is a space where creative expression exists under curated visibility — where talent is present but agency is rationed. The club is not evil. It is a system. Systems are not malicious; they are structural. The myth is not "down with gatekeepers." It is "we outgrow them." The club does not fall. It fades when it becomes irrelevant.
+
+The club is **inevitable**, not seductive. It does not reach for you. It receives you. You were always coming. The space exists regardless of whether you arrive. That is its power.
+
+The transformation the club enables: from curated visibility to self-directed expression. From spotlight to morning. From performance-for-the-beam to creation-in-the-air.
+
+**DEPARTMENT 2: ARCHITECTURE AND SPATIAL PSYCHOLOGY**
+
+*Ceiling:* Low — 9 to 11 feet maximum. Reduces vertical escape. Keeps beams short and dense. Forces intimacy. Shadows feel heavier because there is less vertical room.
+
+*Materials:* Brick foundation walls (real masonry, not decorative paneling). Exposed steel beams or riveted columns. Heavy velvet curtains. Dark wood bar with brass rail. These materials absorb light unevenly and prevent bounce light from flattening the scene. They preserve contrast. They allow spotlights to dominate.
+
+*Stage:* Elevated 6 to 12 inches. Creates authority separation. Light hits performer differently than audience. Performer elevated. Audience submerged.
+
+*Entry:* Narrow. Hidden. Subterranean descent implied. The audience does not arrive — they enter. The alley is a corridor, a descent channel, a transitional lung. If the top of frame is dark or heavy with shadow, the brain assumes containment. The alley behaves psychologically like an interior even though it is exterior.
+
+*Depth layering:* Columns, archways, booths, banquettes create foreground/midground/background planes. Out-of-focus glassware in extreme foreground. Performer in midground. Backlit bottles and brick wall in background. Three planes minimum.
+
+*The boardroom above:* Elevated. Cool daylight (5000K). Hard shadow stripes from Venetian blinds. No haze. No candlelight. No amber. Clean air. Sharp edges. They exist in clarity. The artists exist in atmosphere. The spotlight shaft is a pipeline of curated visibility — they control the beam, not just observe it.
+
+*Timelessness rule:* No neon beer logos. No modern liquor branding. No recognizable mid-century furniture icons. No plastic visible. Wood, brass, glass, velvet — materials durable across eras. Avoid showing the exterior. No cars, no street signage, no skyline. Placelessness = mythic.
+
+**DEPARTMENT 3: LIGHTING DOCTRINE**
+
+*Night doctrine:*
+- Dominant source: 3200K tungsten spotlight, hard, directional
+- Practicals: 2700K bare bulbs and shaded sconces — warm but negligible fill
+- Shadow philosophy: hard edges, deep blacks, minimal midtone detail
+- Darkness preserved: 70% of stage in darkness at minimum
+- Venetian blind patterns: projected from boardroom above, hard-edged, geometric
+- Haze: thin theatrical haze — visible volumetric beams, not dense fog
+- Fill: minimal to none — isolation is the point
+
+*Boardroom doctrine:*
+- 5000–6500K cool daylight
+- No haze, no amber, no warmth
+- Hard shadow geometry from blind slats
+- Clinical, procedural, indifferent
+
+*Dawn doctrine:*
+- 3500–4500K horizontal natural sunlight
+- No vertical beams — light enters horizontally
+- Open shadows — all skin tones dimensional
+- Natural dust in clean air — no theatrical haze
+- Soft filmic tonal curve — compassion, not judgment
+- No single "chosen" figure — everyone has light
+
+*The liberation signal:* When vertical beams disappear and horizontal light arrives, the system has changed. The audience feels this before they understand it.
+
+**DEPARTMENT 4: CAMERA LANGUAGE**
+
+*Movement philosophy:* The camera knows where it is going. It does not search. It does not hesitate. It glides with purpose — not fast, not slow for drama, just certain. This establishes authority. The world does not need to prove itself.
+
+*Night lens doctrine:* 85mm primary — compression, psychological intimacy, constraint. Shallow depth of field — isolation, interior emotional state.
+
+*Dawn lens doctrine:* 35mm primary — space expands, breathable, shared. Deeper depth of field — clarity, freedom, transparency.
+
+*Stillness rule:* The camera stops before the note fades. Stillness is permission. Motion is persuasion. When the camera locks and the air continues moving, time remains alive and responsibility transfers to the viewer.
+
+*Proximity rules:* Never show both eyes clearly in the night chapters. One eye illuminated, one in shadow = guarded intimacy. Two eyes lit = accessibility. The fedora man's face is withheld until the reveal — and even then, only one eye catches light.
+
+**DEPARTMENT 5: SOUND ECOLOGY**
+
+*Night:* Low reverberation (velvet and brick absorb). Crowd murmur present but absorbed — not loud, not silent. Glass clinks audible. Bass from the band felt as much as heard. Applause absorbed, not explosive. The room does not amplify celebration — it contains it.
+
+*Dawn:* Sound opens. Reverberation increases slightly as hard surfaces become more present. Piano notes decay naturally. Silence has texture — not empty, but full of potential. The final unresolved note fades, not cuts. Silence exists inside the image for several seconds after the note fades.
+
+**DEPARTMENT 6: WARDROBE AND TEXTILE LOGIC**
+
+*Night wardrobe doctrine:*
+- Singer: deep red — high reflectance in longer wavelengths, increased perceived saturation under tungsten. Bias-cut silk charmeuse or liquid satin for spotlight magnetism and liquid mercury highlight effect during movement.
+- Fedora man: dark wool or velvet — absorbs light, silhouette dominates over texture. Medium brim (2.5–3 inches) for classic noir shadow geometry.
+- Audience: dark absorptive materials — they recede into the space.
+
+*Dawn wardrobe doctrine:*
+- Linen, cotton, habotai — materials that scatter light softly
+- Fewer hard specular surfaces
+- Diffusion over dominance
+- Colors: muted gold, soft neutrals, pale dusty rose
+
+*Material spectrum reference:*
+- Most absorptive: matte black wool felt, cotton velvet (pile away from light), black suede
+- Mid diffuse: velour, linen, brushed cotton, tweed, crepe
+- Mid reflective: silk habotai, satin blends, taffeta, organza
+- High specular: silk charmeuse, liquid satin, metallic lamé, sequins
+
+**DEPARTMENT 7: RITUAL AND BEHAVIOR PROTOCOL**
+
+*Patrons:* Restrained. Present but not expressive. They do not perform for each other. They attend. Applause is absorbed, not explosive. The bar is reverent, not transactional.
+
+*The singer:* Integrated into the system — not trapped by a villain, but embedded in a gravitational field. Her agency is present but rationed. The dawn release is not escape from a captor. It is stepping outside a gravitational field.
+
+*The fedora man:* Never centered. Shadow in a booth. Hat brim silhouette. Half-visible profile. His presence is architectural, not narrative. He is spatial pressure, not character signaling.
+
+*Entry protocol:* No fanfare when the door opens. Gradual reveal. Door opens into shadow first. Eyes adjust. Stage emerges. The space reveals itself at its own pace.
+
+**DEPARTMENT 8: TEMPORAL RULES**
+
+*Night:* Time feels suspended. The club exists outside ordinary time. Night feels endless — not oppressive, but gravitational. The performance is not an event with a start and end. It is a condition.
+
+*Dawn:* Time resumes. The world outside exists again. Morning light implies the passage of night — not stated, felt.
+
+*The transition:* Time does not announce itself. The physics changes. The audience feels it before they understand it. This is the correct sequence.
+
+**DEPARTMENT 9: SYMBOL SYSTEM**
+
+| Symbol | Charge | Physical Behavior |
+|---|---|---|
+| Fedora hat | His identity, presence, mystery | Absorbs light — dark material |
+| Lipstick glass | Her trace, her presence | Catches warm edge light — specular glass |
+| Stage spotlight | Expression, visibility, rationed agency | Warm, directional, controlled |
+| Venetian blind shadows | Corporate control, geometric imprisonment | Hard-edged, projected from above |
+| Boardroom above | The system, procedural authority | Cold, elevated, indifferent |
+| Match flame | Internal decision, brief illumination | Warm but negligible — never illuminates face |
+| Smoke curl | Aftermath, transition, dissolving authority | Backlit, rising, dissolving |
+| Piano alone in dawn room | Creative potential, invitation | Warm horizontal light, no spotlight |
+| Folded paper / sheet music | Analog carrier of the Riff link | Passed quietly, not announced |
+| Open curtain | Dawn, permeability, freedom | Light enters horizontally |
+
+**The micro cross-cut (no dialogue):** Hat on bar → Cut to her mid-song → Cut to hat untouched → Cut to her glance toward bar → Cut to balcony shadow shifting → Cut to fedora man leaving frame → Cut to lipstick glass alone. Only physics and objects. That builds myth.
+
+**DEPARTMENT 10: BRAND PRESENCE PHILOSOPHY**
+
+*Title behavior:* Butterfly wing, not billboard. The title appears once, at the end, under the sustained silence. Simple. Minimal. Earned. No flashy animation. No hard sell. Just presence.
+
+*When the title appears:* After the note fades. After the silence exists. After the dust continues drifting. After the viewer becomes aware of their own breathing. Then: "Strawberry Riff." Not as a product. As a doorway.
+
+*What is never shown:* A glowing UI. A phone screen. A notification badge. A product demo. The technology is represented through analog carriers — folded lyrics, sheet music annotations, a second piano joining the first from offscreen, a melody echoing back through a window. The audience understands it represents the app. But they feel it as freedom. That is brand transcendence.
+
+---
+
+### 9.3 The Ten Most Important Physical Phenomena for Shooting Live Music in a Dark, Intimate Venue
+
+A cinematographer working in this environment must understand these ten phenomena — not as theory, but as active forces shaping every frame:
+
+1. **Inverse square law** — Light intensity drops dramatically with distance. Small shifts in performer position radically change exposure.
+2. **Dynamic range limits** — Dark venue + bright spotlight = extreme contrast. Sensors clip highlights or crush shadows. You must decide what to sacrifice.
+3. **Color temperature interaction** — Mixed temperatures create emotional chaos unless controlled. Tungsten practicals + LED stage lights + skin tones must be deliberately composed.
+4. **Spectral response of fabric** — Red velvet under tungsten vs LED behaves differently. Some LEDs desaturate reds or skew magenta.
+5. **Specular vs diffuse reflection** — Sweat, sequins, satin = specular highlights. Velvet = diffuse absorption. This determines texture legibility.
+6. **Atmospheric scattering** — Haze makes light beams visible. Particles scatter shorter wavelengths more aggressively. That is why golden light feels thick.
+7. **Rolling shutter artifacts** — LED stage lights can flicker due to PWM dimming. Camera shutter speed must sync.
+8. **Depth of field in low light** — Wide apertures = razor thin focus plane. Singer sways → focus shifts emotionally.
+9. **Motion blur perception** — At lower shutter speeds, hand movement blurs. Blur can feel sensual or sloppy depending on cadence.
+10. **Psychoacoustic-visual synchrony** — Human perception fuses light intensity and sound energy. A louder vocal often feels brighter even if exposure does not change. Understanding this lets you resist unnecessary lighting shifts.
+
+---
+
+### 9.4 The Physics Department vs. The Wardrobe Department: One Shot, Two Languages
+
+**The shot:** Singer in a red dress under a single spotlight.
+
+**Physics department says:**
+A 3200K tungsten spotlight positioned 30 degrees above stage right produces a high-contrast illumination pattern. The red fabric exhibits high absorption in shorter wavelengths and strong reflectance in longer wavelengths, increasing perceived saturation. Specular highlights along the shoulder indicate a semi-satin weave. Falloff across the torso follows inverse square distribution, creating a luminance gradient from face to waist. Venetian blind shadows introduce periodic occlusion patterns with hard edges due to minimal diffusion.
+
+Their language is measurable. Quantitative. Wavelength. Reflectance. Contrast ratio.
+
+**Wardrobe department says:**
+The red dress holds the light like it belongs to her. The velvet deepens at the waist and blooms at the shoulder. The shadow stripes carve rhythm across the bodice. The fabric drinks the dark and releases only what it chooses.
+
+Their language is relational. Interpretive. Intentional. Expressive.
+
+**The same shot. Two realities.**
+
+Physics describes what happens. Wardrobe describes what it means. Cinema lives in the tension between those two.
+
+---
+
+### 9.5 World-Building vs. Directing: The Layer Distinction
+
+**World-building** defines the laws, the physics, the textures, the behaviors, the limits, the symbolic grammar. It answers: "How does reality behave here?" It is ontological. It exists whether a camera is present or not.
+
+**Directing** defines what we attend to, in what order, at what pace, from what distance, with what emphasis. It answers: "Where does attention move inside this world?" It is navigational. It only exists because someone is experiencing the world.
+
+**The relationship:** World-building is the physics engine. Directing is the camera path through it. If the physics engine is weak, directing feels manipulative. If the world is coherent, directing feels inevitable.
+
+**The highest level:** When someone truly masters both, they no longer feel like they are directing. They feel like they are revealing. Because the world has logic, and they are simply guiding attention through it. That is when audience members say: "It felt inevitable."
+
+**World-building asks:** "What is true here?"
+**Directing asks:** "What is revealed first?"
+
+---
+
+### 9.6 The Modular Mythology: Multi-Genre Series Architecture
+
+The myth of Strawberry Riff is not about 1940s jazz. It is about creative agency being centralized — then decentralized. That story can live in any era. The era is costume. The myth is constant.
+
+**Structural constants across all eras:**
+- Night grammar: architectural control, vertical light, curated spotlight, centralized authority
+- Dawn grammar: architectural freedom, horizontal light, ambient dawn, distributed resonance
+- The transition: physics changes before the audience understands why
+- The final frame: still camera, moving air, unresolved note, silence, title
+
+**Era-specific aesthetics (all telling the same story):**
+
+| Era | Setting | Analog Carrier | Night Grammar | Dawn Grammar |
+|---|---|---|---|---|
+| 1920s | Speakeasy | Handwritten lyric on matchbook | Candlelight pools, low arches | Alley door opening to morning |
+| 1940s | Jazz club | Sheet music annotation | Venetian blind beams, velvet | Piano alone in dawn room |
+| 1960s | Folk circle | Typewritten note | Coffeehouse lamplight, close tables | Front porch, open sky |
+| 1970s | Garage | Cassette tape | Single bare bulb, concrete | Garage door opening to daylight |
+| 1980s | Bedroom synth | Cassette tape with handwritten label | Desk lamp, closed blinds | Window opened, curtain lifting |
+| 1990s | Indie coffeehouse | Ticket stub with lyric | Dim string lights, close walls | Outdoor table, morning sun |
+| 2026 | Sunlit apartment | Phone tap on table | (no night chapter needed) | Full dawn, open windows |
+
+**The final swell:** All eras echo the same melodic phrase. Cross-cut faster. Music fuller. Light brighter. Windows open in every era. No vertical shadows anywhere. End on faces — different ages, different backgrounds, different eras — all mid-creation, mid-breath, mid-smile. Freeze not on triumph but on participation. Because participation is the revolution. Then: "Strawberry Riff." Simple. Minimal. Earned.
+
+**The final note:** Unresolved. Sustained. Then fading — not resolving, just fading. Silence exists inside the image. The camera does not move. The dust continues drifting. The viewer becomes aware of their own breathing. The note was an open invitation. Just as night is an invitation to the dawn.
+
+---
+
+*The Cinématique Physics and Wardrobe Bible — Version 1.0*
+*Nine chapters. Complete.*
+*Ready for integration into the Expert Council system prompt.*
+*To be updated as the Velvet Strawberry series develops and as new eras are added to the modular mythology.*
