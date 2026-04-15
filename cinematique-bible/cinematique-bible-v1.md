@@ -1525,3 +1525,231 @@ The myth of Strawberry Riff is not about 1940s jazz. It is about creative agency
 *Nine chapters. Complete.*
 *Ready for integration into the Expert Council system prompt.*
 *To be updated as the Velvet Strawberry series develops and as new eras are added to the modular mythology.*
+
+---
+
+## CHAPTER TEN: PHYSICS ENGINE DEEP DIVE — GENESIS RESEARCH FINDINGS
+
+> *"The difference between a simulation and a truth is the number of physical laws you have obeyed."*
+
+This chapter documents the findings from a systematic mining of the Genesis physics engine repository and its associated academic papers. Genesis is a universal physics simulation platform developed by researchers at Carnegie Mellon, MIT, Stanford, and other institutions, integrating six physics solvers — Rigid Body, MPM, SPH, FEM, PBD, and Stable Fluid — into a unified framework. While Genesis is designed for robotics research, its underlying physics models are the same mathematical laws that govern how fabric moves on a performer, how smoke behaves under a spotlight, and how light interacts with material surfaces. What follows is a translation of that research into cinematic production knowledge.
+
+---
+
+### 10.1 Thin-Shell Fabric Physics: The Mathematics of Drape
+
+**Source:** Wang et al., "Thin-Shell Object Manipulations With Differentiable Physics Simulations," arXiv:2404.00451 (2024); Qiao et al., "Differentiable simulation of soft multi-body systems," NeurIPS 2021.
+
+The physics of fabric is governed by what researchers call **thin-shell mechanics** — the behavior of materials whose thickness is negligible relative to their other dimensions. This co-dimensionality is what makes fabric physics so complex and so visually distinctive. A fabric is not a solid object that bends; it is a surface that folds, and the difference between those two descriptions contains everything a cinematographer or wardrobe designer needs to know.
+
+**The three forces that determine every fold:**
+
+The first is **bending stiffness** — a material's resistance to curvature. This is the single most important parameter for predicting how a fabric will look on a body or in motion. High bending stiffness (thick wool, stiff leather, heavily starched cotton) produces rigid, deliberate folds that hold their geometry. The fabric makes a statement. Low bending stiffness (chiffon, thin silk, fine linen) produces soft, pliable surfaces that conform to underlying forms and generate numerous small, intricate wrinkles. The fabric listens to the body.
+
+The second is **bending plasticity** — a material's ability to retain a deformed shape after the deforming force is removed. This is the physics of a crease. A sharply pressed trouser leg, a permanently pleated skirt, a crushed velvet that holds the impression of a hand — all of these are bending plasticity made visible. The mathematical model uses a **tolerance angle**: below this angle, the material springs back elastically; above it, the deformation becomes permanent. For the Velvet Strawberry, this means the fedora brim holds its curve, the singer's dress retains the memory of previous movements in its fold geometry, and a jacket that has been worn for years carries the history of its wearer in its creases.
+
+The third is **frictional contact** — how the fabric interacts with itself, with other surfaces, and with the air. High friction (velvet, brocade, rough wool) creates sharp, defined folds and resistance to movement. The fabric grips. Low friction (silk charmeuse, liquid satin, polished taffeta) creates cascading, fluid drapes and effortless movement. The fabric flows. This is not merely aesthetic — it is the physical reason why a velvet jacket reads as authoritative and a silk dress reads as sensual. The friction coefficient is encoding character.
+
+**The bias cut — why it matters physically:**
+
+A bias-cut garment is cut at 45 degrees to the grain of the fabric. This is not a stylistic choice alone — it is a physics intervention. When fabric is cut on the bias, the threads run diagonally rather than perpendicular to the body. This changes the effective bending stiffness and stretch resistance of the material, making it more elastic and more conforming. A bias-cut silk charmeuse drapes differently from a straight-cut piece of the same fabric because the thread geometry has changed. The result is a garment that moves with the body rather than around it — that follows every curve, catches light along every contour, and produces the liquid mercury highlight effect that makes bias-cut silk one of the most cinematically powerful materials in existence.
+
+**Fabric physics reference table for the Velvet Strawberry:**
+
+| Material | Bending Stiffness | Friction | Plasticity | Visual Behavior | Cinematic Use |
+|---|---|---|---|---|---|
+| Silk charmeuse (bias cut) | Very low | Very low | Low | Liquid drape, mercury highlights, body-conforming | Singer's performance gown — movement = light |
+| Velvet (pile up) | Medium | High | Medium | Deep color, absorbs light, sharp fold edges | Fedora, curtains, upholstery — authority |
+| Velvet (pile down) | Medium | High | Medium | Lighter, more reflective, pile catches rim light | Jacket lapels — reveals direction of movement |
+| Satin | Low | Low | Low | Specular highlights, mirror-like at angles | Evening wear — status, visibility |
+| Heavy wool | High | Medium | High | Structured folds, holds geometry, slow movement | Overcoat, suit — permanence, weight |
+| Chiffon | Very low | Very low | Very low | Floats, responds to air, multiple transparent layers | Overlay, scarf — breath, freedom |
+| Sequined fabric | Low (base) + mass | Low | Low | Slow, heavy swing; individual sparkle points | Statement pieces — controlled spectacle |
+
+---
+
+### 10.2 Fluid Dynamics and Atmospheric Physics: The Science of Visible Air
+
+**Source:** Xian et al., "FluidLab: A differentiable environment for benchmarking complex fluid manipulation," arXiv:2303.02346 (2023); SPH_Taichi reference implementation; Jos Stam, "Stable Fluids" (1999); Mie scattering physics literature.
+
+The atmosphere of the Velvet Strawberry is not decoration. It is a physics system. Every particle of haze, every curl of cigarette smoke, every breath that becomes visible under a cold spotlight — these are governed by fluid dynamics equations that have been studied for over a century. Understanding them at the level of principle (not equation) gives a production designer precise control over what the camera will see.
+
+**Two solvers, two kinds of atmosphere:**
+
+Genesis uses two complementary approaches to simulate gaseous phenomena. **Smoothed Particle Hydrodynamics (SPH)** treats the atmosphere as a collection of individual particles, each interacting with its neighbors. This is the correct model for dense, localized phenomena — a cigarette plume, a breath in cold air, a puff of smoke from a match. Each particle carries velocity, density, and temperature, and the aggregate behavior of millions of particles produces the visual result. SPH simulations with approximately 1.74 million particles have been demonstrated in real-time on modern GPUs, which means the physics we are describing is not theoretical — it is computable.
+
+**Stable Fluid solvers** take the opposite approach, treating the atmosphere as a continuous medium on a grid and solving the Navier-Stokes equations — the fundamental equations of fluid motion. This is the correct model for diffuse, room-scale phenomena — the general haze that fills the club, the slow drift of atmosphere under the ceiling, the way air moves when a door opens. Stable Fluid solvers are unconditionally stable (they do not blow up numerically regardless of time step), which is why they are used for interactive and real-time applications.
+
+**The four stages of atmospheric simulation:**
+
+Every fluid simulation, regardless of solver, proceeds through four stages that are directly observable in the final image. External forces are applied first — gravity pulling smoke downward, heat from a spotlight creating an updraft, a performer's movement generating a pressure wave. Then advection carries the fluid properties along the flow — this is why smoke trails behind a moving hand rather than staying in place. Then diffusion spreads the properties outward — this is why a cigarette plume eventually becomes a general haze rather than a sharp column. Finally, projection enforces physical consistency — this is why smoke does not pass through solid surfaces.
+
+**Mie scattering: why light beams are visible:**
+
+The visibility of a light beam in atmospheric haze is governed by **Mie scattering** — the interaction of light with particles whose size is comparable to the wavelength of the light. This is fundamentally different from Rayleigh scattering (which explains blue skies and is strongly wavelength-dependent). Mie scattering is nearly wavelength-independent, which is why theatrical haze appears white or neutral rather than colored. The key properties are:
+
+**Forward-scattering dominance** — Mie scattering sends more light in the direction of the incident beam than in any other direction. This means a light beam is most visible when you are looking toward the light source, not away from it. A performer standing between the camera and a spotlight will appear backlit with a visible halo of scattered light. A performer standing beside the spotlight will show a visible beam column. A performer in front of the spotlight, with the camera behind them, will show the least visible beam.
+
+**Particle concentration and density** — More particles per cubic meter means more scattering events per unit length of beam, which means a more visible beam. Thin haze (low concentration) produces subtle, romantic beam visibility. Dense haze (high concentration) produces dramatic, theatrical beam columns but can flatten depth and obscure facial detail. The production directive for the Velvet Strawberry is thin haze — presence without domination.
+
+**Particle size and material** — Water-based haze (most theatrical foggers) produces larger droplets that scatter light more broadly and dissipate faster. Oil-based haze (hazer machines) produces smaller, more stable particles that linger longer and produce finer, more cinematic beam definition. Cigarette smoke produces extremely fine particles with a complex organic composition, producing a distinctly different visual quality — warmer, more amber-tinted, slower to dissipate, and more likely to curl and eddy rather than diffuse uniformly.
+
+**Atmospheric behavior reference table:**
+
+| Phenomenon | Physics Mechanism | Visual Behavior | Production Directive |
+|---|---|---|---|
+| Stage haze (water-based) | Mie scattering, large droplets | Visible beams, fast dissipation, neutral color | Use sparingly — thin presence only |
+| Stage haze (oil-based) | Mie scattering, fine particles | Defined beams, slow dissipation, longer persistence | Preferred for Velvet Strawberry |
+| Cigarette smoke | Complex organic particles | Warm amber tint, curling eddies, slow rise | Motivated practical — from specific sources |
+| Breath vapor | Water vapor condensation | Visible only in cold air, fast dissipation | Dawn transition — cold morning air |
+| Dust motes | Gravity-driven particle drift | Downward drift, sparkle in horizontal light | Dawn liberation sequence only |
+| Updraft from spotlight | Thermal convection | Haze thins directly above hot fixture | Creates natural "hole" in atmosphere |
+| Air current from door | Pressure differential | Visible eddy and swirl in haze | Entry/exit moments — atmospheric punctuation |
+
+**Temperature gradients as invisible architecture:**
+
+One of the most cinematically useful atmospheric phenomena is the temperature gradient — the invisible boundary between warm and cool air masses. In a jazz club, warm air rises from bodies, from stage lights, from the bar. Cool air sinks from ventilation, from exterior walls, from the floor. These gradients create **density stratification** — layers of atmosphere with different particle concentrations. A spotlight beam passing through stratified air will show subtle variations in density along its length, creating a beam that is not uniform but has texture and movement. This is the physics of why a well-photographed jazz club feels alive rather than static. The air is doing something. The atmosphere has structure.
+
+---
+
+### 10.3 Ray-Tracing Physics and Light-Material Interaction: The BRDF of Fabric
+
+**Source:** Zheng et al., "LuisaRender: A high-performance rendering framework," ACM TOG 2022; Physically Based Rendering literature; "A BRDF analysis of cloth," UC eScholarship; "Specular reflection from woven cloth," ACM SIGGRAPH 2011.
+
+The LuisaRender framework used in Genesis is a physically-based ray-tracing renderer — meaning it simulates light by tracing individual photons from the camera into the scene and calculating every interaction with every surface. The mathematical heart of this system is the **Bidirectional Reflectance Distribution Function (BRDF)** — a function that describes, for every possible combination of incoming and outgoing light directions, how much light a surface reflects. Every fabric has a BRDF. Understanding what that BRDF looks like for the materials in the Velvet Strawberry is the difference between a cinematographer who guesses and one who knows.
+
+**The BRDF of velvet:**
+
+Velvet's visual character comes from its pile — thousands of short, upright fibers that scatter light in multiple directions simultaneously. The BRDF of velvet is dominated by **diffuse reflection** with a very wide scattering lobe. There is minimal specular component, which is why velvet appears to absorb light rather than reflect it. However, velvet has a distinctive **retroreflective component** — when light comes from behind the camera (front lighting), velvet appears darkest. When light comes from the side or behind (rim or back lighting), the pile fibers catch the light at their tips and create a luminous edge glow. This is the physics of why velvet under rim light appears to have an inner fire — the fiber tips are acting as tiny forward-scattering elements, each contributing a small specular highlight that aggregates into a visible glow.
+
+**Pile direction and anisotropy:**
+
+Velvet is an **anisotropic** material — its optical properties depend on direction. When the pile is stroked toward the viewer (pile down), the fibers lie flat and the surface appears lighter and more reflective. When the pile is stroked away from the viewer (pile up), the fibers stand upright and the surface appears darker and more absorptive. This means a velvet jacket that a performer moves in will shift in apparent brightness as the pile direction changes relative to the camera and light source. This is not a flaw — it is information. The fabric is encoding movement.
+
+**The BRDF of silk and satin:**
+
+Silk and satin have BRDFs dominated by **specular reflection** with a narrow, concentrated lobe. The smooth, aligned fibers of these materials act as micro-mirrors, reflecting light at angles close to the specular angle. This produces the sharp, bright highlights that make silk and satin read as luminous and expensive. The specular lobe is not perfectly sharp — it has a small spread determined by the micro-roughness of the fiber surface — but it is far narrower than velvet's diffuse lobe. The result is that silk and satin highlights are localized, directional, and dynamic: they move as the performer moves, creating trails of light that trace the body's motion through space.
+
+**Colored gels and spectral response:**
+
+A colored gel is a spectral filter — it transmits certain wavelengths of light and absorbs others. The visual result of a gel on a fabric depends on the **spectral reflectance** of the fabric (which wavelengths it reflects) combined with the **spectral transmittance** of the gel (which wavelengths it passes). The interaction is multiplicative: only wavelengths that both the gel transmits and the fabric reflects will be visible.
+
+| Gel Color | Wavelength Transmitted | Red Fabric | Blue Fabric | Black Fabric | White Fabric |
+|---|---|---|---|---|---|
+| Red (620–750nm) | Long wavelengths only | Intensified, saturated | Very dark, near-black | Stays black | Appears warm red |
+| Blue (450–490nm) | Short wavelengths only | Very dark, near-black | Intensified, saturated | Stays black | Appears cool blue |
+| Amber (590–620nm) | Mid-long wavelengths | Warm, slightly orange | Dark brown | Stays black | Appears golden |
+| Green (520–560nm) | Mid wavelengths | Dark, desaturated | Dark teal | Stays black | Appears green |
+
+**The critical insight for the Velvet Strawberry:** The singer's deep red dress under tungsten (2700K, warm spectrum) will appear maximally saturated and luminous. Under a blue gel, the same dress will appear nearly black — the red pigment absorbs blue light, leaving almost nothing to reflect. This is not just a color effect — it is a power effect. The dress that glows under warm light disappears under cold light. The corporate boardroom's cool daylight (5000–6500K) is not just aesthetically cold — it is spectrally hostile to the warm palette of the club. The physics is doing the ideology.
+
+**The inverse square law in intimate spaces:**
+
+In a space with 30-foot depth (the Velvet Strawberry's approximate stage-to-back-wall distance), the inverse square law creates dramatic consequences. A performer standing 5 feet from a practical lamp receives 4 times more light than a performer standing 10 feet away. At 15 feet, they receive 9 times less light than at 5 feet. This rapid falloff is what creates the pools of light and deep shadow that define the visual grammar of intimate venues. It is also why a single practical lamp can serve as a motivated light source for a close-up but becomes negligible for a wide shot — the physics of distance changes the story the light is telling.
+
+---
+
+### 10.4 PBD Cloth Simulation and Granular Physics: Movement, Weight, and Camera Response
+
+**Source:** Matthias Müller et al., "Position Based Dynamics" (2007); Unreal Engine Chaos Cloth documentation; Ten Minute Physics reference implementation.
+
+**Position Based Dynamics (PBD)** and its extended variant **XPBD** are the simulation methods used in Genesis and Unreal Engine's Chaos physics system for cloth. The core insight of PBD is that fabric, despite appearing flexible, exhibits very limited stretch — typically 0 to 5% elongation under normal conditions. Any stretch beyond this range is a visual artifact. The primary variable that determines how fabric looks in motion is therefore not stretch but **bending resistance** — the parameter that controls how easily the fabric curves.
+
+**Bending resistance as visual language:**
+
+High bending resistance produces structured, deliberate folds that move slowly and hold their geometry between movements. This is the physics of authority — a stiff garment that does not respond to every micro-movement, that maintains its form regardless of what the body inside it is doing. Low bending resistance produces soft, flowing surfaces that respond to every breath, every shift of weight, every air current. This is the physics of vulnerability and openness — a garment that cannot hide what the body is feeling.
+
+For the Velvet Strawberry, the singer's performance gown should have very low bending resistance — it should be a physics instrument, translating every movement into light. The fedora man's clothing should have high bending resistance — it should be a physics shield, revealing nothing.
+
+**Granular materials and added weight:**
+
+Sequins, beading, and embroidery are not merely decorative — they are **granular materials** that change the physics of the underlying fabric. Each sequin adds mass to a specific point on the fabric surface, increasing the effective weight and inertia of that region. The aggregate effect of a heavily sequined garment is a fabric that moves more slowly, swings with greater momentum, and settles with more deliberate gravity. Individual sequins also act as **point specular reflectors** — each one is a tiny mirror that catches light from a specific angle and reflects it toward the camera. A sequined dress in motion produces a field of moving highlight points that trace the fabric's velocity through space. This is not shimmer — it is a physics visualization of movement.
+
+**How fabric physics appears on camera:**
+
+The camera does not record physics — it records light. But physics determines what light does, and therefore what the camera sees. Three camera phenomena are directly governed by fabric physics:
+
+**Motion blur** is the temporal integration of fabric position over the exposure duration. Fast-moving, low-resistance fabric (chiffon, thin silk) accumulates significant motion blur at normal shutter speeds, creating trailing highlights and soft edges. Slow-moving, high-resistance fabric (heavy wool, structured satin) shows minimal motion blur, maintaining sharp edges and defined fold geometry. The shutter speed choice is therefore a physics decision: a faster shutter freezes fabric physics and shows structure; a slower shutter integrates fabric physics and shows movement.
+
+**Highlight trails** are the specular component of fabric BRDFs integrated over time. As a silk garment moves, its specular highlights move with it — but because the highlight position depends on both the fabric orientation and the light source angle, the highlights do not simply translate with the fabric. They appear, disappear, and reappear at different locations as the fabric folds and unfolds. At slow shutter speeds, these moving highlights create luminous trails that trace the fabric's movement through the frame. This is the physics of why a moving silk dress appears to be made of light.
+
+**Shadow geometry** is the projection of fabric fold structure onto adjacent surfaces and the performer's body. Deep folds in heavy fabric create strong, defined shadow edges. Shallow folds in light fabric create soft, diffuse shadow gradients. The Venetian blind shadow pattern discussed in Chapter 5 is an extreme case of shadow geometry — the fold structure of the blind projected onto the performer's body. Every fold in every piece of fabric in the frame is doing the same thing at a smaller scale: projecting its geometry onto the world.
+
+**Unreal Engine Chaos Cloth — the future integration:**
+
+Unreal Engine's Chaos physics system uses the same PBD principles as Genesis but adds several production-specific features that will be directly relevant when the Strawberry Studios pipeline integrates Unreal. The **Cloth Config** system allows each garment to be assigned specific physics parameters — bending resistance, friction, air drag, gravity scale — that can be swapped non-destructively using **Masks**. The **smooth transition from skin to cloth** feature ensures that garment physics hands off gracefully from skeletal animation (for tight-fitting areas) to full cloth simulation (for loose areas), preventing the visual seam between animated and simulated regions. The **kernel radius** parameter controls how the low-resolution simulation mesh drives the high-resolution render mesh — a crucial parameter for achieving fine fabric detail without prohibitive simulation cost.
+
+**The Chaos Cloth parameters that matter for Cinématique production:**
+
+| Parameter | Low Value | High Value | Cinematic Effect |
+|---|---|---|---|
+| Bending resistance | Flowing, responsive | Structured, held | Freedom vs. authority |
+| Air drag coefficient | Fabric ignores air | Fabric responds to air currents | Intimacy vs. openness |
+| Gravity scale | Floats, defies weight | Heavy, grounded | Ethereal vs. earthbound |
+| Friction (self-collision) | Fabric slides freely | Fabric grips itself | Fluid vs. sculptural |
+| Damping | Oscillates, bounces | Settles quickly | Energetic vs. composed |
+
+---
+
+### 10.5 The Unified Physics Grammar: From Equation to Frame
+
+The four physics domains covered in this chapter — thin-shell fabric mechanics, fluid dynamics and atmospheric physics, ray-tracing and light-material interaction, and PBD cloth simulation — are not separate systems. They are one system. Every frame of the Velvet Strawberry is the simultaneous output of all four operating together.
+
+**The physics stack of a single frame:**
+
+Consider the canonical shot: the singer in a deep red bias-cut silk charmeuse gown, standing in a thin oil-based haze, under a 3200K tungsten spotlight at a 30-degree angle from stage right, shot on an 85mm lens at f/1.8.
+
+The **thin-shell physics** of the bias-cut silk determines the fold geometry — the specific pattern of curves and creases that the gown has settled into given the singer's posture and recent movement. The **PBD bending resistance** of the silk (very low) means the gown is conforming closely to the body, with soft, flowing folds rather than structured geometry.
+
+The **BRDF of the silk** determines how the spotlight interacts with those folds. The specular lobe is narrow and concentrated — the highlight appears only where the fold geometry creates the correct angle between the light source, the fabric surface, and the camera. As the singer breathes, the fold geometry shifts, and the highlight moves — not smoothly, but in discrete jumps as different micro-facets come into and out of specular alignment.
+
+The **atmospheric physics** of the thin oil-based haze determines the visibility of the spotlight beam. Mie scattering makes the beam visible as a column of light above and around the singer. The forward-scattering dominance of Mie scattering means the beam is brightest when viewed from the camera's position (slightly off-axis from the light source). The thermal convection from the hot spotlight creates a subtle updraft that thins the haze directly above the fixture, creating a natural variation in beam density.
+
+The **inverse square law** determines the exposure gradient across the singer's body — the shoulder closest to the light receives significantly more illumination than the hip farthest from it, creating a luminance gradient that the 85mm lens at f/1.8 renders with shallow depth of field, further isolating the singer from the background.
+
+The **spectral response** of the deep red silk under the 2700K tungsten light means the red wavelengths are maximally reflected — the gown appears intensely saturated, almost luminous, while the background velvet curtains (which have a different spectral reflectance) appear darker and more absorbed.
+
+All of this happens simultaneously, in every frame, governed by physics equations that have been studied for over a century. The cinematographer who understands these equations does not need to guess — they can predict what the camera will see before the first light is turned on.
+
+**The prompt language of physics:**
+
+When instructing an AI video generation system, the physics vocabulary is the precision vocabulary. Vague aesthetic language ("moody," "cinematic," "atmospheric") activates the model's training distribution toward generic results. Physics language ("thin oil-based haze with Mie forward-scattering, bias-cut silk charmeuse with low bending resistance and narrow specular BRDF, 85mm compression at f/1.8, inverse square falloff from single 3200K source") activates specific, accurate behaviors.
+
+**Master prompt bundle — Velvet Strawberry canonical frame:**
+
+> Bias-cut silk charmeuse gown, deep crimson, low bending resistance with soft conforming drape, narrow specular BRDF with moving highlight as fabric shifts. Thin oil-based theatrical haze, Mie forward-scattering, visible volumetric beam column from single 3200K tungsten spotlight at 30 degrees stage right. 85mm lens, f/1.8, shallow depth of field, background velvet curtains soft-focused. Inverse square falloff — sharp luminance gradient from lit shoulder to shadowed hip. Hard contrast curve, preserved shadow detail, no fill light. Film grain in shadow regions. Camera locked, no movement.
+
+This is not a description of a mood. It is a physics specification. The AI model that receives this prompt is being given the laws of the world, not a suggestion about how it should feel.
+
+---
+
+### 10.6 Forward Reference: Unreal Engine Integration
+
+The physics knowledge documented in this chapter — thin-shell mechanics, fluid dynamics, PBD cloth simulation, and physically-based rendering — maps directly onto the systems available in Unreal Engine 5:
+
+| Physics Domain | Genesis Solver | Unreal Engine Equivalent |
+|---|---|---|
+| Fabric simulation | FEM / PBD thin-shell | Chaos Cloth (XPBD-based) |
+| Atmospheric fluid | SPH / Stable Fluid | Niagara particle system + volumetric fog |
+| Light-material interaction | LuisaRender (ray-tracing) | Lumen (real-time global illumination) + ray tracing |
+| Rigid body dynamics | Rigid body solver | Chaos physics engine |
+| Granular materials | MPM solver | Niagara GPU particles |
+
+When the Strawberry Studios pipeline integrates Unreal Engine, the Cloth Config parameters, Niagara particle settings, and Lumen lighting configurations will be the direct technical implementation of the physics principles documented here. The Cinématique Bible is not just a knowledge base for AI prompt generation — it is the specification document for the Unreal Engine world build.
+
+---
+
+*Chapter Ten complete. The Cinématique Physics and Wardrobe Bible now contains ten chapters and is grounded in peer-reviewed physics research from Carnegie Mellon, MIT, Stanford, and associated institutions via the Genesis project.*
+
+*Sources consulted for this chapter:*
+- *Wang et al., "Thin-Shell Object Manipulations With Differentiable Physics Simulations," arXiv:2404.00451 (2024)*
+- *Qiao et al., "Differentiable simulation of soft multi-body systems," NeurIPS 2021*
+- *Xian et al., "FluidLab," arXiv:2303.02346 (2023)*
+- *SPH_Taichi reference implementation, github.com/erizmr/SPH_Taichi*
+- *Jos Stam, "Stable Fluids" (1999)*
+- *Zheng et al., "LuisaRender," ACM TOG 41.6 (2022)*
+- *Müller et al., "Position Based Dynamics" (2007)*
+- *Unreal Engine Chaos Cloth documentation*
+- *Mie scattering physics literature*
+- *"A BRDF analysis of cloth," UC eScholarship*
+- *"Specular reflection from woven cloth," ACM SIGGRAPH 2011*
