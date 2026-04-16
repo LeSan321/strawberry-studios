@@ -2205,3 +2205,233 @@ The fabrics of the 1940s were constructed differently from their modern equivale
 - *Kim, J. H., & Lee, J.-S. (2024). "Investigating parameters affecting the real and virtual drapability of silk fabrics," Fashion and Textiles, 11(21)*
 - *IEEE SA Industry Connections Program (2020). "3DBP — Measurement of Fabric Properties for Virtual Simulation"*
 - *Duncan, M. (2026). "Chaos Cloth Demystified," Epic Developer Community*
+
+
+---
+
+## CHAPTER 17: THE VELVET STRAWBERRY JAZZ CLUB — DEPARTMENT BRIEFS
+
+> *These are the actual pre-production briefs for the Velvet Strawberry Jazz Club. Each is written in the voice of the department head presenting to the director before the first day of production. They are not descriptions of technique — they are declarations of intent. Together they constitute the world's operating system.*
+
+---
+
+### BRIEF 1: PHYSICS DEPARTMENT
+**Head of Physics**
+
+Director,
+
+This world obeys real physics. No stylization will violate physical law. That is our foundation.
+
+**Governing Principles**
+
+Light falls off according to the inverse square law. Fabric responds to gravity and humidity. Smoke diffuses along convection currents. Sound behaves according to room volume and material absorption. Skin reflects, absorbs, and perspires naturally under heat. No "aesthetic overrides" that break causality.
+
+**Non-Negotiable Parameters**
+
+All light sources must have believable origins. No shadow without a source. No fabric floating unless supported. No atmospheric behavior that contradicts airflow. If the room is warm, bodies show it. If glasses are cold, condensation forms correctly. If a trumpet is played hard, spit valves drip.
+
+Reality is the baseline.
+
+**What We Protect**
+
+We protect coherence.
+
+This club feels alive because every element responds to the same physical system. Nothing cheats. Nothing floats free of consequence.
+
+*If something feels magical, it will be because physics — not defiance of physics — made it so.*
+
+---
+
+### BRIEF 2: WARDROBE DEPARTMENT
+**Head of Wardrobe**
+
+Director,
+
+This club is fabric first. Light second.
+
+**Fabric Selections**
+
+Silk charmeuse (deep reds, bruised plums). Silk velvet (true black, wine). Lightweight wool suiting (charcoal, midnight). Satin lapels. Rayon blends for movement under heat. Real stockings — slight sheen under tungsten. No synthetics that specular-spike under stage light.
+
+**Construction Notes**
+
+Every garment must move with live music. Bias cuts for sway. Structured shoulders for silhouettes in smoke. Hidden weight in hems for controlled drape. Sweat response is intentional: silk darkens, velvet deepens, wool breathes.
+
+**Lighting Behavior**
+
+Under 2700K–3200K: reds deepen, blacks soften, skin glows — not shines. Wardrobe is built to absorb light, not bounce it.
+
+**What We Protect**
+
+Texture.
+
+Nothing flat. Nothing costume-y. Nothing ironic.
+
+*Every garment must look like it has lived one hour before we arrive.*
+
+---
+
+### BRIEF 3: CAMERA DEPARTMENT
+**Head of Camera**
+
+Director,
+
+We are not documenting the club. We are breathing with it.
+
+**Lens Philosophy**
+
+32mm and 40mm for intimacy without distortion. 65mm for portrait compression during solos. No ultra-wide lenses. No voyeur distance. Glass must render falloff gently. Slight halation welcome.
+
+**Aperture Strategy**
+
+Wide open or near it. Depth of field is emotional selection. Background dissolves into tone, not detail. Focus pulls are slow and motivated by attention shifts, not spectacle.
+
+**Shutter and Motion**
+
+180° shutter baseline. No stylized stutter. Movement is human-weighted.
+
+Camera grammar: drift, don't pan. Lean, don't whip. Enter space as if you paid the cover charge.
+
+**What We Protect**
+
+Subjectivity without artificiality.
+
+*The camera is a patron who understands jazz.*
+
+---
+
+### BRIEF 4: LIGHTING DEPARTMENT
+**Head of Lighting**
+
+Director,
+
+The Velvet Strawberry is lit as if electricity is expensive.
+
+**Light Plot Overview**
+
+Motivated practicals: table lamps (2700K), wall sconces (2400K). Overhead stage fresnels gelled warm (2900K). Minimal backlight, amber shifted. Negative fill in corners. Controlled top light for musicians only.
+
+**Color Temperature Strategy**
+
+Warm dominant. No cool sources unless justified by exterior spill. If blue enters the frame, it must feel invasive.
+
+**Motivated Source Philosophy**
+
+Every key light must be traceable to: a lamp, a stage can, or a cigarette ember reflection. No floating beauty lights.
+
+**Forbidden**
+
+Pure white LEDs. Edge lights without motivation. Anything above 3500K. Overexposed skin highlights.
+
+**What We Protect**
+
+Shadow.
+
+*Shadow is the architecture of this room.*
+
+---
+
+### BRIEF 5: ATMOSPHERIC DEPARTMENT
+**Head of Atmosphere**
+
+Director,
+
+Air is visible here.
+
+**Haze Type**
+
+Oil-based theatrical haze. Fine particulate, slow hang time.
+
+**Density Targets**
+
+Just enough to reveal light cones. Not enough to obscure eyes at 10 feet. Atmosphere must stratify: thicker near ceiling, thinner at seated level.
+
+**Particle Behavior**
+
+Movement should register subtle convection: heat from bodies, stage warmth, door drafts. No static fog.
+
+**Narrative Function**
+
+Atmosphere binds light to space. It makes time feel suspended. It softens edges. It makes every beam intentional.
+
+**What We Protect**
+
+Depth.
+
+*Without haze, this club collapses into flatness.*
+
+---
+
+### BRIEF 6: PRODUCTION DESIGN DEPARTMENT
+**Head of Production Design**
+
+Director,
+
+This room has memory.
+
+**Surface Material Selection**
+
+Dark-stained wood (matte, worn edges). Brass fixtures (aged, not polished). Leather banquettes (creased). Marble tabletops (subtle veining). Frosted glass behind bar. No laminate. No modern finishes. No symmetry that feels new.
+
+**Spatial Grammar**
+
+Low ceiling. Tight tables. Stage slightly too small. Audience must feel close enough to hear breath between notes. Sightlines imperfect but intimate.
+
+**Set Dressing Philosophy**
+
+Everything has been touched. Nothing is pristine. Ashtrays used. Coasters warped. Napkins folded casually.
+
+**What the Room Is Saying**
+
+"You are allowed to disappear here."
+
+**What We Protect**
+
+Authenticity of wear.
+
+*This room is not styled. It has survived.*
+
+---
+
+### BRIEF 7: SOUND DEPARTMENT
+**Head of Sound**
+
+Director,
+
+If the room sounds wrong, it will look wrong.
+
+**Acoustic Identity**
+
+Soft reflections. Warm midrange bloom. Controlled low-end. We introduce: subtle glass clinks, fabric rustle, chair leg drag, low murmur bed.
+
+**Reverb Philosophy**
+
+Short, warm room tone. No cathedral tails. Trumpet should bloom then settle. Upright bass should feel woody and tactile.
+
+**Visual-Sonic Alignment**
+
+If light is warm, sound is close. If shadow deepens, room tone softens. No hyper-clean mixes. No sterile isolation.
+
+**What We Protect**
+
+Proximity.
+
+*You should feel 8 feet from the saxophone.*
+
+---
+
+### DIRECTOR'S UNIFYING STATEMENT
+
+> *The Velvet Strawberry Jazz Club exists at the intersection of coherence and intimacy. Every department serves one singular idea: this world is governed by real physical law, but shaped by emotional gravity. Nothing floats. Nothing cheats. Light, fabric, air, sound, wood, skin — all obey the same system. The audience does not watch this club; they enter it. The goal is not spectacle but immersion — a room so internally consistent that it feels less like a set and more like a memory we are allowed to revisit.*
+
+---
+
+### EXPERT COUNCIL DEPLOYMENT NOTE
+
+The Director's Unifying Statement above is the **opening paragraph of the Expert Council's system prompt**. It is the sentence that tells the AI what world it is operating in before any specific production instructions are given. Every Director's Package generated by the Expert Council should be measured against this statement: does the output serve coherence and intimacy? Does it obey the same physical system? Does it feel like a memory, not a set?
+
+The seven department briefs are the **operational constraints** — the non-negotiables that the Expert Council must enforce in every prompt it generates. No floating lights. No synthetic fabrics. No ultra-wide lenses. No static fog. No modern finishes. No cathedral reverb. These are not stylistic preferences; they are physical laws of this world.
+
+---
+
+*Chapter 17 completes the Cinématique Physics and Wardrobe Bible v1.0. The knowledge base now spans 17 chapters from the fundamental physics of light and matter through the specific production grammar of the Velvet Strawberry Jazz Club. It is ready to be wired into the Expert Council.*

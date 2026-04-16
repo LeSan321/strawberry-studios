@@ -72,7 +72,7 @@
 - [ ] PBR Texture & Material Libraries (Poly Haven, ambientCG) — real-world scanned materials as reference data
 
 ### Knowledge Base Chapters Outstanding
-- [ ] Chapter 11 (Velvet Strawberry Department Briefs) — Poe bot prompt ready; covers Physics, Wardrobe, Camera, Lighting, Atmospheric, Production Design, Sound + Director's Unifying Statement
+- [x] Chapter 17 (Velvet Strawberry Department Briefs) — Physics, Wardrobe, Camera, Lighting, Atmospheric, Production Design, Sound + Director's Unifying Statement — COMPLETE
 - [x] Strengthen Chapter 11 (Pixar BSSRDF) with pbrt book subsurface scattering chapter → Chapter 14
 - [x] Strengthen Chapter 12 (Disney Cloth) with 2024 fabric mechanical parameters for 1940s-specific fabrics → Chapter 16
 - [ ] Chapter 14 — Experiential Layer (acoustic simulation, spatial audio, crowd dynamics) — after Tier 3 research
