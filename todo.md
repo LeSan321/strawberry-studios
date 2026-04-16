@@ -76,3 +76,12 @@
 - [x] Strengthen Chapter 11 (Pixar BSSRDF) with pbrt book subsurface scattering chapter → Chapter 14
 - [x] Strengthen Chapter 12 (Disney Cloth) with 2024 fabric mechanical parameters for 1940s-specific fabrics → Chapter 16
 - [ ] Chapter 14 — Experiential Layer (acoustic simulation, spatial audio, crowd dynamics) — after Tier 3 research
+
+## Psychology and Immersion Bible
+- [x] Cinématique Psychology and Immersion Bible v1.0 — 6 chapters, 283 lines, 5,391 words
+  - [x] Chapter 1: Film Lighting and Biological Response (EPN, cortisol, chiaroscuro neuroscience)
+  - [x] Chapter 2: Atmosphere, Rain, Fog, and Spatial Psychology (dominance reduction, enclosure)
+  - [x] Chapter 3: Fashion, Clothing Movement, and Enclothed Cognition (mirror neurons, sweat arc)
+  - [x] Chapter 4: Immersive Experience, Presence, and VR Concert Psychology (4 dimensions of presence)
+  - [x] Chapter 5: Biopsychological Foundations — The Emotional Cocktail (dopamine, oxytocin, frisson)
+  - [x] Chapter 6: The Velvet Strawberry Psychological Brief + Director's Psychological Unifying Statement
