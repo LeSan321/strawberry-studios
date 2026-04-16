@@ -1753,3 +1753,257 @@ When the Strawberry Studios pipeline integrates Unreal Engine, the Cloth Config 
 - *Mie scattering physics literature*
 - *"A BRDF analysis of cloth," UC eScholarship*
 - *"Specular reflection from woven cloth," ACM SIGGRAPH 2011*
+
+
+---
+
+## CHAPTER 11: PIXAR RENDERMAN — SUBSURFACE SCATTERING AND SPECTRAL FABRIC RENDERING
+
+> *Light does not stop at the surface. It enters, wanders, and returns changed — and that journey is what makes skin alive and velvet deep.*
+
+**Sources:** Jensen et al., "A Practical Model for Subsurface Light Transport"; Pixar, "Physically Based Shading at Pixar"; "An Approximate Reflectance Profile for Efficient Subsurface Scattering" (ACM SIGGRAPH 2015)
+
+### 11.1 The BSSRDF: Beyond Surface Reflection
+
+The standard BRDF model used in most rendering systems describes only what happens at the surface of a material — light arrives, bounces, leaves. For opaque surfaces like metal or dry paint, this is sufficient. But for skin, silk, velvet, and wax, it is fundamentally wrong. These materials are translucent at the microscopic level: light enters the surface, scatters through the interior volume, and re-emerges at a different point. This phenomenon — Bidirectional Scattering Surface Reflectance Distribution Function (BSSRDF) — is what gives human skin its characteristic warmth, what makes velvet appear to glow from within, and what separates a photographically real fabric from a digitally rendered one.
+
+The BSSRDF extends the BRDF by adding two additional dimensions: the entry point and the exit point of light. In a BRDF, these are the same point. In a BSSRDF, they can be millimeters or centimeters apart. The distance between entry and exit is governed by two material properties: the **absorption coefficient (σa)**, which determines how much light is consumed per unit distance, and the **scattering coefficient (σs)**, which determines how frequently light changes direction per unit distance. Together they define the **effective transport coefficient (σtr)** — the exponential falloff of light energy within the material.
+
+For the Velvet Strawberry, this physics governs three critical visual elements: the singer's skin under the spotlight, the crimson charmeuse gown, and the deep velvet wall panels. Each has a distinct BSSRDF profile that determines how the tungsten light at 2700K interacts with it.
+
+### 11.2 Material BSSRDF Reference Table
+
+| Material | Absorption σa (R,G,B mm⁻¹) | Scattering σs (R,G,B mm⁻¹) | Refractive Index η | Cinematic Character |
+|---|---|---|---|---|
+| Fair skin | 0.032, 0.17, 0.48 | 0.74, 0.88, 1.01 | 1.3 | Warm reddish glow in thin areas (ears, nostrils) under backlighting; soft shadow edges |
+| Darker skin | 0.013, 0.070, 0.145 | 1.09, 1.59, 1.79 | 1.3 | Deeper, richer tones; subtler SSS but essential for realism and depth |
+| Silk charmeuse | Low (spectral) | Low (spectral) | ~1.5 | Primarily specular reflection; sharp highlights; minimal internal scattering |
+| Velvet | High (spectral) | High (spectral) | ~1.5 | Extensive fiber scattering; rich matte appearance; light absorbed and re-emitted diffusely |
+| Crimson dyed fabric | High G,B absorption | High R scattering | ~1.5 | Red wavelengths scatter deep; edges glow softly under backlight; color appears volumetric |
+| Marble | 0.0021, 0.0041, 0.0071 | 2.19, 2.62, 3.00 | 1.5 | Deep light penetration; internal glow; reveals subtle veining |
+
+### 11.3 Spectral Rendering and the Crimson Dress Problem
+
+Standard RGB rendering treats light as three channels. Spectral rendering treats it as a continuous function across wavelengths from approximately 380nm (violet) to 700nm (deep red). The difference matters enormously for the Velvet Strawberry's visual grammar.
+
+Tungsten light at 2700K emits a spectrum heavily weighted toward red and amber wavelengths (600–700nm) and deficient in blue (400–500nm). When this light strikes the crimson charmeuse gown, the fabric's dye absorbs green and blue wavelengths aggressively while scattering red wavelengths internally. The result is not simply "a red dress under warm light." The red wavelengths penetrate the fabric, scatter through the fiber structure, and re-emerge across a wider area than the entry point — the dress appears to glow from within at its edges, particularly where the fabric is thinnest (at folds, at the hem, at the neckline). This is the **subsurface edge glow** that distinguishes a cinematically real crimson gown from a flat digital render.
+
+Under a cooler light source (5600K daylight), the same dress would appear darker and more muted — the blue-deficient tungsten is actually what activates the dress's full chromatic depth. This is a key reason why the Velvet Strawberry's tungsten-only lighting philosophy is not merely aesthetic but physically correct for the wardrobe.
+
+### 11.4 Skin Under Tungsten: The Warm Glow Physics
+
+Human skin has a layered structure — epidermis, dermis, subcutaneous tissue — each with different optical properties. The epidermis contains melanin (which absorbs strongly in blue and UV) and the dermis contains hemoglobin (which absorbs green and scatters red). Under tungsten light, the red-weighted spectrum interacts preferentially with the hemoglobin layer, producing the characteristic warm, living quality of skin under incandescent light.
+
+The practical consequence for the Velvet Strawberry: the singer's face under the single spotlight will exhibit a soft, warm glow at the edges of the face where the skin is thinnest — the earlobes, the bridge of the nose, the lips. These areas will appear slightly translucent, slightly warmer than the center of the face. This is not a lighting effect to be added in post — it is a physical consequence of the BSSRDF of human skin under tungsten. Any AI video model that accurately simulates this physics will produce this effect automatically when given the correct prompt vocabulary.
+
+### 11.5 Velvet vs. Silk Charmeuse: The Scattering Contrast
+
+The visual contrast between the crimson charmeuse gown and the dark velvet wall panels is not merely a color contrast — it is a scattering contrast. The charmeuse has a low scattering coefficient and a smooth surface: light reflects off it specularly, producing sharp, bright highlights that move as the performer moves. The velvet has a high scattering coefficient and a dense pile structure: light enters the fibers, scatters repeatedly, and re-emerges diffusely, producing a rich, deep, matte surface that appears to absorb light rather than reflect it.
+
+This contrast is the visual engine of the Velvet Strawberry's aesthetic. The performer in crimson charmeuse is the only specular element in a room full of diffuse surfaces. Every highlight on her gown is a point of visual attention. Every movement creates a new highlight. The velvet walls, the dark wool of the Fedora Man's suit, the leather upholstery — all of these are diffuse absorbers that make the performer's specular highlights more dramatic by contrast.
+
+**Production Directive:** When prompting AI video models for the Velvet Strawberry, always specify the scattering contrast explicitly. The performer is the specular element; the environment is the diffuse absorber. This contrast is the physics of the visual hierarchy.
+
+### 11.6 Pixar RenderMan Prompt Vocabulary
+
+The following phrases activate subsurface-aware rendering in AI video models:
+
+**"Subsurface scattering enabled, skin translucency visible at edges"** — instructs the model to calculate internal light transport, producing the warm edge glow on skin under backlighting.
+
+**"BSSRDF fabric rendering, crimson charmeuse, red wavelength internal scattering"** — activates spectral-aware fabric rendering where red wavelengths penetrate and re-emerge across the fabric surface.
+
+**"Velvet pile diffuse absorption, minimal specular, deep matte surface"** — directs the model to render velvet as a light-absorbing diffuse surface with no sharp highlights.
+
+**"Tungsten spectral bias, warm skin tones, hemoglobin red scatter"** — activates the specific interaction between tungsten's red-weighted spectrum and skin's hemoglobin layer.
+
+**"Specular performer against diffuse environment, visual hierarchy through scattering contrast"** — establishes the fundamental visual grammar of the Velvet Strawberry: one specular element in a room of diffuse absorbers.
+
+**"Physically based shading, energy conservation, no overbright surfaces"** — ensures the model does not produce unrealistically bright reflections that would break the noir grammar.
+
+**"Microfacet GGX distribution, long specular tail, silk charmeuse highlight spread"** — activates the GGX microfacet model that produces the characteristic extended highlight on silk rather than a sharp pinpoint.
+
+---
+
+## CHAPTER 12: DISNEY RESEARCH — CLOTH SIMULATION AND FABRIC DYNAMICS
+
+> *Fabric is not decoration. It is a physics system that narrates the body's relationship with gravity, momentum, and time.*
+
+**Sources:** Brent Burley, "Physically-Based Shading at Disney" (SIGGRAPH 2012); Disney Research, "Dynamics-Aware Numerical Coarsening for Fabrication Design"; "Stable Constrained Dynamics" (Levin, Selle, Fedkiw); Selle et al., "A Material Point Method for Snow Simulation"
+
+### 12.1 The Bias-Cut Problem: Why 45 Degrees Changes Everything
+
+Fabric cut along the grain (warp or weft direction) is structurally stable. The threads run parallel and perpendicular to the cut edge; they resist stretching and produce angular, structured folds. A straight-cut wool jacket holds its shape because the grain-aligned threads are at maximum stiffness in the direction of gravity.
+
+Bias-cut fabric — cut at 45 degrees to the grain — is fundamentally different. At 45 degrees, neither the warp nor the weft threads run parallel to the cut edge. Instead, both thread families run diagonally, and the fabric's resistance to stretching is now governed by the shear stiffness of the weave rather than the tensile stiffness of the threads. Shear stiffness is dramatically lower than tensile stiffness in most woven fabrics — the bias stretch of silk charmeuse can be **20–30% greater** than its on-grain stretch.
+
+The practical consequence: a bias-cut charmeuse gown hangs from the body in a completely different way than a straight-cut gown. It drapes in sinuous, curvilinear folds that follow the body's contours rather than falling in straight vertical lines. When the performer turns, the fabric does not swing outward like a bell — it flows in a delayed, liquid wave that lags behind the body's rotation. When the performer stops, the fabric continues moving for a fraction of a second, settling in a new configuration that reveals the body's shape beneath.
+
+The fold wavelength of a fabric is governed by the equation **λ ~ (B/w)^(1/4)**, where B is the bending rigidity and w is the weight per unit area. Silk charmeuse has very low bending rigidity and moderate weight, producing numerous small, fine folds. Heavy wool has high bending rigidity and high weight, producing fewer, larger, more angular folds. This equation is why the crimson charmeuse gown and the Fedora Man's wool suit produce such visually distinct fold grammars even under identical lighting conditions.
+
+### 12.2 Fabric Dynamics Reference Table
+
+| Fabric Type | Weave Structure | Bending Rigidity | Fold Character | Movement Response | Cinematic Role |
+|---|---|---|---|---|---|
+| Silk charmeuse (bias-cut) | Satin, 45° cut | Very low | Numerous, fine, sinuous curvilinear folds | Liquid delay on movement; settles slowly | Performer's body revealed through fabric motion |
+| Silk charmeuse (straight-cut) | Satin, grain-aligned | Low | Fewer, more angular folds | Swings outward on turn; settles faster | More structured; less body-revealing |
+| Velvet (pile weave) | Dense pile | Moderate | Rounded, voluminous folds; pile direction visible | Heavy, plush; resists fine rippling | Environmental surface; absorbs light |
+| Wool twill (fedora) | Twill weave, felted | High | Structured; holds pressed shape | Minimal movement; shape-retentive | Character armor; psychological rigidity |
+| Heavy wool suit | Plain/twill weave | High | Broad, angular folds; drapes from shoulders | Moves as a unit with the body | Authority and containment |
+| Chiffon | Plain weave, sheer | Very low | Extremely fine, numerous folds; floats | Responds to breath and air currents | Atmospheric; reveals air movement |
+
+### 12.3 The Fedora: Structural Physics as Character Psychology
+
+The wool fedora is not merely a costume element — it is a physics system that communicates psychological rigidity. Wool felt is produced by matting and compressing wool fibers under heat and pressure, creating a non-woven structure with very high bending rigidity and shape retention. A properly blocked fedora will maintain its pressed shape under stage lighting, under physical handling, and under the heat of a performance environment.
+
+The brim of a fedora functions as a structural cantilever: the felt's high bending rigidity allows it to project outward from the crown without drooping, maintaining a precise geometric relationship with the face beneath it. The shadow cast by the brim is therefore geometrically predictable — it falls at a consistent angle determined by the brim width, the brim angle, and the elevation of the light source. This predictability is what makes the fedora brim shadow a reliable compositional tool: it can be precisely positioned to cover the eyes at a specific camera angle, revealing only the jaw and lips.
+
+The physics of the fedora's shape retention also communicates character. A hat that holds its shape under pressure reads as controlled, deliberate, armored. The Fedora Man's hat does not move when he moves. It does not respond to the music. It is the one element in the Velvet Strawberry that refuses to participate in the atmospheric physics of the room — and that refusal is his character.
+
+### 12.4 The Disney BRDF: Why Fabric Highlights Have Tails
+
+The Disney BRDF model, developed by Brent Burley from analysis of 100 measured material samples (the MERL 100 dataset), revealed something that traditional shading models missed: most real materials have specular highlights with much longer tails than the Phong or Beckmann models predict. A chrome surface, for example, has a specular peak only a few degrees wide but a tail that extends many times wider. Silk charmeuse exhibits a similar but softer version of this behavior.
+
+The GGX microfacet distribution, which Disney adopted over traditional Beckmann, captures this long-tail behavior accurately. The practical consequence for the Velvet Strawberry: the highlight on the crimson charmeuse gown under the spotlight is not a sharp point — it is a bright center with a soft, extended halo that spreads across the fabric surface. This halo is physically real, not an artistic choice. It is the GGX tail. When prompting AI video models, specifying GGX distribution activates this behavior.
+
+The Disney BRDF also revealed that most materials show **grazing retroreflection** — an increase in reflectivity at extreme viewing angles. For velvet, this manifests as a subtle brightening at the edges of the fabric where the viewing angle is most oblique. This is the velvet "sheen" effect — not a separate phenomenon but a consequence of the grazing retroreflection physics of the pile structure.
+
+### 12.5 Wrinkle Formation: Elastic Buckling vs. Plastic Deformation
+
+Fabric wrinkles form through two distinct physical mechanisms that produce visually different results. **Elastic buckling** occurs when compressive forces exceed the fabric's bending stiffness locally — the fabric buckles into a temporary fold that disappears when the force is removed. These are the wrinkles that form when a performer sits, bends, or moves, and then release when the performer returns to standing. They are transient, dynamic, and narrative — they tell the story of the body's recent movement.
+
+**Plastic deformation** occurs when the fabric is compressed or bent beyond its elastic limit — the fibers take a permanent set and the wrinkle remains even when the force is removed. These are the creases in a well-worn suit, the permanent fold lines in a frequently worn gown. They are the fabric's memory of its history. For the Fedora Man's wool suit, the plastic deformation wrinkles at the elbows and knees communicate that this suit has been worn many times, in many rooms, over many years.
+
+The distinction matters for AI video generation: elastic buckling wrinkles should appear and disappear with movement; plastic deformation wrinkles should persist throughout the scene as a constant character detail.
+
+### 12.6 Disney Cloth Physics Prompt Vocabulary
+
+**"Bias-cut silk charmeuse, liquid drape, 20–30% bias stretch, sinuous curvilinear folds"** — activates the specific fold grammar of bias-cut fabric with accurate elasticity.
+
+**"Low bending rigidity, fine fold wavelength, numerous small folds, body-revealing drape"** — directs the model to produce the characteristic fine-fold grammar of lightweight silk.
+
+**"Heavy wool twill, high bending rigidity, broad angular folds, shape-retentive structure"** — activates the structured fold grammar of the Fedora Man's suit.
+
+**"Felt fedora, blocked brim, structural cantilever, shape retention under heat and movement"** — specifies the fedora's physical rigidity and its resistance to environmental deformation.
+
+**"GGX microfacet distribution, long specular tail, silk highlight halo"** — activates the extended highlight behavior of silk under the Disney BRDF model.
+
+**"Elastic buckling wrinkles, transient folds, movement-responsive, body-narrative"** — directs the model to produce dynamic wrinkles that appear and disappear with performer movement.
+
+**"Plastic deformation creases, permanent fold memory, worn-suit character detail"** — activates persistent wrinkle behavior that communicates garment history.
+
+**"Velvet grazing retroreflection, pile sheen at oblique angles, edge brightening"** — activates the velvet sheen effect at the fabric's edges where viewing angle is most oblique.
+
+---
+
+## CHAPTER 13: UNREAL ENGINE 5 — THE CINÉMATIQUE BIBLE IN PRODUCTION
+
+> *The knowledge base is both a prompt library and a production specification. Every physics principle in this Bible has a named parameter in Unreal Engine 5.*
+
+**Sources:** Epic Games, "Lumen Global Illumination and Reflections in Unreal Engine"; "Hardware Ray Tracing in Unreal Engine"; "Chaos Cloth Demystified: A Zero to Hero Guide"; "Overview of Niagara Effects for Unreal Engine"; "Overview of Substrate Materials in Unreal Engine"
+
+### 13.1 Why Unreal Engine Is the End State
+
+The Cinématique Bible serves two simultaneous purposes. In the near term, it is a prompt knowledge base for AI video generation — the physics principles translate into prompt vocabulary that activates accurate model behavior. In the medium term, it is a production specification for an Unreal Engine 5 world build — every physics principle maps to a named parameter in a specific UE5 system.
+
+This chapter provides the complete mapping. When the Velvet Strawberry Jazz Club is built in Unreal Engine 5, every creative decision in this Bible has a technical implementation. The tungsten practicals become Point Lights with specific color temperature and intensity values. The oil-based theatrical haze becomes a Niagara volumetric fog system with specific particle density and scattering parameters. The crimson charmeuse gown becomes a Chaos Cloth simulation with specific bending stiffness, damping, and drag values. The velvet wall panels become Substrate materials with Fuzz layers and specific roughness values.
+
+### 13.2 Chaos Cloth: The Cinématique Bible in Fabric Parameters
+
+Chaos Cloth uses a Position-Based Dynamics (PBD) solver — the same mathematical framework described in the Genesis and Disney research chapters, now implemented as production-ready parameters in a real-time engine. The key parameters and their physical meanings:
+
+**Bending Stiffness** is the fabric's resistance to bending deformation — equivalent to the bending rigidity B in the fold wavelength equation. Low values produce silk-like drape with fine, numerous folds. High values produce wool-like structure with broad, angular folds.
+
+**Stretching Stiffness** is the fabric's resistance to elongation — equivalent to tensile stiffness. For bias-cut charmeuse, this should be set low to allow the 20–30% bias stretch described in Chapter 12.
+
+**Damping** controls how quickly the fabric loses energy and settles — equivalent to the Rayleigh damping parameters from Disney's research. High damping produces heavy, non-responsive fabric (velvet, heavy wool). Low damping produces light, fluttery fabric (chiffon, thin silk).
+
+**Drag** accounts for air resistance — critical for the atmospheric interaction described in Chapter 8. In the Velvet Strawberry's haze-filled environment, the air has measurable density that affects how the charmeuse gown moves.
+
+### 13.3 Chaos Cloth Parameter Settings: Velvet Strawberry Fabrics
+
+| Fabric | Bending Stiffness | Stretching Stiffness | Damping | Drag | Gravity Scale | Character |
+|---|---|---|---|---|---|---|
+| Bias-cut silk charmeuse | 0.05–0.1 | 0.1–0.2 | 0.8–1.0 | 0.3–0.5 | 1.0 | Liquid drape, sinuous folds, delayed movement response |
+| Heavy velvet (wall panels) | N/A (static mesh) | N/A | N/A | N/A | N/A | Static diffuse absorber; Substrate Fuzz material |
+| Wool suit (Fedora Man) | 0.6–0.8 | 0.7–0.9 | 1.5–2.0 | 0.1–0.2 | 1.0 | Structured, moves as unit with body, minimal independent motion |
+| Felt fedora | N/A (rigid mesh) | N/A | N/A | N/A | N/A | Static rigid body; shape-retentive by construction |
+| Stage curtain (velvet) | 0.3–0.5 | 0.4–0.6 | 1.2–1.5 | 0.2–0.3 | 1.0 | Heavy, slow-settling, voluminous folds |
+
+### 13.4 Niagara Atmospheric System: The Velvet Strawberry Atmosphere
+
+The Velvet Strawberry's atmospheric environment — oil-based theatrical haze at low density, cigarette smoke at medium density, breath vapor at very low density — requires three separate Niagara systems operating simultaneously, each with distinct particle physics.
+
+**Theatrical Haze (Base Layer):** Oil-based haze particles are approximately 0.3–1.0 microns in diameter, placing them in the Mie scattering regime described in Chapter 8. In Niagara, this translates to: low Particle Spawn Rate (persistent ambient density rather than active emission), small Particle Size (0.1–0.5 in normalized units), low Particle Velocity (near-static; haze does not move unless disturbed), moderate Volumetric Fog Opacity (0.3–0.5 to create visible light shafts without obscuring faces), warm Particle Color (amber-tinted to match the tungsten spectrum).
+
+**Cigarette Smoke (Localized):** Cigarette smoke particles are larger (1–10 microns) and actively rising due to thermal convection. In Niagara: moderate Spawn Rate (active emission from a point source), larger Particle Size, upward Particle Velocity with turbulence, higher initial Opacity that decreases over particle lifetime as smoke disperses.
+
+**Breath Vapor (Performer):** Breath vapor is extremely fine (0.1–0.5 microns) and highly transient — visible only when the performer exhales in the cool air near the stage. In Niagara: very low Spawn Rate (triggered by performance events), very small Particle Size, short particle lifetime (0.5–1.5 seconds), low Opacity.
+
+### 13.5 Lumen Global Illumination: The Tungsten Practical Environment
+
+Lumen is Unreal Engine 5's dynamic global illumination system — it calculates how light bounces between surfaces in real time, producing the color bleeding and indirect illumination that makes a space feel physically real rather than digitally lit.
+
+For the Velvet Strawberry, Lumen's behavior is governed by the room's specific material palette. The crimson velvet walls will bleed warm red light into the shadows — any surface near the velvet walls will receive a subtle crimson tint from indirect illumination. The brass fixtures will produce warm amber color bleeding onto adjacent surfaces. The dark mahogany bar will absorb most incident light, contributing minimal indirect illumination.
+
+The practical light sources — Edison bulbs, candles, the single spotlight — should be implemented as Point Lights and Spot Lights with physically accurate color temperatures (2200K for candles, 2700K for Edison bulbs, 3200K for the spotlight) and intensity values in lumens. Lumen will then calculate the indirect illumination from these sources automatically, producing the characteristic warm pools of light surrounded by deep shadow that define the Velvet Strawberry's visual grammar.
+
+### 13.6 Substrate Materials: The Velvet Strawberry Surface Library
+
+Unreal Engine 5's Substrate material system replaces fixed shading models with a physically-based BSDF representation that directly implements the principles from Chapters 11 and 12. Key Substrate parameters for the Velvet Strawberry:
+
+**Velvet wall panels:** Fuzz Amount: 0.8–1.0 (dense pile), Fuzz Roughness: 0.6–0.8 (soft, diffuse pile), Fuzz Color: deep crimson (matching the physical dye absorption spectrum), Base Roughness: 0.9 (highly diffuse base layer), Metallic: 0.0.
+
+**Silk charmeuse gown:** Base Roughness: 0.05–0.1 (near-specular smooth surface), Anisotropy: 0.3–0.5 (directional sheen from satin weave), Metallic: 0.0, F0: 0.04 (standard dielectric Fresnel), Subsurface Profile: crimson skin-like (activates BSSRDF behavior at fabric edges).
+
+**Brass fixtures:** Metallic: 1.0, Base Color: warm amber (0.85, 0.65, 0.15), Roughness: 0.3–0.4 (polished but not mirror-like), F0: 0.95 (high metallic reflectance).
+
+**Mahogany bar surface:** Roughness: 0.5–0.6, Metallic: 0.0, Base Color: deep warm brown, Anisotropy: 0.2 (wood grain direction).
+
+### 13.7 Complete Cinématique Bible → Unreal Engine 5 Mapping
+
+| Cinématique Bible Physics Concept | UE5 System | Parameter Name | Velvet Strawberry Value |
+|---|---|---|---|
+| Tungsten practical light (2700K) | Point Light / Spot Light | Color Temperature | 2700K |
+| Oil-based theatrical haze (Mie scattering) | Niagara + Volumetric Fog | Particle Density, Opacity, Scattering | Low density, warm tint, 0.3–0.5 opacity |
+| Bias-cut silk charmeuse drape | Chaos Cloth | Bending Stiffness, Stretching Stiffness | 0.05–0.1, 0.1–0.2 |
+| Fabric damping (settling rate) | Chaos Cloth | Damping | 0.8–1.0 (silk), 1.5–2.0 (wool) |
+| Velvet pile diffuse absorption | Substrate Material | Fuzz Amount, Fuzz Roughness | 0.8–1.0, 0.6–0.8 |
+| Silk charmeuse specular highlight | Substrate Material | Roughness, Anisotropy | 0.05–0.1, 0.3–0.5 |
+| Subsurface scattering (skin/fabric edges) | Substrate Material | Subsurface Profile | Crimson/skin BSSRDF profile |
+| Indirect illumination color bleed | Lumen GI | Dynamic GI Method, Diffuse Color Boost | Lumen, 1.0–1.2 |
+| Accurate soft shadows from practicals | Hardware Ray Tracing | Ray Traced Shadows | Enabled |
+| Brass fixture reflections | Hardware Ray Tracing | Ray Traced Reflections | Enabled |
+| Cigarette smoke (thermal convection) | Niagara | Spawn Rate, Velocity, Turbulence | Active emission, upward velocity |
+| Breath vapor (transient) | Niagara | Spawn Rate, Particle Lifetime | Event-triggered, 0.5–1.5s lifetime |
+| GGX specular tail (silk highlight halo) | Substrate Material | Roughness + Anisotropy combination | Low roughness + moderate anisotropy |
+| Grazing retroreflection (velvet sheen) | Substrate Material | Fuzz layer grazing behavior | Fuzz Amount 0.8–1.0 |
+
+### 13.8 The Velvet Strawberry in Unreal Engine: A Production Checklist
+
+When the Velvet Strawberry Jazz Club is built in UE5, this checklist ensures the physics of the Cinématique Bible are correctly implemented:
+
+**Lighting:** All light sources are practical (Point Lights and Spot Lights only — no sky light, no ambient fill, no HDRI). Color temperatures set to 2200K (candles), 2700K (Edison practicals), 3200K (spotlight). Lumen GI enabled with Hardware Ray Tracing for accurate color bleed and soft shadows.
+
+**Atmosphere:** Three-layer Niagara system: base theatrical haze (persistent, low density), cigarette smoke (localized, active emission), breath vapor (event-triggered, short lifetime). Volumetric fog opacity 0.3–0.5.
+
+**Fabrics:** Chaos Cloth enabled on the charmeuse gown with low bending stiffness (0.05–0.1) and moderate damping (0.8–1.0). Wool suit with high stiffness (0.6–0.8) and high damping (1.5–2.0). Fedora as rigid mesh.
+
+**Materials:** Substrate materials for all surfaces. Velvet walls with Fuzz layer (Amount 0.8–1.0). Charmeuse with low roughness (0.05–0.1) and Anisotropy (0.3–0.5). Brass with Metallic 1.0 and Roughness 0.3–0.4.
+
+**Camera:** Cine Camera Actor with 35mm lens (wide establishing), 85mm lens (intimate performance), f/1.4–f/2.8 aperture, 1/48s shutter (180-degree rule), ISO 800–1600 for visible grain.
+
+---
+
+*Chapters 11–13 complete. The Cinématique Physics and Wardrobe Bible now contains thirteen chapters, grounded in peer-reviewed physics from Pixar, Disney Research, and Epic Games' Unreal Engine 5 documentation. This Bible is simultaneously a prompt knowledge base for AI video generation and a production specification for Unreal Engine 5 world-building.*
+
+*Sources consulted for Chapters 11–13:*
+- *Jensen et al., "A Practical Model for Subsurface Light Transport" (SIGGRAPH 2001)*
+- *Pixar, "Physically Based Shading at Pixar" (SIGGRAPH 2017)*
+- *Brent Burley, "Physically-Based Shading at Disney" (SIGGRAPH 2012)*
+- *Disney Research, "Dynamics-Aware Numerical Coarsening for Fabrication Design"*
+- *Levin, Selle, Fedkiw, "Stable Constrained Dynamics" (Disney Research)*
+- *Epic Games, "Lumen Global Illumination and Reflections in Unreal Engine" (dev.epicgames.com)*
+- *Epic Games, "Hardware Ray Tracing in Unreal Engine" (dev.epicgames.com)*
+- *Epic Games, "Chaos Cloth Demystified: A Zero to Hero Guide" (dev.epicgames.com)*
+- *Epic Games, "Overview of Niagara Effects for Unreal Engine" (dev.epicgames.com)*
+- *Epic Games, "Overview of Substrate Materials in Unreal Engine" (dev.epicgames.com)*
