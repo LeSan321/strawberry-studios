@@ -102,3 +102,14 @@
 - [x] Wire video generation result back to concert record in DB
 - [x] Video status polling (5s interval) and display in Library/Concert Ticket pages
 - [x] Write vitest tests for video generation procedure (36 tests passing, 3 test files)
+
+## Backlog — Deferred Features
+- [ ] Shot Selector UI on Generate Video flow — modal letting user pick which shot from the Director's Package to use as the video seed (primaryShotIndex param already exists in the procedure)
+- [ ] Concert Ticket Open Graph meta tags — og:title, og:description, og:image for rich social sharing previews
+
+## Poe API / Veo-3.1 Integration — COMPLETE
+- [x] Build Poe API (Veo-3.1) video generation adapter in videoGeneration.ts
+- [x] Implement async job flow: POST /v1/videos → poll GET /v1/videos/{id} → download /v1/videos/{id}/content → upload to S3
+- [x] Set VIDEO_PROVIDER=poe, POE_API_KEY, POE_VIDEO_MODEL=Veo-3.1 via secrets
+- [x] Validate API key against /v1/models endpoint (4/4 tests passing, Veo-3.1 confirmed available)
+- [x] 40 tests passing across 4 test files

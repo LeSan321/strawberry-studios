@@ -6,19 +6,29 @@
  *
  * Supported providers:
  *   - "mock"   — returns a placeholder immediately (no API key required)
+ *   - "poe"    — Poe API (Veo-3.1 / Veo-3 / Sora-2 etc.) — RECOMMENDED
  *   - "runway" — Runway ML Gen-3 Alpha API
  *   - "kling"  — Kling AI video generation API
  *   - "luma"   — Luma Dream Machine API
+ *
+ * Poe API setup:
+ *   - Set VIDEO_PROVIDER=poe and POE_API_KEY to your Poe API key
+ *   - Optionally set POE_VIDEO_MODEL (default: "Veo-3.1")
+ *   - Video is generated async: POST /v1/videos → poll GET /v1/videos/{id}
+ *   - When complete, GET /v1/videos/{id}/content streams the MP4 bytes
+ *   - We upload those bytes to S3 and store the permanent CDN URL
  *
  * Architecture: all providers share the same VideoGenerationRequest /
  * VideoGenerationResult contract so the tRPC procedure never needs to
  * know which provider is active.
  */
 
+import { storagePut } from "./storage";
+
 export type VideoGenerationRequest = {
   /** The fully-assembled 10-layer Cinématique prompt */
   prompt: string;
-  /** Duration in seconds (default: 10) */
+  /** Duration in seconds (default: 8 for Veo, 4 for Sora) */
   durationSeconds?: number;
   /** Aspect ratio (default: "16:9") */
   aspectRatio?: "16:9" | "9:16" | "1:1";
@@ -37,12 +47,112 @@ async function generateMock(req: VideoGenerationRequest): Promise<VideoGeneratio
   // Simulate a short async delay, then return a placeholder video URL
   await new Promise(r => setTimeout(r, 500));
   const jobId = `mock-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  // Return a publicly accessible placeholder video so the UI has something to render
   return {
     status: "complete",
     jobId,
     videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
   };
+}
+
+// ─── Provider: Poe API (Veo-3.1) ─────────────────────────────────────────────
+
+const POE_API_BASE = "https://api.poe.com/v1";
+
+async function generatePoe(req: VideoGenerationRequest): Promise<VideoGenerationResult> {
+  const apiKey = process.env.POE_API_KEY;
+  if (!apiKey) throw new Error("POE_API_KEY is not configured");
+
+  const model = process.env.POE_VIDEO_MODEL ?? "Veo-3.1";
+
+  // Map aspect ratio to Poe size format (WIDTHxHEIGHT)
+  const sizeMap: Record<string, string> = {
+    "16:9": "1280x720",
+    "9:16": "720x1280",
+    "1:1": "720x720",
+  };
+  const size = sizeMap[req.aspectRatio ?? "16:9"] ?? "1280x720";
+
+  // Veo models default to 8s; Sora defaults to 4s
+  const seconds = req.durationSeconds ?? (model.startsWith("Veo") ? 8 : 4);
+
+  const body: Record<string, unknown> = {
+    model,
+    prompt: req.prompt,
+    seconds,
+    size,
+  };
+
+  const res = await fetch(`${POE_API_BASE}/videos`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Poe API error (${res.status}): ${detail}`);
+  }
+
+  const data = (await res.json()) as { id: string; status: string };
+  // Poe always returns queued immediately
+  return { status: "queued", jobId: data.id };
+}
+
+async function pollPoeStatus(jobId: string): Promise<VideoStatusResult> {
+  const apiKey = process.env.POE_API_KEY;
+  if (!apiKey) throw new Error("POE_API_KEY is not configured");
+
+  const res = await fetch(`${POE_API_BASE}/videos/${jobId}`, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Poe poll error (${res.status}): ${detail}`);
+  }
+
+  const data = (await res.json()) as {
+    id: string;
+    status: "queued" | "in_progress" | "completed" | "failed";
+    error?: { message?: string };
+  };
+
+  if (data.status === "completed") {
+    // Download the MP4 bytes from Poe and upload to S3 for a permanent CDN URL
+    const videoUrl = await downloadPoeVideoToS3(jobId, apiKey);
+    return { status: "complete", videoUrl };
+  }
+  if (data.status === "failed") {
+    return { status: "failed", error: data.error?.message ?? "Poe video generation failed" };
+  }
+  // queued or in_progress
+  return { status: "generating" };
+}
+
+async function downloadPoeVideoToS3(jobId: string, apiKey: string): Promise<string> {
+  const res = await fetch(`${POE_API_BASE}/videos/${jobId}/content`, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Accept: "video/mp4",
+    },
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Poe content download error (${res.status}): ${detail}`);
+  }
+
+  const buffer = Buffer.from(await res.arrayBuffer());
+  const key = `cinematique-videos/${jobId}-${Date.now()}.mp4`;
+  const { url } = await storagePut(key, buffer, "video/mp4");
+  return url;
 }
 
 // ─── Provider: Runway ML ──────────────────────────────────────────────────────
@@ -77,7 +187,6 @@ async function generateRunway(req: VideoGenerationRequest): Promise<VideoGenerat
   }
 
   const data = (await res.json()) as { id: string };
-  // Runway returns a job ID — caller must poll for completion
   return { status: "queued", jobId: data.id };
 }
 
@@ -150,6 +259,8 @@ export async function pollVideoStatus(
   jobId: string
 ): Promise<VideoStatusResult> {
   switch (provider) {
+    case "poe":
+      return pollPoeStatus(jobId);
     case "runway":
       return pollRunwayStatus(jobId);
     case "kling":
@@ -262,6 +373,8 @@ export async function generateVideo(req: VideoGenerationRequest): Promise<VideoG
   const provider = getActiveProvider();
 
   switch (provider) {
+    case "poe":
+      return generatePoe(req);
     case "runway":
       return generateRunway(req);
     case "kling":
