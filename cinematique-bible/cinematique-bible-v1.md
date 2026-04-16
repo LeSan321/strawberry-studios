@@ -3071,3 +3071,449 @@ When generating any Cinématique prompt for the Velvet Strawberry Jazz Club, ver
 - Performer proximity specified (face visible, eyes readable, or "intimate close-up")
 - Implied audience specified ("a hand reaches for a glass", "a silhouette in the background")
 - Performer authority specified ("commands the space", "owns the light", "stage presence")
+
+
+---
+
+# CHAPTER 30: Royal College of Music — Acoustic-Visual Immersion and Stage Presence
+
+## Research Source
+Royal College of Music Virtual Performance Simulator (2024–2025) — acoustic and visual immersion research, stage presence, spatial audio for virtual concert environments.
+
+## Core Principles
+
+Stage presence in virtual performance environments is governed by the convergence of three systems: **acoustic immersion** (how sound fills and defines a space), **visual immersion** (how lighting and depth cues establish spatial reality), and **embodied presence** (how the performer's physical relationship to the space is communicated to the viewer). Research from the RCM simulator demonstrates that acoustic-visual coherence — the alignment between what the eye sees and what the ear expects — is the single most powerful driver of felt presence. A room that looks intimate must sound intimate. A room that looks reverberant must have visible acoustic surfaces.
+
+For the Velvet Strawberry, the acoustic signature is critical: low ceiling (9–12ft) creates short early reflections (under 20ms), which the brain reads as intimacy. Velvet wall surfaces absorb mid-frequency sound (500Hz–2kHz), reducing flutter echo and creating a "dead" mid-range that makes the voice feel close and unmediated. Brass surfaces reflect high frequencies, adding presence and air to the upper register. The combination — velvet absorbs, brass reflects — creates the acoustic grammar of the 1940s jazz club: intimate, warm, with a slight metallic edge on the high end.
+
+**Spatial audio principles for virtual performance:**
+- Early reflections under 20ms → perceived intimacy (small room)
+- Early reflections 20–80ms → perceived spaciousness (medium hall)
+- Early reflections over 80ms → perceived grandeur (concert hall)
+- Reverberation time (RT60) for jazz club: 0.6–1.0 seconds
+- Velvet absorption coefficient at 1kHz: 0.55–0.70
+- Brass reflection coefficient at 4kHz: 0.85–0.92
+
+## Cinématique Prompt Vocabulary
+
+- "acoustic intimacy visible in the room geometry"
+- "low ceiling creates early reflection grammar"
+- "velvet absorbs the mid-range, brass reflects the high end"
+- "RT60 of 0.8 seconds — the sound of a jazz club"
+- "spatial audio coherence — the room sounds like it looks"
+- "stage elevation creates acoustic separation"
+- "close-mic presence in the visual grammar"
+- "dead room acoustics — no flutter echo"
+- "the voice fills the space without competing with it"
+- "acoustic shadow behind the performer"
+
+## Production Directives
+
+1. Every Velvet Strawberry frame must include at least one visible acoustic surface — velvet drape, upholstered seat, or carpet — to establish the acoustic grammar visually.
+2. Brass surfaces (bar fixtures, instrument bells, microphone stand) must be visible in at least one depth plane to signal the high-frequency reflection character of the space.
+3. Low ceiling must be implied or visible — use ceiling practicals, overhead shadow, or ceiling reflection to establish the 9–12ft height.
+4. Stage elevation (6–18 inches) must be visible to establish acoustic separation between performer and audience.
+5. The camera should never be positioned higher than the performer's eye level during intimate moments — this preserves the acoustic intimacy grammar (close, not above).
+6. Reverberation tail in atmospheric elements: haze should drift slowly (under 0.5m/s) to suggest low air movement consistent with a sealed, intimate space.
+
+## Reference Tables
+
+| Acoustic Surface | Absorption Coefficient (1kHz) | Visual Grammar |
+|---|---|---|
+| Velvet drape | 0.55–0.70 | Deep shadow, pile direction visible |
+| Upholstered seat | 0.60–0.75 | Background texture, depth plane marker |
+| Carpet | 0.35–0.50 | Floor reflection absent — matte ground |
+| Bare plaster | 0.05–0.10 | Hard reflection, reverberant grammar |
+| Brass fixture | 0.08–0.12 | Specular highlight, high-frequency signal |
+| Glass (bar) | 0.05–0.08 | Reflection plane, depth doubling |
+
+| RT60 Target | Room Type | Visual Correlate |
+|---|---|---|
+| 0.3–0.6s | Recording studio | Tight, dry, close-mic |
+| 0.6–1.0s | Jazz club (Velvet Strawberry) | Intimate, warm, slight tail |
+| 1.0–1.5s | Small concert hall | Spacious, elevated |
+| 1.5–2.5s | Large concert hall | Grand, distant, reverberant |
+
+## Unreal Engine 5 Mappings
+
+- **Acoustic simulation**: UE5 Audio Engine with Convolution Reverb — use IR (impulse response) of a 0.8s RT60 small jazz club
+- **Early reflections**: UE5 Reverb Plugin with early reflection delay set to 15–20ms for intimacy
+- **Velvet absorption**: UE5 Audio Volumes with material absorption coefficients applied to velvet surfaces
+- **Spatial audio**: UE5 MetaSounds with HRTF spatialization for headphone delivery
+- **Stage elevation**: UE5 Audio Occlusion system — slight occlusion of audience-level sources relative to stage sources
+
+## Chapter Summary
+
+The Royal College of Music's virtual performance research establishes a foundational principle for the Cinématique system: acoustic and visual grammar must be coherent, because the brain cross-validates them constantly. When a viewer sees velvet walls and a low ceiling, they expect a specific acoustic signature — short early reflections, warm mid-range absorption, slight metallic high-frequency presence from brass. If the visual grammar promises intimacy but the acoustic grammar delivers grandeur, presence collapses.
+
+For the Velvet Strawberry, this means every frame must contain visible acoustic markers: velvet surfaces to signal absorption, brass to signal reflection, low ceiling to signal short RT60. These are not decorative choices — they are acoustic information delivered through the visual channel. The viewer's nervous system reads them before the conscious mind does, and they prime the expectation of intimacy that the lighting and camera grammar then fulfill.
+
+---
+
+# CHAPTER 31: VR Concert Immersion — How Virtual Reality Mediates the Concert Experience
+
+## Research Source
+"Investigating how immersive virtual reality mediates the experience of virtual concerts" — presence theory, embodiment, emotional response in virtual music performance environments.
+
+## Core Principles
+
+VR concert research identifies four dimensions of presence that govern how deeply a viewer feels "inside" a performance rather than "watching" it: **spatial presence** (the sense of being physically located in the venue), **social presence** (the sense of sharing space with the performer), **embodied presence** (the sense that one's body is in the space), and **temporal presence** (the sense that the performance is happening now, not recorded).
+
+For 2D cinematic video, the same four dimensions apply but are achieved through different mechanisms:
+
+**Spatial presence** in 2D is created by: four visible depth planes, atmospheric haze that stratifies at a specific height, practical light sources with visible falloff, and camera positions that imply a physical viewpoint within the space (not above it).
+
+**Social presence** in 2D is created by: eye contact or near-eye-contact with the performer, close-up shots that reduce the social distance to under 1.2m (intimate zone), and the performer's gaze directed toward the camera position (not past it).
+
+**Embodied presence** in 2D is created by: camera movement that implies a body in motion (slow push-in, not mechanical zoom), slight camera instability that suggests breathing or weight shift, and low-angle shots that place the viewer at standing height rather than floating above.
+
+**Temporal presence** in 2D is created by: visible motion in every frame (haze drift, fabric movement, flame flicker), real-time audio-visual synchronization, and the avoidance of "frozen" frames where nothing moves.
+
+## Cinématique Prompt Vocabulary
+
+- "spatial presence — four depth planes establish the room"
+- "social presence — performer's gaze toward camera position"
+- "intimate zone — social distance under 1.2 meters"
+- "embodied camera — slow push-in implies a body moving"
+- "temporal presence — haze drift confirms real time"
+- "eye contact grammar — not past the lens, toward it"
+- "camera at standing height — viewer is in the room"
+- "breathing camera — slight instability, not mechanical"
+- "performer awareness of the camera — not performance for a void"
+- "the frame implies a witness, not a recording device"
+
+## Production Directives
+
+1. Every Velvet Strawberry frame must establish spatial presence through four visible depth planes — foreground object, mid-ground haze, performer, background darkness.
+2. Close-up shots must reduce implied social distance to under 1.2m — the intimate zone where social presence is strongest.
+3. The performer's gaze must be directed toward the camera position in at least one shot per sequence — this establishes social presence and breaks the fourth wall in the correct direction.
+4. Camera movement must imply a body: slow push-ins (0.5–2cm/sec), never mechanical zoom, slight breathing instability on long holds.
+5. Every frame must contain at least one moving element to establish temporal presence — haze drift, fabric movement, flame flicker, or smoke curl.
+6. Camera height must be at standing height (1.5–1.8m) for establishing shots — never floating above the action.
+
+## Reference Tables
+
+| Presence Dimension | 2D Cinematic Mechanism | Velvet Strawberry Application |
+|---|---|---|
+| Spatial presence | Four depth planes, atmospheric haze, practical light falloff | Foreground glass, mid-ground haze, performer, background darkness |
+| Social presence | Eye contact, intimate zone (under 1.2m), performer awareness | Close-up at 85mm f/1.4, gaze toward lens |
+| Embodied presence | Slow push-in, breathing instability, standing height camera | 0.5–2cm/sec push-in, 1.6m camera height |
+| Temporal presence | Visible motion in every frame | Haze drift 0.2–0.4m/s, fabric lag 0.3s |
+
+| Social Distance Zone | Distance | Camera Equivalent | Emotional Register |
+|---|---|---|---|
+| Public | Over 3.6m | Wide establishing shot | Observation |
+| Social | 1.2–3.6m | Medium shot | Engagement |
+| Personal | 0.45–1.2m | Close-up | Intimacy |
+| Intimate | Under 0.45m | Extreme close-up | Vulnerability |
+
+## Unreal Engine 5 Mappings
+
+- **Spatial presence**: UE5 Lumen GI with four depth planes — use Nanite geometry for foreground detail, volumetric fog for mid-ground haze
+- **Social presence**: UE5 MetaHuman eye gaze system — configure gaze target toward camera position
+- **Embodied presence**: UE5 Sequencer camera with spring arm and slight procedural camera shake (breathing frequency: 0.2–0.3Hz)
+- **Temporal presence**: UE5 Niagara particle system for haze drift — velocity 0.2–0.4m/s, Chaos Cloth for fabric movement
+
+## Chapter Summary
+
+VR concert research confirms what the Velvet Strawberry's visual grammar already intuits: presence is not a single quality but a four-dimensional state that must be constructed simultaneously across spatial, social, embodied, and temporal channels. The failure of most AI-generated concert videos is not technical — it is dimensional. They establish spatial presence (a room exists) but fail to establish social presence (the performer is aware of the viewer) or temporal presence (the performance is happening now). The result is a beautiful image that feels like a photograph rather than a moment.
+
+The Cinématique system addresses all four dimensions simultaneously: four depth planes for spatial presence, gaze direction for social presence, slow push-in camera for embodied presence, and mandatory motion elements for temporal presence. These are not aesthetic choices — they are the minimum specification for a frame that feels inhabited rather than depicted.
+
+---
+
+# CHAPTER 32: Marvelous Designer + Unreal Engine — USD Cloth Pipeline for MetaHumans
+
+## Research Source
+Marvelous Designer and Unreal Engine workflows — USD export of cloth simulation data into Chaos Cloth for MetaHumans, garment construction pipeline for cinematic characters.
+
+## Core Principles
+
+The Marvelous Designer → Unreal Engine pipeline is the industry-standard workflow for creating physically accurate garments on digital characters. It operates in three stages: **pattern construction** (garment geometry built from 2D patterns in Marvelous Designer), **simulation baking** (cloth physics simulated in Marvelous Designer and exported as USD or Alembic cache), and **real-time integration** (garment driven by Chaos Cloth in Unreal Engine with MetaHuman skeleton).
+
+For the Velvet Strawberry characters, this pipeline is directly relevant:
+
+**The Red Head Singer's bias-cut charmeuse gown**: Marvelous Designer handles the bias-cut construction (fabric cut at 45° to the grain, which produces the characteristic drape and stretch behavior). The simulation captures the 0.3–0.5 second fabric lag behind body movement. The USD export preserves the simulation data for Chaos Cloth to drive in real-time.
+
+**The Fedora Man's wool gabardine suit**: Marvelous Designer handles the structured tailoring (jacket, trousers, fedora). The wool gabardine's high bending stiffness (0.0089 N·m) means the garment holds its shape with minimal drape. The fedora brim geometry is critical — it must be constructed with accurate brim width (2.5–3.5 inches) to produce the correct shadow geometry at 45° overhead lighting.
+
+**Key technical parameters for the USD export:**
+- Simulation mesh: high-resolution (10,000–50,000 polygons for hero garments)
+- Render mesh: lower-resolution with normal map baked from simulation mesh
+- Chaos Cloth properties imported from Marvelous Designer fabric presets
+- Collision geometry: simplified body mesh for performance
+
+## Cinématique Prompt Vocabulary
+
+- "Marvelous Designer bias-cut construction — fabric cut at 45° to grain"
+- "USD cloth cache — simulation data drives real-time Chaos Cloth"
+- "MetaHuman skeleton drives garment — not the reverse"
+- "hero garment resolution — 50,000 polygon simulation mesh"
+- "fedora brim width 3 inches — 45° shadow geometry"
+- "gabardine holds shape — minimal drape, maximum structure"
+- "charmeuse bias-cut — 0.3 second lag behind hip movement"
+- "normal map baked from simulation mesh — render efficiency"
+- "Chaos Cloth properties from Marvelous Designer fabric preset"
+- "garment as character — the suit tells the story before the face does"
+
+## Production Directives
+
+1. The Red Head Singer's gown must be constructed as a bias-cut garment (45° grain angle) in Marvelous Designer to produce the correct drape and stretch behavior under movement.
+2. The fedora brim must be constructed at 2.5–3.5 inch width to produce the correct shadow geometry at 45° overhead lighting — this is the psychological grammar of concealment.
+3. Simulation mesh resolution for hero garments: minimum 10,000 polygons. Render mesh: 3,000–5,000 polygons with normal map baked from simulation.
+4. Chaos Cloth properties must be imported from Marvelous Designer fabric presets — do not manually set stiffness values without reference to the measured KES-FB parameters in Chapter 16.
+5. Collision geometry must be simplified to 500–1,000 polygons for performance — use the MetaHuman body mesh as the collision source.
+6. USD export must preserve simulation cache for offline rendering; Chaos Cloth drives real-time interactive preview.
+
+## Reference Tables
+
+| Character | Garment | Marvelous Designer Fabric Preset | Chaos Cloth Bending Stiffness | Chaos Cloth Shear |
+|---|---|---|---|---|
+| Red Head Singer | Bias-cut charmeuse gown | Silk Charmeuse (bias) | 0.0023 N·m | 0.8 N/m |
+| Fedora Man | Wool gabardine suit | Wool Gabardine (structured) | 0.0089 N·m | 2.1 N/m |
+| Fedora Man | Fedora hat | Wool Felt (stiff) | 0.0180 N·m | 4.5 N/m |
+| Background musicians | Cotton broadcloth shirts | Cotton Broadcloth | 0.0045 N·m | 1.2 N/m |
+
+| Export Format | Use Case | Fidelity | Performance |
+|---|---|---|---|
+| USD (Universal Scene Description) | Full pipeline, offline render | Highest | Offline only |
+| Alembic (.abc) | Animation cache, baked simulation | High | Offline/pre-baked |
+| FBX with Chaos Cloth | Real-time UE5 | Medium | Real-time |
+| Nanite mesh + Chaos Cloth | UE5 hero character | High | Real-time with LOD |
+
+## Unreal Engine 5 Mappings
+
+- **Marvelous Designer export**: Use USD or FBX with embedded Chaos Cloth properties
+- **Chaos Cloth**: Import fabric presets from Marvelous Designer — bending, shear, stretch, damping
+- **MetaHuman integration**: Attach garment to MetaHuman skeleton via UE5 Clothing Tool
+- **Simulation mesh vs. render mesh**: Use Nanite for render mesh, simplified collision mesh for Chaos Cloth
+- **USD pipeline**: UE5 USD Importer for full simulation cache playback in offline renders
+- **Fedora shadow**: UE5 Ray Tracing with hard shadow enabled — brim shadow must use ray-traced shadows, not shadow maps
+
+## Chapter Summary
+
+The Marvelous Designer to Unreal Engine pipeline transforms garment construction from an art decision into a physics decision. When the Red Head Singer's gown is built as a bias-cut charmeuse garment with the correct grain angle, the fabric behavior under movement is not approximated — it is simulated from the actual mechanical properties of the material. The 0.3–0.5 second lag behind hip movement, the narrow specular highlight that moves with the viewing angle, the way the fabric catches the footlight at the hip — these are not prompt descriptions. They are simulation outputs.
+
+For the Cinématique system, this pipeline matters because it establishes the ground truth that the Expert Council's prompts are describing. When the prompt says "bias-cut silk charmeuse catches the light at the hip," it is describing a specific physical behavior that the Marvelous Designer simulation produces. The knowledge base and the production pipeline speak the same language because they are both grounded in the same physics.
+
+---
+
+# CHAPTER 33: SIGGRAPH 2025 — Strand-Based Hair, Fur, and Real-Time Ray Tracing
+
+## Research Source
+SIGGRAPH 2025 "Advances in Real-Time Rendering" course notes — strand-based hair and fur rendering, ray tracing for open worlds, real-time global illumination (from Indiana Jones and the Great Circle production pipeline).
+
+## Core Principles
+
+Strand-based hair rendering achieves cinematic fidelity at 60 FPS through three innovations: **Position-Based Dynamics (PBD) simulation** for every strand and vertex, **custom software rasterization** using a pixel request stack in Local Data Share (LDS) to handle the high divergence of hair rendering, and **precomputed ray-traced self-shadowing** baked into spherical harmonic coefficients per vertex.
+
+For the Velvet Strawberry, strand-based rendering is directly relevant to:
+- The Red Head Singer's hair — the primary visual element after the gown
+- The Fedora Man's fedora felt texture — wool felt has a fiber structure that benefits from strand-level rendering
+- Background musician hair and any visible fabric pile (velvet)
+
+**The Marschner shading model** for hair uses three light paths: R (direct reflection off the hair cuticle), TT (transmission through the hair), and TRT (transmission, internal reflection, transmission). For red hair under 2500K tungsten:
+- R path: warm orange-red specular highlight (cuticle reflection)
+- TT path: warm transmission glow (light passing through the strand)
+- TRT path: secondary highlight at 180° from light source (backlit rim)
+
+**Performance targets from Indiana Jones pipeline:**
+- 65,000 strands maximum (PC High / PS5 / Xbox Series X)
+- 32,000 strands (PC Low / Xbox Series S / Steam Deck)
+- Total hair render budget: 2.39ms at 4K (simulation 0.49ms, shading 0.62ms)
+
+## Cinématique Prompt Vocabulary
+
+- "strand-based hair — Marschner R/TT/TRT light paths"
+- "cuticle reflection — warm specular highlight on red hair"
+- "transmission glow — light passes through the strand"
+- "backlit rim — TRT path at 180° from tungsten source"
+- "PBD simulation — every strand responds to air movement"
+- "velvet pile as strand array — directional sheen from fiber orientation"
+- "fedora felt — compressed wool strands, matte absorption"
+- "self-shadowing baked — no shadow map artifacts on hair"
+- "65,000 strands — hero character hair resolution"
+- "hair as light instrument — the color of the light lives in the hair"
+
+## Production Directives
+
+1. The Red Head Singer's hair must be rendered with the Marschner model — R path for the warm specular highlight, TT for the transmission glow under backlight, TRT for the rim highlight when the tungsten source is behind her.
+2. Under 2500K tungsten, red hair shifts toward orange-red in the R path and warm amber in the TT path — this is the correct color response, not pure red.
+3. Velvet pile must be treated as a strand array — the directional sheen of velvet is a fiber-level phenomenon, not a surface-level one.
+4. The fedora felt must be rendered with compressed wool strand parameters — high absorption, low specularity, slight directional sheen from the felt pressing direction.
+5. Hair self-shadowing must use precomputed ray-traced visibility, not shadow maps — shadow map artifacts on hair are forbidden in the Velvet Strawberry grammar.
+6. Hair simulation must respond to air movement from haze drift — PBD simulation with air resistance parameter set to match the 0.2–0.4m/s haze velocity.
+
+## Reference Tables
+
+| Hair Light Path | Physical Mechanism | Color Under 2500K Tungsten | Visual Effect |
+|---|---|---|---|
+| R (cuticle reflection) | Specular reflection off cuticle surface | Warm orange-red | Primary highlight, moves with light angle |
+| TT (transmission) | Light passes through strand | Warm amber-gold | Glow effect, strongest when backlit |
+| TRT (internal reflection) | Transmission + internal reflection + transmission | Warm copper-red | Secondary highlight at 180° from source |
+
+| Platform | Max Strands | Render Budget (4K) | LOD Strategy |
+|---|---|---|---|
+| PC High / PS5 / Xbox Series X | 65,000 | 2.39ms total | Full resolution |
+| PC Low / Xbox Series S | 32,000 | 1.94ms total | 50% strand reduction |
+| Steam Deck | 32,000 | 1.95ms total | 50% strand reduction + thickness increase |
+| Mobile | 16,000 | 1.64ms total | 75% reduction + card fallback |
+
+## Unreal Engine 5 Mappings
+
+- **Strand-based hair**: UE5 Groom system — import from Maya xGen or Houdini
+- **Marschner shading**: UE5 Hair Shader with R/TT/TRT path controls
+- **PBD simulation**: UE5 Groom physics with Chaos Hair solver
+- **Self-shadowing**: UE5 Ray Tracing with precomputed visibility baked into Groom asset
+- **LOD management**: UE5 Groom LOD system — automatic strand reduction by distance
+- **Velvet pile**: UE5 Groom system applied to velvet surface mesh — strand density 500–1000 per cm²
+- **Fedora felt**: UE5 Groom with compressed wool parameters — strand length 0.5–1.0mm, high damping
+
+## Chapter Summary
+
+The Indiana Jones and the Great Circle strand-based hair pipeline demonstrates that cinematic hair fidelity at real-time frame rates is now achievable — and the techniques transfer directly to the Velvet Strawberry's visual grammar. The Marschner shading model's three light paths (R, TT, TRT) explain why red hair under tungsten light has a specific warmth and glow that cannot be approximated with surface shaders: the light is physically interacting with the strand structure, not just reflecting off a surface.
+
+For the Expert Council, this means hair color under specific Kelvin temperatures can now be specified precisely. Red hair under 2500K tungsten produces a warm orange-red specular highlight (R path), an amber transmission glow when backlit (TT path), and a copper-red secondary highlight at 180° from the source (TRT path). These are not aesthetic descriptions — they are the outputs of a physically accurate shading model. The Expert Council can now specify them by name.
+
+---
+
+# CHAPTER 34: WebGPU Real-Time Cloth Simulation — Browser-Based Venue Previews
+
+## Research Source
+"Real-Time Cloth Simulation Using WebGPU" (2025 arXiv) — browser-friendly cloth simulation for interactive venue previews using GPU compute shaders.
+
+## Core Principles
+
+WebGPU enables real-time cloth simulation directly in the browser by exposing GPU compute shaders — a capability unavailable in WebGL. The Mass-Spring Method (MSM) with damping forces is the primary simulation approach: each cloth vertex is connected to its neighbors by structural springs (resist stretching), shear springs (resist diagonal deformation), and bending springs (resist folding). Damping forces dissipate energy and prevent oscillation.
+
+**Performance benchmarks:**
+- WebGPU: up to 640,000 cloth nodes at 60 FPS
+- WebGL: significant bottlenecks above 100,000 nodes
+- Collision detection: Möller–Trumbore triangle-triangle intersection algorithm
+
+For the Strawberry Studios web application, WebGPU cloth simulation enables:
+- **Interactive venue previews**: artists can see how their character's garment will behave in the Velvet Strawberry before committing to production
+- **Real-time preset visualization**: switching between Cinématique presets updates the cloth simulation in real-time
+- **Character customization**: artists can adjust garment parameters and see the physics response immediately
+
+**Key simulation parameters for Velvet Strawberry garments:**
+- Charmeuse gown: structural spring stiffness 0.3, shear spring stiffness 0.1, bending spring stiffness 0.02
+- Wool gabardine suit: structural spring stiffness 0.8, shear spring stiffness 0.4, bending spring stiffness 0.15
+- Velvet drape: structural spring stiffness 0.5, shear spring stiffness 0.2, bending spring stiffness 0.05
+
+## Cinématique Prompt Vocabulary
+
+- "WebGPU compute shader cloth — 640K nodes at 60fps"
+- "Mass-Spring Method — structural, shear, and bending springs"
+- "Möller–Trumbore collision detection — precise fabric-body interaction"
+- "damped spring forces — no oscillation artifacts"
+- "browser-native cloth physics — no plugin required"
+- "real-time preset visualization — physics responds to lighting change"
+- "interactive garment preview — artist sees the physics before production"
+- "GPU parallel cloth — every vertex computed simultaneously"
+
+## Production Directives
+
+1. The Strawberry Studios web application should use WebGPU for interactive venue previews — this enables real-time cloth simulation in the browser without plugins.
+2. Garment preview resolution: 10,000–50,000 nodes for hero garments in preview mode (full simulation mesh for offline render).
+3. Collision detection must use the Möller–Trumbore algorithm for accurate fabric-body interaction — avoid bounding box approximations for hero garments.
+4. Damping coefficient must be tuned per fabric type — charmeuse requires low damping (0.02) for fluid movement, gabardine requires high damping (0.15) for structured hold.
+5. Bending spring stiffness must match the KES-FB measured values from Chapter 16 — do not use default simulation parameters.
+6. WebGPU fallback: if WebGPU is unavailable, fall back to pre-rendered cloth animation cache (Alembic) rather than WebGL simulation.
+
+## Reference Tables
+
+| Fabric | Structural Spring | Shear Spring | Bending Spring | Damping |
+|---|---|---|---|---|
+| Silk charmeuse (bias-cut) | 0.30 | 0.10 | 0.02 | 0.02 |
+| Wool gabardine | 0.80 | 0.40 | 0.15 | 0.12 |
+| Wool felt (fedora) | 0.95 | 0.60 | 0.25 | 0.18 |
+| Velvet drape | 0.50 | 0.20 | 0.05 | 0.06 |
+| Cotton broadcloth | 0.55 | 0.25 | 0.07 | 0.08 |
+
+| Platform | WebGPU Support | Max Nodes (60fps) | Fallback |
+|---|---|---|---|
+| Chrome 113+ | Full | 640,000 | WebGL |
+| Firefox 121+ | Full | 640,000 | WebGL |
+| Safari 17.4+ | Partial | 320,000 | WebGL |
+| Mobile Chrome | Partial | 160,000 | Pre-rendered cache |
+
+## Unreal Engine 5 Mappings
+
+- **WebGPU cloth → UE5 Chaos Cloth**: Spring parameters map directly to Chaos Cloth stiffness values
+- **Möller–Trumbore collision → UE5 Chaos collision**: Use UE5 Chaos Cloth collision with simplified body mesh
+- **Browser preview → UE5 Sequencer**: Pre-rendered cloth animation from UE5 Sequencer as fallback cache
+- **Real-time preset switching → UE5 Material Parameter Collection**: Lighting preset changes update cloth material parameters in real-time
+
+## Chapter Summary
+
+WebGPU cloth simulation represents the bridge between the Cinématique knowledge base and the artist-facing interface of Strawberry Studios. The physics that the Expert Council describes in its Director's Package — the 0.3-second fabric lag, the bias-cut drape, the wool gabardine structure — can now be visualized interactively in the browser before a single frame of video is generated. This closes the loop between specification and preview: the artist selects a preset, sees the cloth respond in real-time, and understands what the Expert Council is promising before committing to production.
+
+The performance benchmarks are encouraging: 640,000 cloth nodes at 60 FPS in a modern browser means hero garment simulation is entirely feasible as a preview tool. The Möller–Trumbore collision detection ensures that the fabric-body interaction is accurate, not approximated — the gown drapes correctly over the singer's body, not through it.
+
+---
+
+# CHAPTER 35: PBR Material Libraries — Poly Haven, ambientCG, and Scanned Material Reference Data
+
+## Research Source
+PBR Texture and Material Libraries (Poly Haven, ambientCG) — real-world scanned materials as reference data for velvet, silk, wool, brass, leather, and other Velvet Strawberry surfaces.
+
+## Core Principles
+
+Physically Based Rendering (PBR) material libraries provide measured, scanned reference data for real-world materials — the actual albedo, roughness, metallic, normal, and ambient occlusion maps captured from physical samples under controlled lighting. For the Cinématique system, these libraries serve as the ground truth for how specific materials behave under specific lighting conditions.
+
+**Core PBR principles governing Velvet Strawberry materials:**
+
+**Energy conservation**: A surface cannot reflect more light than it receives. For velvet under 2200K tungsten, the total reflected energy (diffuse + specular) must equal the incident energy minus absorption. Velvet's high absorption coefficient (0.55–0.70 at 1kHz acoustic, 0.85–0.92 optical absorption) means most incident light is absorbed, not reflected — which is why velvet reads as deep, rich color rather than bright surface.
+
+**Fresnel effect**: Reflectivity increases at grazing angles. For silk charmeuse at grazing angles (above 75°), the specular reflectivity approaches 1.0 regardless of the base roughness — this is the source of the bright edge highlight on the gown's silhouette under rim lighting.
+
+**Microfacet theory for velvet**: Velvet's characteristic soft appearance and directional sheen are governed by the orientation of its pile fibers. The Ashikhmin-Shirley anisotropic BRDF model captures this: the pile direction creates a gradient from bright (against the pile) to dark (with the pile) that moves as the viewing angle changes.
+
+**Key material parameters for Velvet Strawberry surfaces:**
+
+| Material | Albedo (2500K) | Roughness | Metallic | Anisotropy | Specular |
+|---|---|---|---|---|---|
+| Deep crimson velvet | 0.12–0.18 | 0.85–0.92 | 0.0 | 0.7 (pile direction) | 0.04 |
+| Silk charmeuse (crimson) | 0.35–0.45 | 0.08–0.15 | 0.0 | 0.3 (bias direction) | 0.08 |
+| Wool gabardine (charcoal) | 0.04–0.08 | 0.75–0.85 | 0.0 | 0.2 | 0.04 |
+| Brass (aged) | 0.65–0.75 | 0.35–0.55 | 0.95 | 0.1 | 1.0 |
+| Dark wood (bar) | 0.08–0.15 | 0.60–0.75 | 0.0 | 0.0 | 0.04 |
+| Glass (bar) | 0.02–0.05 | 0.05–0.10 | 0.0 | 0.0 | 0.08 |
+
+## Cinématique Prompt Vocabulary
+
+- "PBR accurate velvet — Ashikhmin-Shirley anisotropic BRDF"
+- "Fresnel edge highlight — silk specular approaches 1.0 at grazing angle"
+- "energy conservation — velvet absorbs 85% of incident light"
+- "microfacet velvet pile — directional sheen from fiber orientation"
+- "aged brass — metallic 0.95, roughness 0.45"
+- "silk charmeuse albedo 0.40 — rich crimson, not bright red"
+- "roughness 0.10 silk — high specular, narrow highlight"
+- "roughness 0.88 velvet — diffuse absorption, no specular"
+- "anisotropy 0.70 velvet pile — sheen direction follows pile"
+- "scanned material reference — not approximated, measured"
+
+## Production Directives
+
+1. All Velvet Strawberry material parameters must reference the PBR values in the table above — do not use default material settings.
+2. Velvet must use the Ashikhmin-Shirley anisotropic BRDF with anisotropy 0.70 and pile direction specified — the directional sheen is the defining visual property of velvet.
+3. Silk charmeuse must use Fresnel-accurate specular with roughness 0.08–0.15 — the edge highlight at grazing angles is the defining visual property of charmeuse.
+4. Brass must use metallic 0.95 with roughness 0.35–0.55 (aged, not polished) — polished brass (roughness under 0.20) is too bright for the Velvet Strawberry grammar.
+5. Under 2200K tungsten, all albedo values shift warm — multiply albedo by the tungsten spectral distribution (peak at 700nm) to get the correct rendered color.
+6. Glass surfaces (bar, mirrors) must use roughness 0.05–0.10 — they are reflection planes that double the depth of the space.
+
+## Unreal Engine 5 Mappings
+
+- **Velvet Ashikhmin-Shirley**: UE5 Material with Anisotropy input + custom Tangent — set anisotropy to 0.70, tangent aligned to pile direction
+- **Silk charmeuse Fresnel**: UE5 Material with Fresnel node — roughness 0.10, specular 0.08
+- **Aged brass**: UE5 Material with Metallic 0.95, Roughness 0.45, Base Color from Poly Haven aged brass albedo map
+- **Velvet albedo**: Import from ambientCG velvet texture set — use Albedo, Normal, Roughness, AO maps
+- **Silk albedo**: Import from Poly Haven silk fabric texture set — tint to deep crimson (0.35, 0.05, 0.05 in linear)
+- **Glass reflection**: UE5 Screen Space Reflections + Lumen reflections — roughness 0.05 for bar glass
+
+## Chapter Summary
+
+PBR material libraries provide the measured ground truth that makes the Cinématique Bible's material descriptions physically accurate rather than aesthetically approximate. When the Expert Council specifies "deep crimson velvet with anisotropy 0.70 and roughness 0.88," it is describing a material that has been measured from a physical sample — the albedo, roughness, and anisotropy values correspond to real velvet under real lighting conditions, not an artist's approximation.
+
+For the Velvet Strawberry, the most important material insight from PBR research is the relationship between absorption and perceived richness. Velvet's high optical absorption (albedo 0.12–0.18) is why it reads as deep, saturated color rather than bright surface color. The crimson is not bright — it is deep. The darkness is in the material, not just in the lighting. This is the physical basis for the Velvet Strawberry's visual grammar: the richness comes from what the material absorbs, not from what it reflects.

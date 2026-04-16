@@ -64,18 +64,18 @@
 - [x] Real-Time Cloth Rendering with Fiber-Level Detail (SIGGRAPH courses) — procedural yarn model, volumetric fabric, fiber type reference tables → Chapter 25
 
 ### Tier 3 — Experiential Layer (Platinum Venues / Future Phases)
-- [ ] Royal College of Music virtual performance simulator (2024–2025) — acoustic + visual immersion, stage presence, spatial audio
-- [ ] VR concert research — "Investigating how immersive virtual reality mediates the experience of virtual concerts"
-- [ ] Marvelous Designer + Unreal Engine workflows — USD export of simulation data into Chaos Cloth for MetaHumans
-- [ ] SIGGRAPH 2025 "Advances in Real-Time Rendering" course notes — strand-based hair/fur, ray tracing for open worlds
-- [ ] "Real-Time Cloth Simulation Using WebGPU" (2025 arXiv) — browser-friendly venue previews
-- [ ] PBR Texture & Material Libraries (Poly Haven, ambientCG) — real-world scanned materials as reference data
+- [x] Royal College of Music virtual performance simulator (2024–2025) — acoustic + visual immersion, stage presence, spatial audio → Chapter 30
+- [x] VR concert research — "Investigating how immersive virtual reality mediates the experience of virtual concerts" → Chapter 31
+- [x] Marvelous Designer + Unreal Engine workflows — USD export of simulation data into Chaos Cloth for MetaHumans → Chapter 32
+- [x] SIGGRAPH 2025 "Advances in Real-Time Rendering" course notes — strand-based hair/fur, ray tracing for open worlds → Chapter 33
+- [x] "Real-Time Cloth Simulation Using WebGPU" (2025 arXiv) — browser-friendly venue previews → Chapter 34
+- [x] PBR Texture & Material Libraries (Poly Haven, ambientCG) — real-world scanned materials as reference data → Chapter 35
 
 ### Knowledge Base Chapters Outstanding
 - [x] Chapter 17 (Velvet Strawberry Department Briefs) — Physics, Wardrobe, Camera, Lighting, Atmospheric, Production Design, Sound + Director's Unifying Statement — COMPLETE
 - [x] Strengthen Chapter 11 (Pixar BSSRDF) with pbrt book subsurface scattering chapter → Chapter 14
 - [x] Strengthen Chapter 12 (Disney Cloth) with 2024 fabric mechanical parameters for 1940s-specific fabrics → Chapter 16
-- [ ] Chapter 14 — Experiential Layer (acoustic simulation, spatial audio, crowd dynamics) — after Tier 3 research
+- [x] Chapter 14 — Experiential Layer (acoustic simulation, spatial audio, crowd dynamics) — COMPLETE via Chapters 30–31
 
 ## Psychology and Immersion Bible
 - [x] Cinématique Psychology and Immersion Bible v1.0 — 6 chapters, 283 lines, 5,391 words
@@ -85,3 +85,15 @@
   - [x] Chapter 4: Immersive Experience, Presence, and VR Concert Psychology (4 dimensions of presence)
   - [x] Chapter 5: Biopsychological Foundations — The Emotional Cocktail (dopamine, oxytocin, frisson)
   - [x] Chapter 6: The Velvet Strawberry Psychological Brief + Director's Psychological Unifying Statement
+  - [x] Chapter 7: Psychology Department Brief (full brief for Expert Council integration)
+
+## Cinématique Bible Status
+- [x] Physics and Wardrobe Bible v1.0 — 35 chapters, 3,519 lines, 43,774 words — ALL TIERS COMPLETE
+- [x] Psychology and Immersion Bible v1.0 — 7 chapters — COMPLETE
+- [x] Expert Council system prompt upgraded with full Bible content (checkpoint 47d6caae)
+
+## Next Phase: Video Generator Backend
+- [ ] Build tRPC procedure for video generation (takes Director's Package, calls AI video API)
+- [ ] Implement 10-layer Cinématique prompt formula (Chapter 6) for prompt construction
+- [ ] Wire video generation result back to concert record in DB
+- [ ] Video status polling and display in Library/Concert Ticket pages
