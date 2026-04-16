@@ -2798,3 +2798,276 @@ For The Fedora Man's wool felt hat, fiber-level rendering captures the **nap dir
 - "micro-cylinder forward scattering at fabric edges"
 - "hair fiber fuzz density creating soft pile absorption"
 - "satin with near-zero hair fiber ratio — clean specular surface"
+
+---
+
+## Chapter 26: Acoustic-Visual Immersion — Virtual Performance Space Research
+
+*Source: Royal College of Music virtual performance simulator research and acoustic-visual coherence studies, 2020–2025*
+
+### Domain Overview
+
+The Royal College of Music and allied institutions have developed virtual performance simulators that model the precise interaction between acoustic environment and visual staging in concert spaces. This research establishes that **acoustic-visual coherence** — the alignment between what a viewer sees and what the acoustic environment implies — is a primary driver of felt presence in performance contexts. A viewer watching a performance in a visually intimate space will feel dissonance if the acoustic signature suggests a large reverberant hall. Conversely, when visual and acoustic cues are aligned, the brain integrates them into a unified spatial experience that triggers genuine presence rather than observation.
+
+For the Velvet Strawberry Jazz Club, this means every visual element must carry acoustic information. Velvet surfaces imply sound absorption. Low ceilings imply short reverberation times. Brass fixtures imply early reflections. The visual grammar of the room is simultaneously an acoustic grammar, and the viewer's nervous system reads both simultaneously even when watching a silent video.
+
+The research further establishes that **stage presence** — the felt quality of a performer's physical authority in a space — is not solely a function of performance quality. It is produced by the spatial relationship between performer and environment: the ratio of performer scale to room scale, the quality of light on the performer relative to the ambient light level, and the acoustic intimacy ratio (how much of the sound energy reaches the listener as direct sound versus reflected sound).
+
+### Key Principles
+
+1. **Acoustic-visual coherence is non-negotiable for presence.** When visual cues and implied acoustic cues are misaligned, the brain registers dissonance and presence collapses. Every visual choice carries acoustic implications.
+2. **Intimacy ratio governs felt proximity.** The ratio of direct sound to reverberant sound (the intimacy ratio) determines how close a listener feels to a performer. Visual equivalents exist: the ratio of motivated light to ambient light, the ratio of performer scale to frame scale.
+3. **Early reflections create imaging.** Sound reflections arriving within 30–40ms of the direct sound contribute to spatial imaging — the sense of where a sound source is located in three-dimensional space. Visual equivalents are the secondary light sources (reflections off brass, glass, polished wood) that create spatial depth.
+4. **Stage presence is a spatial relationship, not a performance quality.** A performer lit with a single motivated source against deep shadow has more stage presence than the same performer in flat ambient light, regardless of performance quality.
+5. **Room scale relative to performer scale determines authority.** A performer who fills a significant portion of the frame in a low-ceilinged intimate space reads as more authoritative than the same performer in a vast space, even at identical physical scale.
+6. **Velvet and fabric surfaces are acoustic objects.** Heavy drapes, upholstered furniture, and fabric-covered walls are visible indicators of sound absorption. Their presence in the frame implies a short, warm reverberation time — which the viewer's nervous system interprets as intimacy.
+
+### Presence Thresholds
+
+| Threshold | Minimum Requirement | Velvet Strawberry Target |
+|---|---|---|
+| Acoustic-visual coherence | Visual surfaces must imply correct acoustic behavior | Velvet, brass, wood — all acoustically consistent |
+| Intimacy ratio (visual) | Motivated light must exceed ambient by minimum 4:1 | 8:1 to 16:1 (deep shadow) |
+| Performer-to-room scale | Performer must occupy minimum 20% of frame height | 30–60% depending on shot type |
+| Early reflection indicators | Minimum 2 secondary light sources visible | Brass, glass, polished wood reflections |
+| Stage presence trigger | Single motivated source with shadow edge visible | Hard shadow edge, 45–60° angle |
+| Ceiling height indicator | Low ceiling must be visible or implied | Ceiling visible in wide shots, implied in close-ups |
+
+### 2D Video Application
+
+In 2D AI-generated video, acoustic-visual coherence must be encoded entirely through visual cues since there is no actual acoustic environment. This means the visual grammar of the Velvet Strawberry must carry the full acoustic signature of the space. Every frame should contain at least two acoustic indicators: a fabric surface implying absorption, a reflective surface implying early reflections, a low ceiling implying short reverberation, or a performer-to-room scale ratio implying intimacy.
+
+The stage presence formula translates directly: a single motivated light source with a visible hard shadow edge, a performer occupying 30–60% of frame height, and deep shadow in the background creates the visual equivalent of a high intimacy ratio acoustic environment. The viewer's nervous system reads this as "I am close to this performer in a small, warm, absorptive space."
+
+### Production Directives
+
+1. Every wide shot must include at least one fabric surface (velvet drape, upholstered chair) as an acoustic indicator.
+2. Brass fixtures (trumpet bells, microphone stands, light fixtures) must be visible in at least 40% of frames as early reflection indicators.
+3. Low ceiling must be visible or strongly implied in all establishing shots.
+4. Performer-to-frame ratio: minimum 30% in medium shots, 50–70% in close-ups.
+5. Motivated light must exceed ambient by minimum 8:1 ratio in all performance shots.
+6. Hard shadow edges are required on all performance shots — soft shadows imply large reverberant spaces.
+7. Never use flat ambient lighting — it destroys the acoustic-visual coherence of the intimate jazz club environment.
+
+### Cinématique Prompt Vocabulary
+
+`acoustic intimacy`, `sound-absorbing velvet surfaces`, `early reflection brass`, `low ceiling compression`, `intimate performer scale`, `hard shadow edge presence`, `motivated source dominance`, `room-scale authority`, `fabric acoustic indicators`, `spatial imaging depth`, `short reverberation visual grammar`, `performer proximity threshold`
+
+### UE5 Mapping
+
+- **Lumen Global Illumination:** Set indirect lighting intensity low (0.1–0.3) to maintain acoustic-visual coherence — high indirect light implies large reverberant space
+- **Chaos Cloth on drapes:** Enable for all fabric surfaces — moving fabric reinforces acoustic absorption cues
+- **Ceiling geometry:** Low ceiling mesh required in all venue builds — minimum 9ft, maximum 12ft for jazz club intimacy
+- **Point light attenuation:** Short radius (200–400cm) for all practical sources — implies acoustic intimacy ratio
+- **Ambient Occlusion:** High intensity (0.8–1.0) in corners and under furniture — reinforces sound absorption visual grammar
+
+---
+
+## Chapter 27: VR Concert Presence — Immersion Theory in Live Music Contexts
+
+*Source: VR concert immersion research, presence theory in live music, spatial audio-visual coherence studies*
+
+### Domain Overview
+
+Research into VR concert experiences has produced a precise taxonomy of presence — the felt sense of "being there" — that applies directly to 2D cinematic video production. The foundational finding is that presence is not a single phenomenon but a composite of three distinct components: **spatial presence** (the sense of being physically located in the environment), **social presence** (the sense of sharing space with other beings), and **self-presence** (the sense that one's own body is located in the space). Each component has distinct triggers and minimum thresholds.
+
+For cinematic video production, spatial presence is the primary target. The research establishes that spatial presence in 2D video is triggered by specific compositional and lighting conditions that activate the brain's spatial processing systems — the same systems that process real-world spatial information. When these systems are activated, the viewer experiences the frame as a space they inhabit rather than an image they observe.
+
+The critical finding for Strawberry Studios is that **presence in 2D video is not diminished compared to VR when the correct spatial cues are present**. Studies comparing 2D film to VR found that high-quality 2D cinematography with correct spatial cues (shallow depth of field, motivated lighting, camera movement that implies physical navigation) produced presence scores comparable to low-quality VR experiences. The quality of the spatial cues matters more than the delivery medium.
+
+### Key Principles
+
+1. **Presence is a composite of spatial, social, and self-presence.** Each component has distinct triggers. For cinematic video, spatial presence is the primary target.
+2. **Spatial presence requires spatial cues, not spatial medium.** High-quality 2D cinematography can produce spatial presence comparable to VR when correct cues are present.
+3. **Performer proximity is the primary social presence trigger.** Close-up framing of a performer's face activates mirror neurons and oxytocin response — the same biological mechanism as physical proximity.
+4. **Camera movement implies physical navigation.** Slow push-ins, tracking shots, and camera movements that follow the logic of a person walking through a space activate the brain's navigation systems and produce spatial presence.
+5. **Darkness is a presence amplifier.** Deep shadow around a lit subject forces the viewer's attention into the lit area and activates the brain's threat-detection systems, which heighten alertness and felt presence.
+6. **Active social cues (other audience members, performer acknowledgment) amplify presence.** Even in 2D video, implied audience presence (a hand reaching for a glass, a figure in shadow) activates social presence mechanisms.
+
+### Presence Thresholds
+
+| Component | Minimum Threshold | Optimal for Velvet Strawberry |
+|---|---|---|
+| Spatial presence | Shallow depth of field (f/1.4–f/2.8) + motivated lighting | f/1.4–f/2.0, 8:1 motivated-to-ambient ratio |
+| Social presence | Performer face visible at minimum 15% of frame | 30–50% of frame in close-ups |
+| Self-presence | Camera movement implying physical navigation | Slow push-in (0.5–2cm/sec) or tracking |
+| Darkness threshold | Minimum 60% of frame in shadow | 70–80% shadow coverage |
+| Depth cue minimum | Minimum 3 depth planes visible | 4–5 planes (foreground, mid, performer, background, ceiling) |
+| Movement minimum | Minimum one element of motion per frame | Haze drift, fabric movement, or camera movement |
+
+### 2D Video Application
+
+The presence research translates into a specific set of compositional rules for the Velvet Strawberry. Every frame should activate at least two of the three presence components: spatial presence through shallow depth of field and motivated lighting, social presence through performer proximity and implied audience, and self-presence through camera movement that implies physical navigation.
+
+The darkness threshold finding is particularly important: when 70–80% of a frame is in deep shadow, the viewer's attention is forced into the lit area with a quality of focus that activates the brain's threat-detection and reward systems simultaneously. This is the neurological basis of the jazz club aesthetic — darkness is not absence of information, it is a presence amplifier.
+
+### Production Directives
+
+1. Minimum 70% shadow coverage in all performance shots — darkness is presence, not absence.
+2. Performer face must occupy minimum 30% of frame in close-up shots to activate social presence.
+3. Every sequence must include at least one camera movement implying physical navigation (push-in, track, or slow pan).
+4. Minimum three depth planes must be visible in every wide shot.
+5. At least one element of motion must be present in every frame (haze, fabric, flame, or camera).
+6. Implied audience presence (hand, glass, silhouette) must appear in minimum 20% of frames to maintain social presence.
+7. Shallow depth of field (f/1.4–f/2.0) is required for all close-up and medium shots.
+
+### Cinématique Prompt Vocabulary
+
+`spatial presence cues`, `social presence trigger`, `performer proximity threshold`, `darkness as presence amplifier`, `navigation camera movement`, `depth plane layering`, `implied audience presence`, `mirror neuron activation framing`, `threat-detection shadow ratio`, `shallow focus presence`, `physical navigation implied`, `three-plane depth minimum`
+
+### UE5 Mapping
+
+- **CineCameraComponent.CurrentAperture:** f/1.4–f/2.0 for all close-up and medium shots
+- **Post Process Volume — Depth of Field:** Focal distance locked to performer, background blur intensity 0.8–1.0
+- **Lumen Shadow Maps:** High quality shadows enabled, shadow sharpness 0.8–1.0
+- **Niagara Particle System:** Haze particles active in all shots — minimum motion threshold maintained
+- **Camera Sequencer:** Push-in animations at 0.5–2cm/sec for all performance sequences
+- **Ambient Occlusion Intensity:** 0.9–1.0 — deep corner shadows reinforce presence
+
+---
+
+## Chapter 28: Spatial Audio Physics for Visual Production
+
+*Source: Binaural sound research, psychoacoustics of intimate performance spaces, acoustic-visual integration studies*
+
+### Domain Overview
+
+Spatial audio research has produced a precise set of acoustic parameters for intimate jazz club environments that have direct visual equivalents. The key insight is that the human brain processes acoustic and visual spatial information through overlapping neural systems — the same circuits that compute where a sound is coming from also process visual depth cues. This means that visual production choices carry acoustic implications that the viewer's nervous system processes automatically, even in silent or music-only video.
+
+The most important acoustic parameter for the Velvet Strawberry is the **Initial Time Delay Gap (ITDG)** — the time between the direct sound from a performer and the first reflected sound from a wall or ceiling. In intimate jazz clubs, the ITDG is typically 10–20 milliseconds, which the brain interprets as extreme proximity to the performer. The visual equivalent of a short ITDG is a tight frame with the performer occupying a large portion of the image, combined with visible sound-absorbing surfaces (velvet, fabric) that imply the room is small and absorptive.
+
+The **reverberation time (RT60)** for jazz clubs is typically 0.8–1.2 seconds — shorter than classical concert halls (1.8–2.2 seconds) to maintain clarity and intimacy. The visual equivalent is a room with significant fabric coverage (drapes, upholstered furniture, carpet) that implies sound absorption, combined with a low ceiling that limits the volume of reverberant space.
+
+### Key Acoustic Parameters and Visual Equivalents
+
+| Acoustic Parameter | Jazz Club Value | Visual Equivalent | Prompt Language |
+|---|---|---|---|
+| Initial Time Delay Gap (ITDG) | 10–20ms | Tight framing, performer >30% frame | `intimate proximity framing` |
+| Reverberation Time (RT60) | 0.8–1.2 seconds | Heavy fabric surfaces, low ceiling | `sound-absorbing velvet environment` |
+| Clarity (C80) | +3 to +6 dB | Hard reflective surfaces (brass, glass) | `early reflection brass detail` |
+| Intimacy Ratio | >0.15 | Motivated light >8:1 over ambient | `motivated source dominance` |
+| Room Gain | +3 to +6 dB | Enclosed space, visible walls | `enclosed intimate space` |
+| Bass Ratio | 1.0–1.2 | Warm tungsten light, deep shadow | `warm tungsten bass register` |
+| Ensemble Width | 30–60° | Performer spread across 30–60% of frame | `ensemble spatial spread` |
+
+### Production Directives
+
+1. **Visualize ITDG:** Tight framing with performer occupying minimum 30% of frame height implies short ITDG — acoustic intimacy. Wide frames with small performers imply long ITDG — acoustic distance.
+2. **Visualize RT60:** Heavy fabric coverage (velvet drapes, upholstered chairs) in frame implies short RT60 — jazz club intimacy. Bare walls and hard surfaces imply long RT60 — concert hall distance.
+3. **Visualize Clarity:** Brass fixtures, glass surfaces, and polished wood in frame imply early reflections — acoustic clarity. Their presence signals that the room has good acoustic imaging.
+4. **Visualize Bass Ratio:** Warm tungsten light (2200–2700K) and deep shadow imply the warm bass register of an intimate jazz club. Cool light implies the thin acoustic signature of a large space.
+5. **Never use flat ambient light** — it implies a large, reverberant, acoustically undifferentiated space. Every frame must have a dominant motivated source.
+
+### Cinématique Prompt Vocabulary
+
+`acoustic intimacy visual grammar`, `ITDG tight framing`, `RT60 fabric surfaces`, `clarity brass reflections`, `bass ratio warm tungsten`, `intimacy ratio motivated light`, `ensemble spatial spread`, `sound-absorbing velvet`, `acoustic imaging depth`, `jazz club reverberation visual`, `short decay intimate space`
+
+### UE5 Mapping
+
+- **Audio Volume — Reverb Settings:** RT60 0.8–1.2 seconds for all Velvet Strawberry spaces
+- **Chaos Cloth on all fabric surfaces:** Enables visual acoustic absorption cues
+- **Point Light Color Temperature:** 2200–2700K for all practicals — warm bass register visual
+- **Room mesh dimensions:** Maximum 30ft depth, 12ft ceiling — enforces acoustic intimacy visual grammar
+- **Niagara haze density:** Medium (0.4–0.6) — implies acoustic diffusion without obscuring clarity
+
+---
+
+## Chapter 29: Cinematic Presence in 2D Film — The Science of Immersive Framing
+
+*Source: Research on camera placement psychology, chiaroscuro spatial perception, compositional immersion triggers in 2D film*
+
+### Domain Overview
+
+Research into cinematic presence in 2D film has established that the sensation of being inside a space rather than observing it from outside is produced by a specific set of compositional, lighting, and camera movement conditions. These conditions activate the brain's spatial processing systems — the same neural circuits that process real-world spatial navigation — and produce a felt sense of physical location within the frame.
+
+The foundational finding is that **camera movement is the primary presence trigger in 2D film**. Specifically, camera movements that imply physical navigation — slow push-ins, tracking shots that follow the logic of a person walking through a space, camera movements that reveal new spatial information — activate the brain's navigation systems and produce spatial presence. Static cameras produce observation; moving cameras produce participation.
+
+The secondary presence trigger is **chiaroscuro lighting** — the strong contrast between lit and shadow areas that creates perceived three-dimensional depth in a two-dimensional image. When the brain processes a high-contrast image with clear depth cues (near objects brighter, far objects darker; hard shadow edges implying directional light), it activates the same spatial processing systems as real-world depth perception. The viewer does not consciously perceive depth — they feel it.
+
+The third presence trigger is **negative space as active composition**. Research on negative space in film found that frames with deliberate negative space — darkness, empty background, shadow — that actively contributes to narrative meaning produce higher presence scores than frames that fill the image with information. Negative space forces the viewer's attention into the lit area with a quality of focus that activates the brain's threat-detection and reward systems simultaneously.
+
+### The Immersion Formula for 2D Film
+
+The research converges on a specific formula for maximum presence in 2D film:
+
+> **Camera movement (navigation) + Chiaroscuro (depth) + Negative space (focus) + Shallow depth of field (proximity) = Felt spatial presence**
+
+Each element contributes independently, and their combination produces a multiplicative rather than additive effect. A frame with all four elements produces presence scores significantly higher than the sum of their individual contributions.
+
+### Presence Thresholds
+
+| Element | Minimum Threshold | Optimal for Velvet Strawberry |
+|---|---|---|
+| Camera movement | Minimum 1 navigation movement per sequence | Slow push-in every 8–12 seconds |
+| Chiaroscuro ratio | Minimum 4:1 lit-to-shadow | 8:1 to 16:1 |
+| Negative space | Minimum 40% of frame in shadow | 60–75% shadow coverage |
+| Depth of field | Maximum f/4.0 for close-ups | f/1.4–f/2.0 |
+| Depth planes | Minimum 3 visible planes | 4–5 planes |
+| Shadow edge quality | Hard edge required (not soft) | Hard edge, 45–60° angle |
+
+### Production Directives
+
+1. **Every sequence must include at least one navigation camera movement** — slow push-in, tracking shot, or reveal pan. Static sequences break presence.
+2. **Chiaroscuro ratio minimum 8:1** — the lit area must be at least 8 times brighter than the ambient shadow level.
+3. **Negative space is active, not accidental** — shadow areas must contain implied content (a figure, an object, a doorway) to maintain narrative tension.
+4. **Shallow depth of field is required for all close-up and medium shots** — f/1.4 to f/2.0 maximum. Deep focus implies observation; shallow focus implies proximity.
+5. **Hard shadow edges are non-negotiable** — soft shadows imply large diffuse light sources (overcast, fluorescent, studio fill) which destroy the acoustic-visual coherence of the jazz club environment.
+6. **Minimum four depth planes in all wide shots** — foreground element, mid-ground performer, background environment, and ceiling/wall detail.
+7. **Darkness is content** — every shadow area must contain at least one implied element (silhouette, object, light source) to prevent the viewer from reading darkness as absence of production rather than intentional composition.
+
+### The Velvet Strawberry Immersion Checklist
+
+Every generated frame should be evaluated against this checklist before delivery:
+
+- [ ] Camera movement present or implied (push-in, track, or motivated static)
+- [ ] Chiaroscuro ratio minimum 8:1
+- [ ] Minimum 60% shadow coverage
+- [ ] Shallow depth of field (f/1.4–f/2.0 equivalent)
+- [ ] Minimum four depth planes visible
+- [ ] Hard shadow edges on all lit subjects
+- [ ] Negative space contains implied content
+- [ ] At least one acoustic indicator visible (velvet, brass, low ceiling)
+- [ ] Performer occupies minimum 30% of frame in close-ups
+- [ ] At least one element of motion present (haze, fabric, flame, or camera)
+
+### Cinématique Prompt Vocabulary
+
+`navigation camera movement`, `chiaroscuro spatial depth`, `negative space as content`, `shallow focus proximity`, `hard shadow edge presence`, `four-plane depth composition`, `darkness as active element`, `immersive framing formula`, `spatial presence triggers`, `felt physical location`, `observation-to-participation shift`, `threat-detection shadow ratio`, `reward-system lighting`, `cinematic presence formula`
+
+### UE5 Mapping
+
+- **CineCameraComponent.CurrentFocalLength:** 35–85mm for presence-optimized framing
+- **CineCameraComponent.CurrentAperture:** f/1.4–f/2.0 for all close-up and medium shots
+- **Sequencer Camera Tracks:** Push-in animations at 0.5–2cm/sec minimum for all performance sequences
+- **Post Process — Depth of Field:** Bokeh mode, focal distance locked to performer
+- **Lumen — Shadow Quality:** Ultra quality, shadow sharpness 0.9–1.0
+- **Post Process — Exposure:** Manual exposure, EV compensation -1.5 to -2.0 for deep shadow coverage
+- **Niagara Haze:** Active in all shots, subtle drift motion maintained
+
+---
+
+## Chapter 29 Appendix: The Master Presence Checklist for Cinématique Prompt Engineering
+
+When generating any Cinématique prompt for the Velvet Strawberry Jazz Club, verify the prompt encodes the following presence triggers:
+
+**Spatial Presence Layer:**
+- Shallow depth of field specified (f/1.4 equivalent or "razor-thin focus")
+- Camera movement specified (push-in, tracking, or "camera drifts toward")
+- Minimum depth planes specified (foreground, mid-ground, performer, background)
+- Chiaroscuro ratio specified ("single motivated source", "deep shadow", "8:1 contrast")
+
+**Acoustic-Visual Coherence Layer:**
+- Fabric surface specified (velvet drape, upholstered chair, carpet)
+- Reflective surface specified (brass fixture, glass, polished wood)
+- Low ceiling specified or implied ("intimate low-ceilinged space", "ceiling visible above")
+- Performer scale specified ("fills the frame", "intimate proximity", "close enough to touch")
+
+**Temporal Presence Layer:**
+- Motion element specified (haze drift, fabric movement, flame flicker, or camera movement)
+- Shadow edge quality specified ("hard shadow edge", "crisp shadow line", not "soft shadow")
+- Darkness as content specified ("shadow contains a figure", "darkness implies depth", "negative space active")
+
+**Social Presence Layer:**
+- Performer proximity specified (face visible, eyes readable, or "intimate close-up")
+- Implied audience specified ("a hand reaches for a glass", "a silhouette in the background")
+- Performer authority specified ("commands the space", "owns the light", "stage presence")
