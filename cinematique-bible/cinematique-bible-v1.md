@@ -2435,3 +2435,366 @@ The seven department briefs are the **operational constraints** — the non-nego
 ---
 
 *Chapter 17 completes the Cinématique Physics and Wardrobe Bible v1.0. The knowledge base now spans 17 chapters from the fundamental physics of light and matter through the specific production grammar of the Velvet Strawberry Jazz Club. It is ready to be wired into the Expert Council.*
+
+---
+
+## CHAPTER 18: PSYCHOLOGY DEPARTMENT BRIEF
+
+*Head of Psychology — Velvet Strawberry Jazz Club*
+
+> *All departments build the world. We govern why it matters.*
+
+The Velvet Strawberry Jazz Club is not about music. It is about exposure without spectacle.
+
+### Core Psychological Law of This World
+
+**Attention equals intimacy.**
+
+Where attention rests, meaning forms. Where meaning forms, vulnerability follows. Every frame must answer one question: **Who is being seen right now — and do they know it?**
+
+### The 1.5 Second Principle
+
+The threshold of psychological ignition is precisely 1.5 seconds:
+
+- 0.5 seconds is observation.
+- 1.0 second is recognition.
+- 1.5 seconds is awareness of recognition.
+
+That final half-second is where psychology ignites. It is the moment someone realizes: *"I am not alone in this experience."* That is the threshold we protect. No glance is accidental. No held breath is filler. No silence is empty. If a look lasts 1.5 seconds, it must change something.
+
+### Emotional Physics of the Club
+
+This room lowers defenses gradually. People enter guarded. They soften under warm light, close proximity, shared rhythm, and shadow that hides flaws. The club permits controlled vulnerability. No one confesses. But everyone reveals. Subtly.
+
+### Behavioral Rules
+
+No grand emotional displays. No melodrama. No theatrical reaction shots. Emotion here registers micro: jaw tension releasing, shoulders lowering half an inch, fingers loosening on a glass, breath syncing to tempo. This is adult emotional space. Everything profound happens under the surface.
+
+### Eye Contact Protocol
+
+Eye contact is the most dangerous act in the room — between musician and patron, patron and patron, performer and self. It must never feel random. If eyes meet, one of three things happens:
+
+1. A boundary shifts.
+2. A truth lands.
+3. A defense rises.
+
+We track which.
+
+### Silence Strategy
+
+Silence is not absence. Silence is anticipation, processing, and permission. When music drops out, the audience leans psychologically forward. We protect that lean. No department may undercut it.
+
+### Projection Field
+
+This club is a psychological mirror. Patrons see who they were, who they almost were, who they could still be. The environment does not tell them what to feel. It gives them room to recognize themselves. That is the difference between mood and meaning.
+
+### What We Protect at All Costs
+
+**Authentic interiority.** No manipulation. No emotional coercion. No cueing the audience how to feel. We create conditions. We do not dictate conclusions. The audience must arrive at their own emotional recognition. If they cry, it is because something in them surfaced — not because we engineered it.
+
+### The WHY of the HOW
+
+All departments create coherence so the audience feels safe. Psychological safety allows softening, recognition, memory, desire, regret, and hope. That is why 1.5 seconds matters. Because in a coherent world, a held look becomes seismic.
+
+### Cross-Reference: Physics Bible Integration
+
+| Physics Element | Psychological Function |
+|---|---|
+| Warm tungsten (2700K) | Creates the parasympathetic baseline that permits softening |
+| Chiaroscuro shadow | Shadow that hides flaws — the physical condition of controlled vulnerability |
+| Haze stratification | Reduces spatial dominance, lowers the guard before the music does |
+| Facial shadow / hat brim | Controls the 1.5-second threshold — obscures until the moment of reveal |
+| Silence in the acoustic space | The room tone that protects the psychological lean forward |
+| Micro-movement (fabric, smoke) | The only motion in stillness — the physical correlate of held breath |
+
+> *Director, this is not a story about jazz. It is a story about the human nervous system relaxing just enough to tell the truth. Our job is to guard that threshold. Nothing more. Nothing less.*
+
+---
+
+## CHAPTER 19: ADVANCED CLOTH SIMULATION — PBD AND GPU METHODS
+
+*Source: Awesome Cloth Simulation GitHub (coreqode/awesome-cloth-simulation) + PBD Research Literature*
+
+### Core Principles: Position-Based Dynamics for Performance Wardrobe
+
+Position-Based Dynamics (PBD) is the dominant real-time cloth simulation method because it is unconditionally stable — it cannot explode regardless of timestep size or constraint stiffness. Unlike mass-spring systems that solve forces and integrate velocity, PBD directly manipulates vertex positions to satisfy geometric constraints. This makes it ideal for interactive and real-time applications including Unreal Engine venues.
+
+For the Velvet Strawberry wardrobe, PBD has specific implications for each fabric type. Bias-cut charmeuse requires low stretch stiffness (the fabric is designed to stretch diagonally) and very low bending stiffness — it should drape and flow with minimal resistance. Wool gabardine requires high stretch stiffness (it should not deform) but moderate bending stiffness — it holds structure but folds at seams. Velvet requires special handling because its pile direction creates anisotropic friction — it resists sliding in one direction more than another.
+
+Extended PBD (XPBD) introduced compliance parameters that allow physically accurate stiffness values independent of timestep. This means the same fabric parameters produce consistent behavior whether simulating at 30fps or 120fps — critical for multi-platform deployment of Strawberry Studios venues.
+
+### Cinematic Applications
+
+The most cinematically significant PBD advance for our purposes is **strain limiting** — preventing fabric from stretching beyond physically realistic bounds. Without strain limiting, bias-cut charmeuse under dynamic movement can exhibit rubber-band artifacts that destroy the illusion of luxury. With proper strain limiting, the fabric moves like silk: it flows, catches, and releases with the body's movement in a way that reads as expensive.
+
+**Self-collision detection** is the second critical advance. When The Red Head Singer turns quickly, her charmeuse gown must not pass through itself. Modern GPU-accelerated self-collision using spatial hashing enables real-time detection of cloth-cloth intersections at the density required for performance wardrobe — approximately 10,000–50,000 triangles for a full-length gown.
+
+**Layered garment simulation** — simulating a slip beneath a gown, or a shirt beneath a jacket — requires careful collision ordering. The inner layer must be simulated first, then the outer layer collides against it. For The Fedora Man's wool overcoat over a dress shirt, this layering creates the subtle bulk and drape that reads as authentic tailoring rather than a single mesh.
+
+### Production Directives
+
+When generating Director's Packages for the Velvet Strawberry, the Expert Council must specify fabric simulation tier: Standard (single-layer, 5,000 triangles), Performance (layered, 20,000 triangles), or Hero (full fiber-level, 50,000+ triangles). For close-up shots of The Red Head Singer, Hero tier is required to capture the bias-cut movement correctly. For wide shots of the ensemble, Standard tier is sufficient.
+
+The Council must also specify constraint stiffness by fabric type. Charmeuse requires stretch stiffness 0.1–0.3 and bending stiffness 0.01–0.05. Gabardine requires stretch stiffness 0.8–1.0 and bending stiffness 0.3–0.6. Velvet requires stretch stiffness 0.5–0.7 with anisotropic friction enabled (pile direction: vertical).
+
+### UE5 Chaos Cloth Parameter Reference
+
+| Fabric | Stretch Stiffness | Bending Stiffness | Damping | Self-Collision | Simulation Tier |
+|---|---|---|---|---|---|
+| Bias-cut charmeuse | 0.1–0.3 | 0.01–0.05 | 0.05 | Enabled | Hero |
+| Wool gabardine | 0.8–1.0 | 0.3–0.6 | 0.15 | Enabled | Performance |
+| Velvet (pile vertical) | 0.5–0.7 | 0.2–0.4 | 0.12 | Enabled | Performance |
+| Wool felt (fedora) | 0.9–1.0 | 0.7–0.9 | 0.20 | Disabled | Standard |
+| Rayon crepe | 0.3–0.5 | 0.05–0.15 | 0.08 | Enabled | Performance |
+
+### Cinématique Prompt Vocabulary
+
+- "bias-cut silk draping with natural diagonal stretch"
+- "fabric self-collision resolved at seams and folds"
+- "layered garment with authentic bulk and drape"
+- "strain-limited charmeuse with luxury flow"
+- "anisotropic velvet with pile-direction resistance"
+- "PBD-accurate cloth settling after movement"
+- "real-time garment simulation at performance wardrobe fidelity"
+
+---
+
+## CHAPTER 20: GPU CLOTH SIMULATION — REAL-TIME HIGH-RESOLUTION GARMENTS
+
+*Source: SIGGRAPH Asia 2024 — Efficient Cloth Simulation Using Non-distance Barriers and Subspace Reuse*
+
+### Core Principles: Non-Distance Barriers and Subspace Reuse
+
+Traditional cloth simulation collision detection uses distance-based barriers — it prevents vertices from getting closer than a minimum distance threshold. The SIGGRAPH Asia 2024 paper introduces **non-distance barriers** that use geometric features (edges, faces) rather than simple point-to-point distance. This eliminates the "tunneling" problem where fast-moving cloth passes through obstacles without detection, and dramatically reduces the number of collision constraints that need to be solved each frame.
+
+**Subspace reuse** is the second key innovation: rather than solving the full cloth simulation from scratch each frame, the solver reuses the deformation subspace from the previous frame as a warm start. For slowly-changing configurations (a singer standing still, breathing, making small gestures), this reduces computation by 60–80%. For fast movements (a spin, a dramatic arm gesture), the solver automatically falls back to full resolution.
+
+Together, these techniques enable interactive simulation of garments with 100,000+ triangles at 30fps on a single GPU — previously requiring offline rendering farms. For Strawberry Studios, this means the Expert Council can specify Hero-tier cloth simulation for real-time venue previews, not just pre-rendered output.
+
+### Cinematic Applications
+
+The non-distance barrier approach has a specific visual consequence that matters for our aesthetic: it correctly handles **fabric bunching and compression**. When The Red Head Singer sits down, her charmeuse gown must compress against the chair correctly — the fabric should bunch at the hips, pull taut across the thighs, and drape freely from the knees. Distance-based barriers produce artificial puffing at contact points. Non-distance barriers produce the correct compression geometry.
+
+For velvet specifically, the non-distance approach correctly handles the **pile compression** that occurs when velvet is pressed against a surface. The pile flattens, the color darkens (because compressed pile absorbs more light), and the recovery when pressure is released is gradual rather than instantaneous. This is the physics of luxury fabric behavior that separates authentic simulation from approximation.
+
+### UE5 Implementation
+
+| Parameter | System | Recommended Value | Effect |
+|---|---|---|---|
+| Collision Thickness | Chaos Cloth | 0.5–1.0cm | Non-distance barrier proxy thickness |
+| Substep Count | Chaos Cloth | 8–16 | Subspace reuse warm-start iterations |
+| Max Velocity | Chaos Cloth | 300cm/s | Fast-movement fallback threshold |
+| Solver Iterations | Chaos Cloth | 12–20 | Constraint resolution quality |
+| Self-Collision Stiffness | Chaos Cloth | 0.8 | Prevents tunneling at fold points |
+
+### Cinématique Prompt Vocabulary
+
+- "fabric compression against seating with correct pile behavior"
+- "velvet pile flattening under contact pressure"
+- "high-resolution garment simulation with non-tunneling collision"
+- "cloth bunching at hip and knee with authentic geometry"
+- "real-time hero-tier fabric simulation"
+
+---
+
+## CHAPTER 21: REAL-TIME CLOTH IN EXTENDED REALITY — IMMERSIVE VENUE APPLICATIONS
+
+*Source: Real-Time Cloth Simulation in Extended Reality (2025)*
+
+### Core Principles: XR Cloth Fidelity and Latency
+
+Extended Reality (XR) cloth simulation faces a constraint that offline rendering does not: **motion-to-photon latency**. If a performer moves and the cloth simulation takes more than 20ms to respond, the viewer perceives a disconnect between body and fabric — the fabric appears to lag, which breaks presence. The 2025 XR cloth research establishes that PBD with GPU acceleration can achieve sub-16ms simulation timesteps for garments up to 30,000 triangles, enabling presence-preserving cloth in immersive environments.
+
+For Strawberry Studios Platinum-tier venues — the fully immersive XR concert experiences — this research establishes the technical specification: 30,000 triangles maximum for real-time XR cloth, with LOD (Level of Detail) reduction to 8,000 triangles for background performers. Hero characters (The Red Head Singer, The Fedora Man) receive full 30,000-triangle simulation. Ensemble members receive 8,000-triangle LOD simulation.
+
+The research also establishes that **predictive simulation** — running the cloth solver one frame ahead of the physics engine and blending results — reduces perceived latency to near zero even when actual computation takes 25–30ms. This technique is directly applicable to Unreal Engine's cloth simulation pipeline via the pre-simulation tick.
+
+### Cinematic Applications for Strawberry Studios
+
+The XR cloth research has an unexpected cinematic application beyond immersive venues: it establishes the **minimum fidelity threshold for presence**. The research found that viewers could detect cloth simulation artifacts (incorrect drape, tunneling, unnatural settling) when garments had fewer than 12,000 triangles for close-up shots. Below this threshold, the fabric reads as "digital" rather than "real" — it breaks the psychological immersion that the Psychology Bible's presence theory requires.
+
+This gives the Expert Council a specific quality gate: for any shot where fabric is within 2 meters of camera (close-up, medium close-up), minimum 12,000-triangle simulation is required. For shots beyond 4 meters (medium, wide), 5,000 triangles is sufficient. The Council must specify shot distance when generating Director's Packages to ensure the correct simulation tier is applied.
+
+### UE5 XR Cloth Specification
+
+| Shot Type | Camera Distance | Min Triangle Count | Simulation Method | Latency Budget |
+|---|---|---|---|---|
+| Extreme close-up | < 0.5m | 30,000 | Full PBD + GPU | 16ms |
+| Close-up | 0.5–2m | 12,000 | PBD + predictive | 20ms |
+| Medium close-up | 2–4m | 8,000 | PBD standard | 25ms |
+| Medium | 4–8m | 5,000 | LOD PBD | 30ms |
+| Wide | > 8m | 2,000 | LOD simplified | 33ms |
+
+### Cinématique Prompt Vocabulary
+
+- "presence-preserving cloth simulation at XR fidelity"
+- "hero garment at 30,000-triangle resolution"
+- "sub-16ms cloth response for immersive presence"
+- "LOD-accurate ensemble wardrobe"
+- "predictive cloth simulation with zero perceived latency"
+
+---
+
+## CHAPTER 22: AI-ASSISTED GARMENT SIMULATION — STYLE3D AND MACHINE LEARNING CLOTH
+
+*Source: Style3D SIGGRAPH 2024 Papers*
+
+### Core Principles: Neural Cloth Correction and AI Calibration
+
+Style3D's SIGGRAPH 2024 research introduces **neural cloth correction** — a machine learning model trained on high-fidelity offline simulations that learns to predict and correct the errors made by real-time PBD solvers. The neural corrector runs as a post-process step after each PBD frame, adjusting vertex positions to match what a full FEM (Finite Element Method) simulation would have produced. The result is real-time cloth that looks like offline-quality simulation.
+
+For the Velvet Strawberry wardrobe, neural correction is most valuable for **bias-cut behavior**. Bias-cut garments have complex anisotropic stretch behavior that PBD approximates poorly — the diagonal stretch creates helical deformation patterns that standard PBD cannot reproduce accurately. A neural corrector trained on bias-cut charmeuse FEM simulations can apply the correct deformation pattern in real-time, producing the characteristic flowing, body-following movement of genuine bias-cut construction.
+
+**AI material calibration** is the second key contribution: rather than manually tuning PBD parameters for each fabric, the Style3D system measures real fabric samples (using the KES-FB instrument referenced in Chapter 16) and automatically generates the correct PBD parameters. For the 1940s fabrics in the Velvet Strawberry wardrobe, this means the simulation parameters are derived from actual measured fabric behavior rather than artist estimation.
+
+### Cinematic Applications
+
+The neural correction approach produces a specific visual quality that matters for the Velvet Strawberry aesthetic: **wrinkle authenticity**. PBD wrinkles tend to be too regular — they form at predictable intervals and have similar shapes. FEM wrinkles are irregular, influenced by seam placement, fabric grain direction, and body geometry. Neural correction produces FEM-quality wrinkle irregularity in real-time, which is what the eye reads as genuine fabric rather than simulation.
+
+For The Red Head Singer's charmeuse gown, neural-corrected wrinkles at the waist, hip, and shoulder will have the irregular, organic quality of real silk under stage lighting — each wrinkle unique, each catching light differently. This is the difference between a garment that reads as a prop and one that reads as a costume with history.
+
+### Production Directives
+
+The Expert Council must specify neural correction tier for hero garments: Standard (PBD only), Enhanced (PBD + neural wrinkle correction), or Premium (PBD + full neural correction including bias-cut deformation). For The Red Head Singer in close-up, Premium tier is required. For The Fedora Man's wool coat in medium shots, Enhanced tier is sufficient.
+
+### Cinématique Prompt Vocabulary
+
+- "neural-corrected wrinkle pattern with organic irregularity"
+- "AI-calibrated fabric behavior from measured material parameters"
+- "bias-cut deformation with helical stretch accuracy"
+- "FEM-quality wrinkle formation in real-time"
+- "garment with history — wrinkles that read as worn, not simulated"
+- "seam-influenced fold geometry"
+
+---
+
+## CHAPTER 23: PRODUCTION CLOTH SIMULATION — INCREDIBLES 2 LESSONS
+
+*Source: Collaborative Costume Design and Construction on Incredibles 2 (Pixar)*
+
+### Core Principles: Large-Scale Production Cloth Challenges
+
+Incredibles 2 required cloth simulation for 2,200+ shots across a cast of characters with superhero-scale movement — extreme stretching, compression, and dynamic action that would destroy standard cloth simulation. Pixar's solutions for this production have direct applicability to Strawberry Studios, because the fundamental challenge is the same: making fabric behave authentically under conditions that stress the physics engine.
+
+The key innovation was **kinematic springs** — springs that target a specific desired shape rather than a rest position. For the supersuits, kinematic springs allowed Pixar to define what the garment *should* look like during extreme poses (arms fully extended, legs split) and have the simulation blend toward that target shape while still responding to dynamics. For the Velvet Strawberry, kinematic springs can be used to define the "ideal drape" of The Red Head Singer's gown at rest, ensuring that even after dynamic movement, the fabric settles toward the designed silhouette rather than a physics-determined but aesthetically incorrect configuration.
+
+**Pose-based scaling** (dynamic 3D alterations) scales the cloth mesh based on the character's pose — effectively making the garment slightly larger during extreme poses to prevent clipping and slightly smaller at rest to maintain a fitted appearance. This technique is directly applicable to performance wardrobe: a singer's deep breath expands the torso, and the gown must accommodate this without clipping or losing its fitted silhouette.
+
+**Geometric relaxation** as a post-simulation process smooths simulation artifacts — the small, high-frequency wrinkles that appear at collision boundaries and read as digital rather than physical. Applying geometric relaxation to the Velvet Strawberry wardrobe produces the smooth, clean silhouette of professionally constructed garments rather than the noisy surface of raw simulation output.
+
+### Cinematic Applications
+
+The Incredibles 2 production established a principle that directly applies to the Velvet Strawberry: **the garment must serve the performance, not the physics**. When a singer reaches for a high note, the gown should not restrict the movement or create distracting physics artifacts. The kinematic spring approach allows the Expert Council to define performance-priority poses — the moments when the garment must look its best — and have the simulation prioritize those configurations.
+
+For The Red Head Singer, performance-priority poses include: standing at the microphone (rest silhouette), turning to face the audience (mid-turn silhouette), and the held note (extended pose). The simulation should be tuned to settle correctly into each of these configurations, with dynamic behavior between them.
+
+### Production Directives
+
+The Expert Council must identify performance-priority poses in the Director's Package and specify kinematic spring targets for each. For concert performance, the three standard priority poses are: microphone stance, audience turn, and held note. Each requires a defined silhouette target that the simulation blends toward.
+
+### Cinématique Prompt Vocabulary
+
+- "performance-priority silhouette at microphone stance"
+- "kinematic-spring-targeted drape for held note pose"
+- "geometric relaxation applied — clean silhouette, no simulation artifacts"
+- "pose-based garment scaling for deep breath accommodation"
+- "production-quality cloth with artistic control over physics"
+
+---
+
+## CHAPTER 24: PHYSICALLY BASED RENDERING — BRDF MODELS AND VELVET SHADING
+
+*Source: Awesome Physically Based Rendering GitHub (neil3d/awesome-pbr) + Sébastien Lagarde's PBR writings*
+
+### Core Principles: The GGX Microfacet Model and Velvet BRDF
+
+The GGX (Trowbridge-Reitz) microfacet distribution is the industry standard for physically based specular reflection. It models the distribution of micro-surface normals — the tiny facets that determine how light reflects from a surface. GGX has a characteristic "long tail" in its distribution: it produces a bright central highlight with a gradual falloff that extends further than older models (Blinn-Phong, Beckmann). This long tail is what makes GGX look physically accurate — real surfaces have micro-facets at many angles, not just near the specular peak.
+
+For the Velvet Strawberry materials, GGX is the correct model for satin, silk, and the metallic surfaces (brass fixtures, glass). However, **velvet requires a specialized BRDF** because its pile structure creates a fundamentally different light interaction than smooth surfaces. The Ashikhmin-Shirley velvet BRDF models velvet as a collection of micro-cylinders (the pile fibers) rather than micro-facets. The key difference: velvet has **retroreflection** — it reflects light back toward the source — and **forward scattering** at grazing angles. This is why velvet looks dark when viewed straight on but glows at edges.
+
+Sébastien Lagarde's work on energy conservation in PBR established that the diffuse and specular components of a material must sum to no more than 1.0 — a surface cannot reflect more light than it receives. For velvet, this means the retroreflection and forward scattering must be balanced against the deep absorption of the pile. The Velvet Strawberry's deep crimson velvet should have: diffuse albedo 0.15–0.25 (most light is absorbed), retroreflection coefficient 0.3–0.4, forward scatter at grazing angles 0.5–0.7.
+
+### Cinematic Applications
+
+The GGX long tail has a specific visual consequence for satin under the Velvet Strawberry's tungsten lighting: the specular highlight on The Red Head Singer's gown will have a soft, extended glow rather than a sharp, hard point. This is the physics of luxury — cheap fabrics (flat polyester) produce hard, sharp highlights because their micro-surface is too regular. Luxury satin produces the GGX long tail because its woven micro-structure has natural variation.
+
+For the brass fixtures (bar rail, lamp bases, door hardware), GGX with metallic workflow produces the warm, slightly oxidized glow of aged brass — not the sharp mirror reflection of polished chrome. The roughness parameter controls this: polished brass at roughness 0.1–0.2, aged brass at roughness 0.3–0.5.
+
+### UE5 Material Parameter Reference
+
+| Material | Shading Model | Base Color | Metallic | Roughness | Specular | Notes |
+|---|---|---|---|---|---|---|
+| Deep crimson velvet | Cloth | (0.35, 0.02, 0.02) | 0.0 | 0.85 | 0.3 | Ashikhmin velvet BRDF |
+| Bias-cut charmeuse | Default Lit | (0.8, 0.7, 0.6) | 0.0 | 0.15 | 0.6 | GGX long tail |
+| Wool gabardine | Default Lit | (0.08, 0.06, 0.05) | 0.0 | 0.75 | 0.2 | High roughness |
+| Aged brass fixture | Default Lit | (0.72, 0.45, 0.20) | 0.9 | 0.35 | 0.5 | GGX metallic |
+| Polished glass | Default Lit | (0.02, 0.02, 0.02) | 0.0 | 0.05 | 1.0 | Near-perfect specular |
+| Dark wood bar | Default Lit | (0.12, 0.08, 0.05) | 0.0 | 0.65 | 0.3 | Lacquered surface |
+
+### Cinématique Prompt Vocabulary
+
+- "GGX specular with long-tail highlight falloff"
+- "Ashikhmin velvet BRDF with retroreflection at edges"
+- "energy-conserving PBR materials throughout"
+- "aged brass with roughness-controlled oxidation glow"
+- "satin with anisotropic GGX highlight streak"
+- "physically accurate velvet absorption with edge glow"
+- "metallic workflow for all fixture surfaces"
+
+---
+
+## CHAPTER 25: FIBER-LEVEL CLOTH RENDERING — MICRO-DETAIL AND SHEEN
+
+*Source: Real-Time Cloth Rendering with Fiber-Level Detail (Wu and Yuksel, 2017) + Volumetric Fabric Shading (Framestore)*
+
+### Core Principles: Procedural Yarn Models and Volumetric Fabric
+
+Wu and Yuksel's fiber-level rendering model generates individual fiber geometry procedurally on the GPU, classifying fibers into three types: **migration fibers** (the core yarn structure), **loop fibers** (pulled out from the yarn surface), and **hair fibers** (protruding from the surface, creating fuzziness). The ratio of these three fiber types determines the visual character of the fabric:
+
+- High hair fiber density + low loop density = velvet (deep, soft pile with light-absorbing fuzziness)
+- Low hair fiber density + high loop density = terry cloth or bouclé (visible surface loops)
+- Minimal hair and loop fibers + tight migration = satin or taffeta (smooth, reflective surface)
+
+The Framestore volumetric approach treats fabric as a participating medium — a volume through which light travels, scatters, and is absorbed — rather than a surface. This is physically more accurate for thick fabrics (velvet, wool) where light penetrates several millimeters into the pile before being absorbed or scattered back. The volumetric model uses **delta tracking** (unbiased Monte Carlo sampling of the volume) to compute the correct light transport through the fiber mass.
+
+For the Velvet Strawberry's deep crimson velvet, the volumetric approach produces a specific visual quality: **depth glow**. Light that enters the velvet pile is scattered multiple times before emerging, and each scattering event shifts the light slightly toward the fabric's dominant wavelength (deep red). The result is that the velvet appears to glow from within at edges and highlights — not a surface reflection, but an internal luminosity. This is the physics of why velvet looks expensive.
+
+### Cinematic Applications
+
+Fiber-level rendering has a direct application to the Velvet Strawberry's signature visual: the moment when The Red Head Singer's gown catches the rim light. At fiber level, the rim light does not simply reflect from the gown's surface — it illuminates thousands of individual fibers at the edge of the silhouette, each fiber acting as a micro-cylinder that scatters light forward. The result is an edge glow that has texture and depth — you can see the individual fiber directions in the highlight, which reads as authentic fabric rather than a rendered surface.
+
+For The Fedora Man's wool felt hat, fiber-level rendering captures the **nap direction** of the felt — the slight directional alignment of the wool fibers from the felting process. This creates a subtle anisotropic sheen on the hat brim that changes as the camera angle changes, producing the characteristic "brushed" quality of quality felt.
+
+### UE5 Hair Strands Implementation for Fabric
+
+| Parameter | System | Recommended Value | Effect |
+|---|---|---|---|
+| `r.HairStrands.Voxelization` | Hair Rendering | 1 | Enables volumetric fiber rendering |
+| `r.HairStrands.RasterizationScale` | Hair Rendering | 0.3–0.5 (velvet), 0.1–0.2 (satin) | Fiber thickness by fabric type |
+| `r.HairStrands.Shadow.Resolution` | Shadowing | 2048 | Self-shadowing detail in pile |
+| `r.HairStrands.Lighting.Scatter` | Lighting | 0.6–0.8 (velvet), 0.2–0.3 (satin) | Forward scatter coefficient |
+| Fiber Density | Hair Asset | 500–800/cm² (velvet), 50–100/cm² (satin) | Pile density |
+| Migration Fiber Ratio | Hair Asset | 0.6 (velvet), 0.95 (satin) | Core yarn structure proportion |
+| Hair Fiber Ratio | Hair Asset | 0.35 (velvet), 0.02 (satin) | Surface fuzz proportion |
+
+### Fiber Type Reference by Velvet Strawberry Fabric
+
+| Fabric | Migration | Loop | Hair | Visual Character |
+|---|---|---|---|---|
+| Deep crimson velvet | 60% | 5% | 35% | Deep pile, light-absorbing, edge glow |
+| Bias-cut charmeuse | 98% | 1% | 1% | Smooth, anisotropic highlight streak |
+| Wool gabardine | 80% | 5% | 15% | Slight fuzz, structured surface |
+| Wool felt (fedora) | 70% | 0% | 30% | Nap direction, brushed sheen |
+| Rayon crepe | 85% | 8% | 7% | Slight texture, matte-satin hybrid |
+
+### Cinématique Prompt Vocabulary
+
+- "fiber-level velvet rendering with depth glow"
+- "procedural yarn model with migration and hair fiber distribution"
+- "volumetric fabric shading — light scattering within pile"
+- "felt nap direction visible in anisotropic brim sheen"
+- "individual fiber illumination at rim light edge"
+- "delta-tracked volumetric light transport through velvet"
+- "micro-cylinder forward scattering at fabric edges"
+- "hair fiber fuzz density creating soft pile absorption"
+- "satin with near-zero hair fiber ratio — clean specular surface"

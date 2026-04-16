@@ -281,3 +281,83 @@ The **frisson readiness** must be earned. Aesthetic chills cannot be manufacture
 ---
 
 *The Cinématique Psychology and Immersion Bible v1.0 is the companion volume to the Cinématique Physics and Wardrobe Bible v1.0. Together they constitute the complete operating system of the Velvet Strawberry Jazz Club. The Physics Bible describes how things behave. This Bible describes why those behaviors make people feel something in their bodies. The Expert Council uses both.*
+
+---
+
+## CHAPTER 7: PSYCHOLOGY DEPARTMENT BRIEF
+
+*Head of Psychology — Velvet Strawberry Jazz Club*
+
+> *All departments build the world. We govern why it matters.*
+
+The Velvet Strawberry Jazz Club is not about music. It is about exposure without spectacle.
+
+### Core Psychological Law of This World
+
+**Attention equals intimacy.**
+
+Where attention rests, meaning forms. Where meaning forms, vulnerability follows. Every frame must answer one question: **Who is being seen right now — and do they know it?**
+
+### The 1.5 Second Principle
+
+The threshold of psychological ignition is precisely 1.5 seconds. At 0.5 seconds, the viewer is observing. At 1.0 second, they are recognizing. At 1.5 seconds, they become aware of their own recognition — they realize they are not alone in this experience. That is the threshold we protect. No glance is accidental. No held breath is filler. No silence is empty. If a look lasts 1.5 seconds, it must change something.
+
+This principle has direct neurological grounding in the research from Chapter 1 of this Bible: the Early Posterior Negativity (EPN) response to facial shadowing peaks at approximately 1.5 seconds of sustained attention. The brain's emotional processing system has been given enough time to move from detection to meaning-making. The 1.5 second principle is not an aesthetic preference — it is a description of how long the nervous system needs to feel something rather than merely see it.
+
+### Emotional Physics of the Club
+
+This room lowers defenses gradually. People enter guarded. They soften under warm light (the parasympathetic baseline established by 2700K tungsten), close proximity (the oxytocin architecture of tight tables and low ceiling), shared rhythm (the dopamine priming of jazz harmonic resolution), and shadow that hides flaws (the controlled vulnerability of chiaroscuro). The club permits controlled vulnerability. No one confesses. But everyone reveals. Subtly.
+
+### Behavioral Rules
+
+No grand emotional displays. No melodrama. No theatrical reaction shots. Emotion here registers micro: jaw tension releasing, shoulders lowering half an inch, fingers loosening on a glass, breath syncing to tempo. These are the behavioral micro-details that activate social presence (Chapter 4 of this Bible) — the small, unrehearsed-seeming behaviors that signal real human presence and trigger the mirror neuron system in the observer.
+
+This is adult emotional space. Everything profound happens under the surface.
+
+### Eye Contact Protocol
+
+Eye contact is the most dangerous act in the room — between musician and patron, patron and patron, performer and self. It must never feel random. If eyes meet, one of three things happens:
+
+1. A boundary shifts.
+2. A truth lands.
+3. A defense rises.
+
+We track which. The camera tracks which. The 1.5-second threshold determines whether a glance becomes a moment.
+
+### Silence Strategy
+
+Silence is not absence. Silence is anticipation, processing, and permission. When music drops out, the audience leans psychologically forward. This is the frisson-readiness state described in Chapter 5 — the moment when the conditions for aesthetic chills are most active. We protect that lean. No department may undercut it. The atmospheric haze must not drift noisily. The camera must not cut. The room must hold.
+
+### Projection Field
+
+This club is a psychological mirror. Patrons see who they were, who they almost were, who they could still be. The environment does not tell them what to feel. It gives them room to recognize themselves. That is the difference between mood and meaning. Mood is what the room does to you. Meaning is what you find in the room that was already yours.
+
+This is why the Projection Field principle is the most important thing the Psychology Department protects: the audience must arrive at their own emotional recognition. The conditions we create — the warm light, the intimate space, the atmospheric ambiguity, the music — are not the experience. They are the permission structure for the experience the audience brings with them.
+
+### What We Protect at All Costs
+
+**Authentic interiority.** No manipulation. No emotional coercion. No cueing the audience how to feel. We create conditions. We do not dictate conclusions. If they cry, it is because something in them surfaced — not because we engineered it.
+
+### The WHY of the HOW
+
+All departments create coherence so the audience feels safe. Psychological safety allows softening, recognition, memory, desire, regret, and hope. That is why 1.5 seconds matters. Because in a coherent world, a held look becomes seismic.
+
+### Cross-Reference: Both Bibles
+
+| Element | Physics Bible Reference | Psychological Function |
+|---|---|---|
+| Warm tungsten (2700K) | Chapter 1: Practical Lamp Physics | Parasympathetic baseline — the physical condition of permission |
+| Chiaroscuro shadow | Chapter 1: Inverse Square Law | Shadow that hides flaws — controlled vulnerability |
+| Haze stratification | Chapter 8: Atmospheric Physics | Reduces spatial dominance, lowers the guard |
+| Facial shadow / hat brim | Chapter 1: Hat Brim Shadow Geometry | Controls the 1.5-second threshold |
+| Silence in acoustic space | Chapter 9: Production Bible — Sound | Protects the psychological lean forward |
+| Micro-movement (fabric, smoke) | Chapter 12: Disney Cloth Physics | Physical correlate of held breath |
+| EPN facial response | Psychology Bible Chapter 1 | The neuroscience of the 1.5-second threshold |
+| Frisson readiness | Psychology Bible Chapter 5 | The biological state silence creates |
+| Mirror neuron activation | Psychology Bible Chapter 3 | Why behavioral micro-detail matters |
+
+> *Director, this is not a story about jazz. It is a story about the human nervous system relaxing just enough to tell the truth. Our job is to guard that threshold. Nothing more. Nothing less.*
+
+---
+
+*The Cinématique Psychology and Immersion Bible v1.0 — 7 chapters. Companion volume to the Cinématique Physics and Wardrobe Bible v1.0 (18 chapters). Together: the complete operating system of the Velvet Strawberry Jazz Club.*

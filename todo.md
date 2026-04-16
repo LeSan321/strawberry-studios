@@ -55,13 +55,13 @@
 - [x] "Fabric mechanical parameters for 3D cloth simulation in apparel CAD" (2024 systematic review) — measured parameters for 1940s fabrics: rayon crepe, wool gabardine, bias-cut charmeuse → Chapter 16
 
 ### Tier 2 — Mine in a Future Session (Strong Supporting Material)
-- [ ] Awesome Cloth Simulation GitHub (coreqode/awesome-cloth-simulation) — Research Papers section: PBD advances, GPU cloth methods, high-resolution garment simulation
-- [ ] SIGGRAPH Asia 2024 — "Efficient Cloth Simulation Using Non-distance Barriers and Subspace Reuse" (GPU-based interactive high-resolution garments for real-time Unreal venues)
-- [ ] "Real-Time Cloth Simulation in Extended Reality" (2025) — Unity vs. PBD with GPU acceleration for immersive concert experiences
-- [ ] Style3D SIGGRAPH 2024 papers — AI-assisted garment simulation and correction
-- [ ] Incredibles 2 simulation technical breakdowns — large-scale production challenges, hair/cloth/skin for 2200+ shots
-- [ ] Awesome Physically Based Rendering GitHub (neil3d/awesome-pbr) — SIGGRAPH courses 2010–2017+, Sébastien Lagarde's writings
-- [ ] Real-Time Cloth Rendering with Fiber-Level Detail (SIGGRAPH courses) — micro-level sheen, wrinkles, light interaction
+- [x] Awesome Cloth Simulation GitHub (coreqode/awesome-cloth-simulation) — PBD advances, GPU cloth methods, high-resolution garment simulation → Chapter 19
+- [x] SIGGRAPH Asia 2024 — "Efficient Cloth Simulation Using Non-distance Barriers and Subspace Reuse" → Chapter 20
+- [x] "Real-Time Cloth Simulation in Extended Reality" (2025) — XR fidelity thresholds, presence-preserving cloth → Chapter 21
+- [x] Style3D SIGGRAPH 2024 papers — AI-assisted garment simulation and neural cloth correction → Chapter 22
+- [x] Incredibles 2 simulation technical breakdowns — kinematic springs, pose-based scaling, geometric relaxation → Chapter 23
+- [x] Awesome Physically Based Rendering GitHub (neil3d/awesome-pbr) — GGX BRDF, velvet Ashikhmin model, UE5 material parameters → Chapter 24
+- [x] Real-Time Cloth Rendering with Fiber-Level Detail (SIGGRAPH courses) — procedural yarn model, volumetric fabric, fiber type reference tables → Chapter 25
 
 ### Tier 3 — Experiential Layer (Platinum Venues / Future Phases)
 - [ ] Royal College of Music virtual performance simulator (2024–2025) — acoustic + visual immersion, stage presence, spatial audio
