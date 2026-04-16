@@ -88,6 +88,22 @@ export const concerts = mysqlTable("concerts", {
   directorsPackage: json("directorsPackage"),
   /** Generated Cinématique prompt */
   cinematiquePrompt: text("cinematiquePrompt"),
+  /** Video generation status */
+  videoStatus: mysqlEnum("videoStatus", [
+    "none",
+    "queued",
+    "generating",
+    "complete",
+    "failed",
+  ]).default("none").notNull(),
+  /** URL of the generated video (S3 or external) */
+  videoUrl: text("videoUrl"),
+  /** The exact Cinématique prompt sent to the video generation API */
+  videoPrompt: text("videoPrompt"),
+  /** External job ID from the video generation API (for polling) */
+  videoJobId: varchar("videoJobId", { length: 255 }),
+  /** Video generation error message if failed */
+  videoError: text("videoError"),
   /** Unique shareable ticket slug */
   ticketSlug: varchar("ticketSlug", { length: 64 }).unique(),
   /** Whether the concert is publicly shareable */

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -27,22 +27,47 @@ const STATUS_STYLES: Record<string, { label: string; color: string }> = {
   failed: { label: "Failed", color: "oklch(0.52 0.22 18)" },
 };
 
-export default function Library() {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"concerts" | "audio">("concerts");
-  const [uploadingAudio, setUploadingAudio] = useState(false);
-  const [generatingId, setGeneratingId] = useState<number | null>(null);
-  const audioInputRef = useRef<HTMLInputElement>(null);
+const VIDEO_STATUS_STYLES: Record<string, { label: string; color: string; icon: string }> = {
+  none: { label: "No Video", color: "oklch(0.45 0.02 270)", icon: "○" },
+  queued: { label: "Video Queued", color: "oklch(0.62 0.14 55)", icon: "◌" },
+  generating: { label: "Video Generating...", color: "oklch(0.62 0.14 55)", icon: "◎" },
+  complete: { label: "Video Ready", color: "oklch(0.55 0.15 145)", icon: "●" },
+  failed: { label: "Video Failed", color: "oklch(0.52 0.22 18)", icon: "✕" },
+};
 
+// Polling hook for concerts with video in progress
+function useVideoPolling(concertId: number, videoStatus: string | null) {
   const utils = trpc.useUtils();
+  const isPolling = videoStatus === "queued" || videoStatus === "generating";
 
-  const { data: concerts, isLoading: concertsLoading } = trpc.concerts.list.useQuery(undefined, {
-    enabled: !!user,
-  });
+  const { data } = trpc.concerts.pollVideoStatus.useQuery(
+    { concertId },
+    {
+      enabled: isPolling,
+      refetchInterval: isPolling ? 5000 : false,
+    }
+  );
 
-  const { data: audioTracks, isLoading: audioLoading } = trpc.audio.list.useQuery(undefined, {
-    enabled: !!user,
-  });
+  useEffect(() => {
+    if (data?.status === "complete" || data?.status === "failed") {
+      utils.concerts.list.invalidate();
+    }
+  }, [data?.status]);
+
+  return data;
+}
+
+function ConcertCard({ concert }: { concert: any }) {
+  const utils = trpc.useUtils();
+  const [generatingId, setGeneratingId] = useState<number | null>(null);
+  const [generatingVideoId, setGeneratingVideoId] = useState<number | null>(null);
+
+  const videoStatus = concert.videoStatus ?? "none";
+  const videoStatusStyle = VIDEO_STATUS_STYLES[videoStatus] ?? VIDEO_STATUS_STYLES.none;
+  const statusStyle = STATUS_STYLES[concert.status] ?? STATUS_STYLES.draft;
+
+  // Poll while video is in progress
+  useVideoPolling(concert.id, videoStatus);
 
   const generateMutation = trpc.concerts.generate.useMutation({
     onSuccess: () => {
@@ -54,6 +79,187 @@ export default function Library() {
       toast.error("Generation failed: " + err.message);
       setGeneratingId(null);
     },
+  });
+
+  const generateVideoMutation = trpc.concerts.generateVideo.useMutation({
+    onSuccess: (result) => {
+      setGeneratingVideoId(null);
+      if (result.status === "complete") {
+        toast.success("Video generated!");
+      } else {
+        toast.success("Video generation started — we'll update when it's ready.");
+      }
+      utils.concerts.list.invalidate();
+    },
+    onError: (err) => {
+      toast.error("Video generation failed: " + err.message);
+      setGeneratingVideoId(null);
+      utils.concerts.list.invalidate();
+    },
+  });
+
+  const handleGenerate = async () => {
+    setGeneratingId(concert.id);
+    await generateMutation.mutateAsync({ concertId: concert.id });
+  };
+
+  const handleGenerateVideo = async () => {
+    setGeneratingVideoId(concert.id);
+    await generateVideoMutation.mutateAsync({ concertId: concert.id });
+  };
+
+  return (
+    <div className="noir-card p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          {/* Status row */}
+          <div className="flex items-center gap-3 mb-2 flex-wrap">
+            <div className="w-2 h-2 rounded-full" style={{ background: statusStyle.color }} />
+            <span className="text-xs tracking-widest uppercase font-light" style={{ color: statusStyle.color }}>
+              {statusStyle.label}
+            </span>
+            {/* Video status badge */}
+            {videoStatus !== "none" && (
+              <>
+                <span className="text-muted-foreground/30 text-xs">·</span>
+                <span className="text-xs font-mono" style={{ color: videoStatusStyle.color }}>
+                  {videoStatusStyle.icon}
+                </span>
+                <span className="text-xs tracking-widest uppercase font-light" style={{ color: videoStatusStyle.color }}>
+                  {videoStatusStyle.label}
+                </span>
+              </>
+            )}
+          </div>
+
+          <h3 className="font-display text-lg text-foreground mb-1 truncate">{concert.title}</h3>
+          {concert.artistName && (
+            <p className="text-muted-foreground font-serif text-sm mb-3">{concert.artistName}</p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <span className="px-2 py-0.5 text-xs border border-border/30 text-muted-foreground/70 font-light">
+              Velvet Strawberry Jazz Club
+            </span>
+            {concert.moodPreset && (
+              <span className="px-2 py-0.5 text-xs border border-border/30 text-muted-foreground/70 font-light">
+                {MOOD_LABELS[concert.moodPreset] ?? concert.moodPreset}
+              </span>
+            )}
+            {concert.visualPreset && concert.visualPreset !== "none" && (
+              <span className="px-2 py-0.5 text-xs border border-border/30 text-muted-foreground/70 font-light">
+                {VISUAL_LABELS[concert.visualPreset] ?? concert.visualPreset}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 flex-shrink-0">
+          {/* Director's Package generation */}
+          {concert.status === "draft" && (
+            <button
+              onClick={handleGenerate}
+              disabled={generatingId === concert.id}
+              className="px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase disabled:opacity-40">
+              {generatingId === concert.id ? "Generating..." : "Generate Package"}
+            </button>
+          )}
+          {concert.status === "failed" && (
+            <button
+              onClick={handleGenerate}
+              className="px-4 py-2 border border-primary/50 text-primary/70 hover:bg-primary/10 transition-all duration-300 font-display text-xs tracking-widest uppercase">
+              Retry
+            </button>
+          )}
+
+          {/* Video generation — only available when Director's Package is complete */}
+          {concert.status === "complete" && videoStatus === "none" && (
+            <button
+              onClick={handleGenerateVideo}
+              disabled={generatingVideoId === concert.id}
+              className="px-4 py-2 border border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase disabled:opacity-40">
+              {generatingVideoId === concert.id ? "Starting..." : "Generate Video"}
+            </button>
+          )}
+          {concert.status === "complete" && videoStatus === "failed" && (
+            <button
+              onClick={handleGenerateVideo}
+              disabled={generatingVideoId === concert.id}
+              className="px-4 py-2 border border-accent/50 text-accent/70 hover:bg-accent/10 transition-all duration-300 font-display text-xs tracking-widest uppercase disabled:opacity-40">
+              Retry Video
+            </button>
+          )}
+          {(videoStatus === "queued" || videoStatus === "generating") && (
+            <div className="px-4 py-2 border border-accent/30 text-accent/50 font-display text-xs tracking-widest uppercase flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-accent/50 animate-pulse" />
+              Processing...
+            </div>
+          )}
+
+          {/* View Ticket */}
+          {concert.status === "complete" && concert.ticketSlug && (
+            <Link href={`/concert/${concert.ticketSlug}`}
+              className="px-4 py-2 border border-border/40 text-muted-foreground hover:border-border hover:text-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase text-center">
+              View Ticket
+            </Link>
+          )}
+          {concert.status === "complete" && concert.ticketSlug && (
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}/concert/${concert.ticketSlug}`;
+                navigator.clipboard.writeText(url);
+                toast.success("Concert link copied!");
+              }}
+              className="px-4 py-2 border border-border/30 text-muted-foreground/60 hover:border-border/60 hover:text-muted-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase">
+              Copy Link
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Video preview (when complete) */}
+      {videoStatus === "complete" && concert.videoUrl && (
+        <div className="mt-4 pt-4 border-t border-border/20">
+          <p className="text-xs tracking-[0.3em] uppercase text-accent/60 mb-3 font-light">Cinématique Video</p>
+          <video
+            src={concert.videoUrl}
+            controls
+            className="w-full max-h-48 object-cover"
+            style={{ background: "oklch(0.08 0.01 270)" }}
+          />
+        </div>
+      )}
+
+      {/* Director's Package prompt preview */}
+      {concert.status === "complete" && concert.cinematiquePrompt && videoStatus === "none" && (
+        <div className="mt-4 pt-4 border-t border-border/20">
+          <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground/60 mb-2 font-light">Cinématique Prompt Preview</p>
+          <p className="text-sm text-muted-foreground font-serif italic leading-relaxed line-clamp-3">
+            {concert.cinematiquePrompt}
+          </p>
+        </div>
+      )}
+
+      <p className="text-xs text-muted-foreground/40 font-light mt-3">
+        Created {new Date(concert.createdAt).toLocaleDateString()}
+      </p>
+    </div>
+  );
+}
+
+export default function Library() {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<"concerts" | "audio">("concerts");
+  const [uploadingAudio, setUploadingAudio] = useState(false);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+
+  const utils = trpc.useUtils();
+
+  const { data: concerts, isLoading: concertsLoading } = trpc.concerts.list.useQuery(undefined, {
+    enabled: !!user,
+  });
+
+  const { data: audioTracks, isLoading: audioLoading } = trpc.audio.list.useQuery(undefined, {
+    enabled: !!user,
   });
 
   const uploadAudioMutation = trpc.audio.upload.useMutation({
@@ -68,18 +274,12 @@ export default function Library() {
     },
   });
 
-  const handleGenerate = async (concertId: number) => {
-    setGeneratingId(concertId);
-    await generateMutation.mutateAsync({ concertId });
-  };
-
   const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploadingAudio(true);
     try {
-      // Upload to S3 via fetch
       const formData = new FormData();
       formData.append("file", file);
       formData.append("title", file.name.replace(/\.[^.]+$/, ""));
@@ -185,91 +385,9 @@ export default function Library() {
               </div>
             ) : (
               <div className="space-y-4">
-                {concerts.map(concert => {
-                  const statusStyle = STATUS_STYLES[concert.status] ?? STATUS_STYLES.draft;
-                  return (
-                    <div key={concert.id} className="noir-card p-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="w-2 h-2 rounded-full" style={{ background: statusStyle.color }} />
-                            <span className="text-xs tracking-widest uppercase font-light" style={{ color: statusStyle.color }}>
-                              {statusStyle.label}
-                            </span>
-                          </div>
-                          <h3 className="font-display text-lg text-foreground mb-1 truncate">{concert.title}</h3>
-                          {concert.artistName && (
-                            <p className="text-muted-foreground font-serif text-sm mb-3">{concert.artistName}</p>
-                          )}
-                          <div className="flex flex-wrap gap-2">
-                            <span className="px-2 py-0.5 text-xs border border-border/30 text-muted-foreground/70 font-light">
-                              Velvet Strawberry Jazz Club
-                            </span>
-                            {concert.moodPreset && (
-                              <span className="px-2 py-0.5 text-xs border border-border/30 text-muted-foreground/70 font-light">
-                                {MOOD_LABELS[concert.moodPreset] ?? concert.moodPreset}
-                              </span>
-                            )}
-                            {concert.visualPreset && concert.visualPreset !== "none" && (
-                              <span className="px-2 py-0.5 text-xs border border-border/30 text-muted-foreground/70 font-light">
-                                {VISUAL_LABELS[concert.visualPreset] ?? concert.visualPreset}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2 flex-shrink-0">
-                          {concert.status === "draft" && (
-                            <button
-                              onClick={() => handleGenerate(concert.id)}
-                              disabled={generatingId === concert.id}
-                              className="px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase disabled:opacity-40">
-                              {generatingId === concert.id ? "Generating..." : "Generate Package"}
-                            </button>
-                          )}
-                          {concert.status === "complete" && concert.ticketSlug && (
-                            <Link href={`/concert/${concert.ticketSlug}`}
-                              className="px-4 py-2 border border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase text-center">
-                              View Ticket
-                            </Link>
-                          )}
-                          {concert.status === "complete" && concert.ticketSlug && (
-                            <button
-                              onClick={() => {
-                                const url = `${window.location.origin}/concert/${concert.ticketSlug}`;
-                                navigator.clipboard.writeText(url);
-                                toast.success("Concert link copied!");
-                              }}
-                              className="px-4 py-2 border border-border/40 text-muted-foreground hover:border-border hover:text-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase">
-                              Copy Link
-                            </button>
-                          )}
-                          {concert.status === "failed" && (
-                            <button
-                              onClick={() => handleGenerate(concert.id)}
-                              className="px-4 py-2 border border-primary/50 text-primary/70 hover:bg-primary/10 transition-all duration-300 font-display text-xs tracking-widest uppercase">
-                              Retry
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Director's Package preview */}
-                      {concert.status === "complete" && concert.cinematiquePrompt && (
-                        <div className="mt-4 pt-4 border-t border-border/20">
-                          <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground/60 mb-2 font-light">Cinématique Prompt Preview</p>
-                          <p className="text-sm text-muted-foreground font-serif italic leading-relaxed line-clamp-3">
-                            {concert.cinematiquePrompt}
-                          </p>
-                        </div>
-                      )}
-
-                      <p className="text-xs text-muted-foreground/40 font-light mt-3">
-                        Created {new Date(concert.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  );
-                })}
+                {concerts.map(concert => (
+                  <ConcertCard key={concert.id} concert={concert} />
+                ))}
               </div>
             )}
           </div>

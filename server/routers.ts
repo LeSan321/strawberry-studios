@@ -5,6 +5,8 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { storagePut } from "./storage";
+import { generateVideo, pollVideoStatus, getActiveProvider } from "./videoGeneration";
+import { buildCinématiqueVideoPrompt } from "./cinematiquePromptBuilder";
 import {
   createConcert,
   getConcertsByUser,
@@ -127,6 +129,45 @@ Every generated frame must meet these minimum thresholds:
 - Motion: minimum one element of motion per frame (haze drift, fabric movement, flame, or camera)
 - Acoustic-visual coherence: minimum one fabric surface and one reflective surface visible per frame
 - Hard shadow edges: required on all lit subjects — soft shadows are forbidden
+- Social presence: performer gaze directed toward camera position in at least one shot per sequence
+- Embodied camera: camera at standing height (1.5–1.8m) for establishing shots — never floating above
+- Temporal presence: every frame must contain visible motion — haze drift 0.2–0.4m/s, fabric lag 0.3s
+
+## FOUR-DIMENSIONAL PRESENCE FRAMEWORK (Ch. 31)
+Every Director's Package must address all four presence dimensions simultaneously:
+1. SPATIAL PRESENCE: Four visible depth planes, atmospheric haze stratified at 4–6ft, practical light falloff visible. Foreground object (glass, ashtray, candle) → mid-ground haze → performer → background darkness.
+2. SOCIAL PRESENCE: Performer gaze toward camera position (not past it), intimate zone close-ups (implied social distance under 1.2m), performer awareness of the witness implied by the frame.
+3. EMBODIED PRESENCE: Camera movement implies a body — slow push-in 0.5–2cm/sec, never mechanical zoom, slight breathing instability on long holds (0.2–0.3Hz). Camera height at standing height (1.6m) for establishing shots.
+4. TEMPORAL PRESENCE: Every frame contains at least one moving element — haze drift, fabric movement, flame flicker, or smoke curl. Nothing is frozen. The performance is happening now.
+
+## ACOUSTIC-VISUAL COHERENCE RULES (Ch. 30)
+The Velvet Strawberry's acoustic signature (RT60 0.8s, velvet absorption 0.55–0.70, brass reflection 0.85–0.92) must be readable in the visual grammar:
+- Every frame must include at least one visible acoustic surface: velvet drape, upholstered seat, or carpet (signals sound absorption, short reverberation, intimacy)
+- Brass surfaces (bar fixtures, instrument bells, microphone stand) must be visible in at least one depth plane (signals high-frequency reflection, metallic edge to the acoustic character)
+- Low ceiling must be implied or visible — ceiling practicals, overhead shadow, or ceiling reflection establish the 9–12ft height and short early reflection time
+- Stage elevation (6–18 inches) must be visible to establish acoustic separation between performer and audience
+- The camera must never be positioned higher than the performer's eye level during intimate moments — this preserves the acoustic intimacy grammar
+
+## PBR MATERIAL PARAMETERS — VELVET STRAWBERRY SURFACES (Ch. 35)
+All material descriptions must reference these physically measured values:
+| Material | Albedo (2500K) | Roughness | Anisotropy | Key Property |
+|---|---|---|---|---|
+| Deep crimson velvet | 0.12–0.18 | 0.85–0.92 | 0.70 (pile direction) | Absorbs 85% of incident light — richness from absorption, not reflection |
+| Silk charmeuse (crimson) | 0.35–0.45 | 0.08–0.15 | 0.30 (bias direction) | Fresnel edge highlight approaches 1.0 at grazing angles |
+| Wool gabardine (charcoal) | 0.04–0.08 | 0.75–0.85 | 0.20 | Near-black with warm undertone under 2200K |
+| Aged brass | 0.65–0.75 | 0.35–0.55 | 0.10 | Metallic 0.95 — warm gold reflection |
+| Dark wood (bar) | 0.08–0.15 | 0.60–0.75 | 0.0 | Matte absorption, no specular |
+| Glass (bar/mirrors) | 0.02–0.05 | 0.05–0.10 | 0.0 | Reflection plane — doubles spatial depth |
+
+Critical principle: Velvet's crimson is not bright — it is deep. The darkness is in the material (albedo 0.12–0.18), not just in the lighting. The richness comes from what the material absorbs.
+
+## STRAND-BASED HAIR AND MARSCHNER SHADING (Ch. 33)
+The Red Head Singer's hair under tungsten lighting follows the Marschner three-path model:
+- R path (cuticle reflection): warm orange-red specular highlight — moves with light angle
+- TT path (transmission through strand): warm amber-gold glow — strongest when backlit
+- TRT path (internal reflection): copper-red secondary highlight at 180° from source — visible as rim
+Under 2500K tungsten, red hair shifts toward orange-red (R path) and warm amber (TT path). Under 2200K, it deepens toward copper-burgundy. This is physically accurate — not an aesthetic choice.
+The fedora felt is compressed wool strands: high absorption, low specularity, slight directional sheen from felt pressing direction. Brim shadow under 45° overhead is hard-edged — this is the psychological grammar of concealment.
 
 ## CINÉMATIQUE PROMPT VOCABULARY
 Use these specific phrases in generated prompts:
@@ -369,6 +410,131 @@ export const appRouter = router({
         if (concert.userId !== ctx.user.id) throw new Error("Unauthorized");
         await updateConcert(input.id, { status: "failed" }); // soft delete via status
         return { success: true };
+      }),
+
+    // ── Video Generation ────────────────────────────────────────────────────
+
+    generateVideo: protectedProcedure
+      .input(z.object({
+        concertId: z.number().int(),
+        /** Optional: override the primary shot index (0-based) */
+        primaryShotIndex: z.number().int().min(0).max(6).optional(),
+        /** Duration in seconds (default: 10) */
+        durationSeconds: z.number().int().min(5).max(30).optional(),
+        /** Aspect ratio */
+        aspectRatio: z.enum(["16:9", "9:16", "1:1"]).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const concert = await getConcertById(input.concertId);
+        if (!concert) throw new Error("Concert not found");
+        if (concert.userId !== ctx.user.id) throw new Error("Unauthorized");
+        if (!concert.directorsPackage) throw new Error("Director's Package not generated yet — run the Expert Council first");
+
+        // Mark as queued immediately
+        await updateConcert(input.concertId, { videoStatus: "queued" });
+
+        try {
+          // Build the 10-layer Cinématique video prompt
+          const videoPrompt = buildCinématiqueVideoPrompt({
+            directorsPackage: concert.directorsPackage as any,
+            primaryShotIndex: input.primaryShotIndex ?? 0,
+            durationSeconds: input.durationSeconds ?? 10,
+          });
+
+          // Store the assembled prompt before calling the API
+          await updateConcert(input.concertId, {
+            videoPrompt,
+            videoStatus: "generating",
+          });
+
+          // Call the video generation API
+          const result = await generateVideo({
+            prompt: videoPrompt,
+            durationSeconds: input.durationSeconds ?? 10,
+            aspectRatio: input.aspectRatio ?? "16:9",
+          });
+
+          if (result.status === "complete") {
+            await updateConcert(input.concertId, {
+              videoStatus: "complete",
+              videoUrl: result.videoUrl,
+              videoJobId: result.jobId,
+            });
+            return {
+              status: "complete" as const,
+              videoUrl: result.videoUrl,
+              jobId: result.jobId,
+              videoPrompt,
+              provider: getActiveProvider(),
+            };
+          } else if (result.status === "queued") {
+            await updateConcert(input.concertId, {
+              videoStatus: "generating",
+              videoJobId: result.jobId,
+            });
+            return {
+              status: "queued" as const,
+              jobId: result.jobId,
+              videoPrompt,
+              provider: getActiveProvider(),
+            };
+          } else {
+            await updateConcert(input.concertId, {
+              videoStatus: "failed",
+              videoError: result.error,
+            });
+            throw new Error(result.error);
+          }
+        } catch (err) {
+          await updateConcert(input.concertId, {
+            videoStatus: "failed",
+            videoError: err instanceof Error ? err.message : String(err),
+          });
+          throw err;
+        }
+      }),
+
+    pollVideoStatus: protectedProcedure
+      .input(z.object({ concertId: z.number().int() }))
+      .query(async ({ ctx, input }) => {
+        const concert = await getConcertById(input.concertId);
+        if (!concert) throw new Error("Concert not found");
+        if (concert.userId !== ctx.user.id) throw new Error("Unauthorized");
+
+        // If already complete or failed, return stored state
+        if (concert.videoStatus === "complete") {
+          return { status: "complete" as const, videoUrl: concert.videoUrl ?? "", jobId: concert.videoJobId ?? "" };
+        }
+        if (concert.videoStatus === "failed") {
+          return { status: "failed" as const, error: concert.videoError ?? "Unknown error" };
+        }
+        if (concert.videoStatus === "none") {
+          return { status: "none" as const };
+        }
+
+        // If generating/queued and we have a job ID, poll the provider
+        if (concert.videoJobId) {
+          const provider = getActiveProvider();
+          const result = await pollVideoStatus(provider, concert.videoJobId);
+
+          if (result.status === "complete") {
+            await updateConcert(input.concertId, {
+              videoStatus: "complete",
+              videoUrl: result.videoUrl,
+            });
+            return { status: "complete" as const, videoUrl: result.videoUrl, jobId: concert.videoJobId };
+          }
+          if (result.status === "failed") {
+            await updateConcert(input.concertId, {
+              videoStatus: "failed",
+              videoError: result.error,
+            });
+            return { status: "failed" as const, error: result.error };
+          }
+          return { status: "generating" as const, jobId: concert.videoJobId };
+        }
+
+        return { status: concert.videoStatus as "queued" | "generating" };
       }),
   }),
 

@@ -41,6 +41,10 @@ export default function ConcertTicket() {
     toast.success("Concert link copied to clipboard!");
   };
 
+  const videoStatus = (concert as any)?.videoStatus ?? "none";
+  const videoUrl = (concert as any)?.videoUrl ?? null;
+  const videoPrompt = (concert as any)?.videoPrompt ?? null;
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -242,6 +246,50 @@ export default function ConcertTicket() {
                 Copy Prompt →
               </button>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Cinématique Video */}
+      {videoStatus === "complete" && videoUrl && (
+        <section className="py-16 px-6 border-t border-border/20">
+          <div className="max-w-4xl mx-auto">
+            <p className="text-xs tracking-[0.4em] uppercase text-accent/70 mb-6 font-light text-center">Cinématique Video</p>
+            <div className="relative overflow-hidden" style={{ background: "oklch(0.06 0.01 270)" }}>
+              <video
+                src={videoUrl}
+                controls
+                className="w-full"
+                style={{ maxHeight: "540px" }}
+              />
+            </div>
+            {videoPrompt && (
+              <div className="mt-6 p-5 border border-accent/15 bg-accent/5">
+                <p className="text-xs tracking-[0.3em] uppercase text-accent/60 mb-3 font-light">Video Prompt (10-Layer Cinématique Formula)</p>
+                <p className="font-serif text-foreground/60 leading-relaxed italic text-sm line-clamp-4">{videoPrompt}</p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(videoPrompt);
+                    toast.success("Video prompt copied!");
+                  }}
+                  className="mt-3 text-xs tracking-widest uppercase font-light text-accent/60 hover:text-accent transition-colors">
+                  Copy Video Prompt →
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Video generating indicator */}
+      {(videoStatus === "queued" || videoStatus === "generating") && (
+        <section className="py-12 px-6 border-t border-border/20">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+              <p className="text-xs tracking-[0.4em] uppercase text-accent/70 font-light">Video Generation In Progress</p>
+            </div>
+            <p className="text-muted-foreground font-serif text-sm">The Cinématique video is being rendered. Check back shortly.</p>
           </div>
         </section>
       )}

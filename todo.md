@@ -92,8 +92,13 @@
 - [x] Psychology and Immersion Bible v1.0 — 7 chapters — COMPLETE
 - [x] Expert Council system prompt upgraded with full Bible content (checkpoint 47d6caae)
 
-## Next Phase: Video Generator Backend
-- [ ] Build tRPC procedure for video generation (takes Director's Package, calls AI video API)
-- [ ] Implement 10-layer Cinématique prompt formula (Chapter 6) for prompt construction
-- [ ] Wire video generation result back to concert record in DB
-- [ ] Video status polling and display in Library/Concert Ticket pages
+## Video Generator Backend — COMPLETE
+- [x] Upgrade Expert Council system prompt with Chapters 30–35 (acoustic-visual coherence, 4D presence, PBR material parameters)
+- [x] Extend DB schema: add video_status, video_url, video_prompt, video_job_id, video_error fields to concerts table
+- [x] Run DB migration for video generation fields (0002_nice_nick_fury.sql)
+- [x] Build tRPC procedures: concerts.generateVideo + concerts.pollVideoStatus
+- [x] Implement 10-layer Cinématique prompt formula (Chapter 6) in cinematiquePromptBuilder.ts
+- [x] Pluggable video adapter (mock/runway/kling/luma) in videoGeneration.ts
+- [x] Wire video generation result back to concert record in DB
+- [x] Video status polling (5s interval) and display in Library/Concert Ticket pages
+- [x] Write vitest tests for video generation procedure (36 tests passing, 3 test files)
