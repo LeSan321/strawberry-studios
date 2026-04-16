@@ -45,3 +45,34 @@
 - [ ] Social sharing with Open Graph meta tags
 - [ ] Admin preset management UI
 - [ ] Strawberry Riff profile integration
+
+## Knowledge Base Research Queue
+
+### Tier 1 — Mine Next (High Direct Impact)
+- [x] Pixar SIGGRAPH 2022 — "Revamping the Cloth Tailoring Pipeline at Pixar" (simulation vs. render mesh pipeline, artistic draping control) → Chapter 15
+- [x] Pixar — "Directing Cloth Draping through Blended UVs" (artistic control over physics for Expert Council prompt generation) → Chapter 15
+- [x] pbrt book (Pharr, Jakob, Humphreys) — Chapters on subsurface scattering, microfacet models, and volumetric materials (smoke/fog/rain) → Chapter 14
+- [x] "Fabric mechanical parameters for 3D cloth simulation in apparel CAD" (2024 systematic review) — measured parameters for 1940s fabrics: rayon crepe, wool gabardine, bias-cut charmeuse → Chapter 16
+
+### Tier 2 — Mine in a Future Session (Strong Supporting Material)
+- [ ] Awesome Cloth Simulation GitHub (coreqode/awesome-cloth-simulation) — Research Papers section: PBD advances, GPU cloth methods, high-resolution garment simulation
+- [ ] SIGGRAPH Asia 2024 — "Efficient Cloth Simulation Using Non-distance Barriers and Subspace Reuse" (GPU-based interactive high-resolution garments for real-time Unreal venues)
+- [ ] "Real-Time Cloth Simulation in Extended Reality" (2025) — Unity vs. PBD with GPU acceleration for immersive concert experiences
+- [ ] Style3D SIGGRAPH 2024 papers — AI-assisted garment simulation and correction
+- [ ] Incredibles 2 simulation technical breakdowns — large-scale production challenges, hair/cloth/skin for 2200+ shots
+- [ ] Awesome Physically Based Rendering GitHub (neil3d/awesome-pbr) — SIGGRAPH courses 2010–2017+, Sébastien Lagarde's writings
+- [ ] Real-Time Cloth Rendering with Fiber-Level Detail (SIGGRAPH courses) — micro-level sheen, wrinkles, light interaction
+
+### Tier 3 — Experiential Layer (Platinum Venues / Future Phases)
+- [ ] Royal College of Music virtual performance simulator (2024–2025) — acoustic + visual immersion, stage presence, spatial audio
+- [ ] VR concert research — "Investigating how immersive virtual reality mediates the experience of virtual concerts"
+- [ ] Marvelous Designer + Unreal Engine workflows — USD export of simulation data into Chaos Cloth for MetaHumans
+- [ ] SIGGRAPH 2025 "Advances in Real-Time Rendering" course notes — strand-based hair/fur, ray tracing for open worlds
+- [ ] "Real-Time Cloth Simulation Using WebGPU" (2025 arXiv) — browser-friendly venue previews
+- [ ] PBR Texture & Material Libraries (Poly Haven, ambientCG) — real-world scanned materials as reference data
+
+### Knowledge Base Chapters Outstanding
+- [ ] Chapter 11 (Velvet Strawberry Department Briefs) — Poe bot prompt ready; covers Physics, Wardrobe, Camera, Lighting, Atmospheric, Production Design, Sound + Director's Unifying Statement
+- [x] Strengthen Chapter 11 (Pixar BSSRDF) with pbrt book subsurface scattering chapter → Chapter 14
+- [x] Strengthen Chapter 12 (Disney Cloth) with 2024 fabric mechanical parameters for 1940s-specific fabrics → Chapter 16
+- [ ] Chapter 14 — Experiential Layer (acoustic simulation, spatial audio, crowd dynamics) — after Tier 3 research

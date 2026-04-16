@@ -2007,3 +2007,201 @@ When the Velvet Strawberry Jazz Club is built in UE5, this checklist ensures the
 - *Epic Games, "Chaos Cloth Demystified: A Zero to Hero Guide" (dev.epicgames.com)*
 - *Epic Games, "Overview of Niagara Effects for Unreal Engine" (dev.epicgames.com)*
 - *Epic Games, "Overview of Substrate Materials in Unreal Engine" (dev.epicgames.com)*
+
+
+---
+
+## CHAPTER 14: PBRT — VOLUMETRIC LIGHT TRANSPORT AND SUBSURFACE SCATTERING (SUPPLEMENT TO CHAPTER 11)
+
+> *The pbrt book is the definitive academic treatment of physically based rendering. Where Chapter 11 introduced the BSSRDF concept, this chapter provides the mathematical foundation and extends it to volumetric phenomena — the smoke, haze, and atmospheric depth that define the Velvet Strawberry's visual grammar.*
+
+**Sources:** Pharr, Jakob & Humphreys, *Physically Based Rendering: From Theory to Implementation* (4th ed., 2023), pbrt.org — Chapters 4, 9, 11, 14
+
+### 14.1 Volume Scattering: The Physics of Haze and Smoke
+
+Volume scattering is the physical process that makes atmospheric haze, cigarette smoke, and theatrical fog visible in a beam of light. When light travels through a participating medium — any substance with suspended particles — three simultaneous processes occur: **absorption** (light energy is converted to heat and disappears), **out-scattering** (light is redirected away from its original path by particles), and **in-scattering** (light from other directions is redirected toward the camera). The balance between these three processes determines the visual character of the atmosphere.
+
+The **phase function** governs the angular distribution of scattered light — it describes the probability that a photon traveling in one direction will be scattered into another specific direction. For the oil-based theatrical haze used in the Velvet Strawberry, the phase function is approximately isotropic (scattering equally in all directions) because the haze particles are small relative to the wavelength of light. For cigarette smoke, which has larger particles, the phase function is forward-biased — more light scatters in the forward direction, which is why cigarette smoke in a spotlight produces a bright, defined shaft rather than a diffuse glow.
+
+**Transmittance** quantifies how much light survives passage through a given thickness of participating medium. It follows an exponential decay governed by the extinction coefficient σt = σa + σs (the sum of absorption and scattering coefficients). For the Velvet Strawberry's theatrical haze at low density, transmittance across the 30-foot depth of the club is approximately 0.7–0.85 — meaning 15–30% of the light is scattered or absorbed before reaching the back wall. This is the physics of depth: the haze makes the far end of the room slightly dimmer and slightly more diffuse than the near end, creating natural atmospheric perspective.
+
+### 14.2 Subsurface Scattering: The BSSRDF in Mathematical Detail
+
+The BSSRDF (Bidirectional Scattering Surface Reflectance Distribution Function) extends the standard BRDF by accounting for light that enters a surface at one point and exits at a different point after scattering through the material's interior. The pbrt formulation defines the BSSRDF as S(p_i, ω_i; p_o, ω_o) — a function of both the entry point p_i with incoming direction ω_i and the exit point p_o with outgoing direction ω_o.
+
+For practical rendering, the dipole approximation (Jensen et al. 2001) simplifies this to a radially symmetric function that depends only on the distance |p_i - p_o| between entry and exit points. This approximation works well for materials like skin, wax, and translucent fabric where the scattering is roughly isotropic. The effective transport coefficient σtr = √(3σa(σa + σs')) determines the spatial extent of the subsurface scattering — materials with low σtr (like marble or thick wax) show scattering over centimeters, while skin shows scattering over millimeters.
+
+For the Velvet Strawberry's specific materials, the pbrt subsurface scattering model produces the following observable effects: the singer's skin shows warm edge glow at the earlobes and nose bridge where the tissue is thinnest; the crimson charmeuse shows a soft volumetric glow at the hem and neckline where the fabric is a single layer; the velvet wall panels show no subsurface scattering (the dense pile absorbs all penetrating light before it can re-emerge).
+
+### 14.3 Microfacet Models: The Physics of Fabric Highlights
+
+The pbrt microfacet model treats surfaces as collections of microscopic mirror-like facets, each oriented slightly differently. The distribution of facet orientations — the Normal Distribution Function (NDF) — determines the shape of the specular highlight. The Trowbridge-Reitz (GGX) distribution, which pbrt uses as its primary NDF, produces highlights with a bright center and a long, soft tail that extends across the surface. This is physically accurate for most real materials and directly explains the characteristic extended highlight on silk charmeuse described in Chapter 12.
+
+The **roughness parameter α** in the GGX model controls the width of the highlight: α = 0 produces a perfect mirror; α = 1 produces a fully diffuse surface. For the Velvet Strawberry's materials: silk charmeuse has α ≈ 0.05–0.1 (near-specular with a long tail), satin has α ≈ 0.1–0.2 (moderate specular), velvet has α ≈ 0.8–0.9 (near-diffuse), and the mahogany bar surface has α ≈ 0.5–0.6 (moderately rough).
+
+The **Fresnel equations** govern how reflectivity changes with viewing angle. For dielectric materials (fabric, skin, wood), reflectivity is low at normal incidence (looking straight at the surface) and rises dramatically at grazing angles. This is the physics of the velvet edge glow and the silk charmeuse rim light described in Chapter 11 — both are Fresnel effects, where the high incidence angle at the edges of the subject activates the material's latent reflectivity.
+
+### 14.4 pbrt Reference Table: Material Optical Parameters
+
+| Material | Roughness α | σa (R,G,B mm⁻¹) | σs (R,G,B mm⁻¹) | η (IOR) | Fresnel F0 | Cinematic Character |
+|---|---|---|---|---|---|---|
+| Silk charmeuse (crimson) | 0.05–0.1 | High G,B; low R | High R | 1.5 | 0.04 | Sharp specular highlight with long GGX tail; crimson SSS edge glow |
+| Velvet pile | 0.85–0.95 | Very high | Very high (diffuse) | 1.5 | 0.04 | Near-zero specular; deep light absorption; Fresnel edge brightening at oblique angles |
+| Human skin (fair) | 0.3–0.5 | 0.032, 0.17, 0.48 | 0.74, 0.88, 1.01 | 1.3 | 0.028 | Warm SSS glow; soft shadow edges; translucent at thin areas |
+| Wool gabardine | 0.5–0.7 | Moderate | Moderate | 1.5 | 0.04 | Diffuse with subtle fiber sheen; structured folds; no sharp highlights |
+| Wool felt (fedora) | 0.8–0.9 | High | High | 1.5 | 0.04 | Near-matte; rigid shape; absorbs light at brim edge |
+| Theatrical haze | N/A | Very low | Low-moderate | 1.0003 | N/A | Forward scattering; volumetric light shafts; atmospheric depth |
+| Cigarette smoke | N/A | Very low | Moderate | 1.0003 | N/A | Forward-biased scattering; defined beam shafts; thermal convection rise |
+
+### 14.5 pbrt Prompt Vocabulary
+
+**"Volumetric haze, participating medium, forward scattering phase function, atmospheric depth"** — activates volume scattering physics for the theatrical haze layer.
+
+**"Subsurface scattering, BSSRDF, dipole approximation, translucent skin edge glow"** — activates the full subsurface light transport model for skin rendering.
+
+**"GGX microfacet distribution, roughness α 0.05, long specular tail, silk charmeuse highlight"** — specifies the exact NDF and roughness for silk's characteristic extended highlight.
+
+**"Fresnel grazing reflectivity, dielectric surface, edge brightening at oblique angles"** — activates the Fresnel effect that produces edge glow on velvet and silk.
+
+**"Extinction coefficient, transmittance 0.75, atmospheric perspective, depth falloff"** — specifies the haze density that creates natural depth in the 30-foot club space.
+
+**"Phase function isotropic, haze particles sub-wavelength, uniform volumetric glow"** — distinguishes theatrical haze behavior from cigarette smoke's forward-biased scattering.
+
+**"Physically based rendering, energy conservation, no overbright surfaces, spectral accuracy"** — ensures the model operates within physically plausible bounds.
+
+---
+
+## CHAPTER 15: PIXAR CLOTH PIPELINE — SIMULATION MESH, RENDER MESH, AND ARTISTIC DRAPING CONTROL
+
+> *Pixar's insight: physics and art are not in conflict. They require separate representations. The simulation mesh is for accuracy; the render mesh is for beauty. The Blended UV technique is the bridge between them.*
+
+**Sources:** "Revamping the Cloth Tailoring Pipeline at Pixar" (SIGGRAPH 2022); "Directing Cloth Draping through Blended UVs" (Pixar Research); Pixar technical blog posts on Turning Red and Lightyear cloth simulation
+
+### 15.1 The Dual-Mesh Architecture: Simulation vs. Render
+
+Pixar's most significant contribution to production cloth simulation is the formal separation of the simulation mesh from the render mesh. These are two distinct representations of the same garment, each optimized for a different purpose, and the pipeline maintains both simultaneously throughout production.
+
+The **simulation mesh** is a triangulated mesh optimized for physical accuracy and computational efficiency. It uses adaptive resolution — higher triangle density in areas of complex deformation (armpits, knees, waist) and lower density in areas of simple drape (flat back panels, straight sleeves). The triangulation algorithm favors Delaunay triangulations, which produce optimal triangle quality and minimize numerical artifacts during simulation. This mesh is derived from the artist's low-resolution quad-dominant design mesh, which serves as the creative blueprint. The simulation mesh does not need to look beautiful — it needs to behave accurately.
+
+The **render mesh** is a quadrangulated tessellation designed for visual fidelity. It supports Catmull-Clark subdivision surfaces, which produce smooth, continuous curvature at any zoom level. It incorporates procedural details that are expensive to simulate but essential to render: fold-over thickness at hems and cuffs (the physical thickness of the fabric edge), refined seam geometry (the slight ridge where panels are joined), and double-sided geometry for translucent fabrics where the back face is visible through the front. The render mesh is what the audience sees; the simulation mesh is what the physics engine calculates.
+
+The pipeline transfers attributes between these meshes — UV shells, face colors, crease edges, vertex weights — ensuring that the visual details of the render mesh are correctly driven by the physical behavior of the simulation mesh. This transfer is the technical heart of the pipeline and is what allows Pixar to achieve both physical accuracy and visual richness simultaneously.
+
+### 15.2 Blended UVs: Artistic Control Over Physics
+
+The Blended UV technique addresses a fundamental tension in cloth simulation: physics produces the correct behavior, but not always the desired behavior. A bias-cut charmeuse gown will drape correctly according to the laws of physics, but the specific fold pattern may not serve the narrative or the composition. The director wants the fabric to fall in a particular way; the physics engine produces a different, equally valid configuration.
+
+Pixar's solution is to introduce **material distortion** through a blending scheme that combines the simulation's natural UV coordinates with a set of artist-defined target UV coordinates. The blend weight — a per-vertex scalar — controls how much the simulation deviates from the artist's intended shape. A blend weight of 0 gives full control to the physics; a blend weight of 1 gives full control to the artist. In practice, blend weights are spatially varied: high physics fidelity at areas of complex body interaction (waist, hips, shoulders) and high artistic control at areas of free drape (hem, sleeves, train).
+
+For the Velvet Strawberry's crimson charmeuse gown, this technique has direct application: the physics simulation handles the dynamic behavior (how the fabric moves when the singer turns, how it settles after a gesture), while the Blended UV system ensures that in the canonical resting pose — the singer standing at the microphone — the fabric falls in the specific configuration that serves the composition and the lighting.
+
+### 15.3 Production Wisdom: Consistency Across Shots
+
+One of the most practically important insights from Pixar's pipeline is the challenge of garment consistency across shots. In a feature film, the same garment appears in hundreds of shots, each simulated independently. Without careful management, the fabric will settle into a slightly different configuration in each shot — a continuity problem that is invisible in isolation but jarring in sequence.
+
+Pixar addresses this through **simulation state transfer**: the final state of the simulation from one shot is used as the starting state for the next shot in sequence. This ensures that the fabric's memory — the plastic deformation creases, the settled fold patterns — carries across cuts. For the Velvet Strawberry's video generation pipeline, this principle translates to: the Expert Council should specify a canonical resting state for each garment, and each generated clip should begin from that canonical state rather than from a random simulation initialization.
+
+### 15.4 Pixar Pipeline Reference Table
+
+| Pipeline Stage | Mesh Type | Optimization Goal | Key Parameters | Cinématique Application |
+|---|---|---|---|---|
+| Design | Quad-dominant input mesh | Artistic control | Low polygon count; clean edge loops | Artist defines garment silhouette and seam placement |
+| Simulation | Triangulated adaptive mesh | Physical accuracy | Delaunay triangulation; adaptive resolution | Physics engine calculates fold behavior, dynamic response |
+| Render | Catmull-Clark subdivision | Visual fidelity | Smooth curvature; procedural seam detail; fold-over thickness | Final rendered appearance with material detail |
+| Artistic control | Blended UV system | Physics + art balance | Per-vertex blend weight 0–1 | Director controls canonical pose while physics handles dynamics |
+| Continuity | State transfer | Shot consistency | Simulation state carried across cuts | Canonical resting state for each garment in each venue |
+
+### 15.5 Pixar Pipeline Prompt Vocabulary
+
+**"Simulation mesh accuracy, render mesh fidelity, dual-mesh cloth pipeline"** — activates the distinction between physical behavior and visual detail in cloth rendering.
+
+**"Adaptive mesh resolution, high detail at deformation zones, smooth drape at free panels"** — directs the model to concentrate detail at body contact points and allow free drape elsewhere.
+
+**"Blended UV artistic control, canonical resting pose, physics-driven dynamics"** — specifies that the fabric has a defined resting configuration while remaining physically responsive to movement.
+
+**"Catmull-Clark subdivision, smooth seam geometry, fold-over hem thickness"** — activates the render mesh details that distinguish production-quality cloth from basic simulation output.
+
+**"Simulation state continuity, plastic deformation memory, consistent fold pattern across shots"** — ensures garment consistency across multiple generated clips.
+
+**"Procedural seam detail, double-sided geometry, translucent fabric back-face visibility"** — activates the fine construction details that make garments read as physically constructed objects.
+
+**"Delaunay triangulation, optimal mesh quality, no numerical artifacts in complex deformation"** — specifies the simulation mesh quality that prevents visual artifacts in areas of high movement.
+
+---
+
+## CHAPTER 16: 1940S FABRIC MECHANICS — MEASURED PARAMETERS FOR CINEMATIC CLOTH SIMULATION
+
+> *The Kawabata Evaluation System gives us numbers. Numbers give us accuracy. Accuracy gives us the specific physical truth of a 1940s bias-cut charmeuse gown that no amount of aesthetic description can replace.*
+
+**Sources:** Kim & Lee (2024), "Investigating parameters affecting the real and virtual drapability of silk fabrics," *Fashion and Textiles* 11(21); IEEE SA Industry Connections Program (2020), "3DBP — Measurement of Fabric Properties for Virtual Simulation"; Chaos Cloth documentation, Epic Developer Community
+
+### 16.1 The Kawabata Evaluation System: Measuring the Hand of Fabric
+
+The Kawabata Evaluation System (KES-FB) is the standard scientific instrument for measuring the mechanical properties of fabric under the low-stress conditions experienced during wear and drape. It produces a set of objective, reproducible measurements that describe exactly how a fabric will behave in a simulation — not as an approximation, but as a physical specification.
+
+The KES-FB measures six primary properties: **bending rigidity (B)** in mN·m²/m (resistance to bending), **bending hysteresis (2HB)** (how much the fabric retains its bent shape — its "memory"), **shear stiffness (G)** in N/(m·degree) (resistance to in-plane shear deformation), **shear hysteresis (2HG, 2HG5)** (shear memory at different angles), **tensile linearity (LT)** and **maximum extension (EM)** (stretch behavior), and **weight per unit area (W)** in g/m². Together these parameters completely characterize the fabric's physical behavior and translate directly into simulation settings.
+
+For the Velvet Strawberry's wardrobe, the most critical parameter is the **bias-cut shear behavior** of silk charmeuse. When charmeuse is cut on the bias (45 degrees to the grain), the shear stiffness G becomes the dominant parameter governing drape — the fabric's resistance to stretching is now controlled by shear rather than tension. The KES-FB shear stiffness of silk charmeuse is approximately 0.5–1.5 N/(m·degree), compared to 3–8 N/(m·degree) for wool gabardine. This 3–5x difference in shear stiffness is the physics of why the charmeuse gown moves like liquid while the wool suit moves like armor.
+
+### 16.2 1940s Fabric Mechanical Parameters Reference Table
+
+| Fabric | Bending Rigidity B (mN·m²/m) | Shear Stiffness G (N/m·deg) | Max Extension EM (%) | Weight W (g/m²) | Bias Behavior | Cinematic Character |
+|---|---|---|---|---|---|---|
+| Silk charmeuse (bias-cut) | 0.005–0.015 | 0.5–1.5 | 8–15% (bias: 20–30%) | 60–80 | Dominant shear deformation; liquid drape | Sinuous, body-revealing; delayed movement response |
+| Rayon crepe | 0.01–0.03 | 1.0–2.5 | 5–12% | 80–120 | Moderate shear; soft cascade | Flowing but with more body than charmeuse; elegant drape |
+| Wool gabardine | 0.05–0.15 | 3.0–8.0 | 2–5% | 200–280 | Low shear; structured folds | Crisp, angular folds; holds pressed shape; authority |
+| Wool felt (fedora) | 0.3–0.8 | 15–40 | <1% | 300–500 | Near-rigid; shape-retentive | Structural cantilever; resists all deformation |
+| Silk satin | 0.008–0.02 | 0.8–2.0 | 6–12% | 70–100 | Moderate shear; directional sheen | Smooth drape with specular highlights; less fluid than charmeuse |
+| Cotton muslin (lining) | 0.02–0.05 | 2.0–5.0 | 3–8% | 100–150 | Moderate; structured support | Provides body to outer fabric; reduces pure bias behavior |
+| Velvet (pile weave) | 0.08–0.20 | 4.0–10.0 | 2–6% | 300–500 | Low shear; voluminous folds | Heavy, plush; slow-settling; absorbs light |
+
+### 16.3 How 1940s Fabrics Differ from Modern Equivalents
+
+The fabrics of the 1940s were constructed differently from their modern equivalents in ways that affect simulation behavior. Understanding these differences is essential for period-accurate cloth simulation.
+
+**Silk charmeuse in the 1940s** was woven from natural silk filaments with a higher twist than modern charmeuse, producing a slightly stiffer hand with more defined drape. Modern charmeuse often uses synthetic silk substitutes (polyester charmeuse) with lower bending rigidity and more uniform drape. The 1940s version would have slightly higher bending rigidity (B ≈ 0.01–0.02 rather than 0.005–0.015) and a more pronounced bias stretch differential.
+
+**Wool gabardine in the 1940s** was typically a tighter, heavier weave than modern equivalents, with a higher thread count and more pronounced twill structure. The higher weight (W ≈ 250–320 g/m² versus modern 180–220 g/m²) produces more pronounced gravitational drape and slower movement response. The Fedora Man's suit would have this heavier, more deliberate movement quality.
+
+**Rayon crepe** was a 1940s innovation — one of the first widely used synthetic fabrics — and its mechanical properties are well-documented from the period. Its moderate bending rigidity and weight produce the characteristic soft cascade of 1940s evening wear that is distinct from both the liquid flow of silk charmeuse and the structured drape of wool.
+
+### 16.4 KES-FB Parameters → Chaos Cloth Settings
+
+| KES-FB Parameter | Physical Meaning | Chaos Cloth Parameter | 1940s Charmeuse Value | 1940s Wool Gabardine Value |
+|---|---|---|---|---|
+| Bending Rigidity B | Resistance to bending | Bending Stiffness | 0.05–0.10 | 0.55–0.75 |
+| Bending Hysteresis 2HB | Fold memory / crease retention | Damping (partial) | 0.8–1.0 | 1.5–2.0 |
+| Shear Stiffness G | Resistance to in-plane shear | Stretch Stiffness (bias direction) | 0.10–0.20 | 0.65–0.85 |
+| Maximum Extension EM | Stretch limit | Max Stretch | 20–30% (bias) | 3–5% |
+| Weight W | Gravitational response | Mass per unit area | 0.7–0.9 (normalized) | 2.5–3.2 (normalized) |
+| Friction MIU | Surface friction | Friction coefficient | 0.15–0.25 (slippery) | 0.35–0.50 (moderate) |
+
+### 16.5 1940s Fabric Prompt Vocabulary
+
+**"1940s silk charmeuse, natural filament, high-twist weave, slightly stiffer bias drape than modern"** — activates period-accurate charmeuse behavior with the specific hand of 1940s natural silk.
+
+**"Heavy wool gabardine, 280 g/m², tight twill, deliberate gravitational drape"** — specifies the heavier 1940s wool weight that produces slower, more authoritative movement.
+
+**"Rayon crepe, 1940s synthetic, soft cascade, moderate body, distinct from silk flow"** — activates the specific drape character of rayon crepe as distinct from silk charmeuse.
+
+**"KES-FB measured parameters, bending rigidity 0.01, shear stiffness 1.0, physically accurate drape"** — invokes the measured mechanical parameters for simulation accuracy.
+
+**"Bias-cut shear dominance, 20–30% extension, liquid movement, body-revealing silhouette"** — activates the specific physics of bias-cut behavior where shear governs all drape.
+
+**"Wool felt, 400 g/m², near-rigid, bending rigidity 0.5, structural shape retention"** — specifies the fedora's physical rigidity with measured parameters.
+
+**"Period-accurate 1940s construction, natural fiber hand, heavier weight than modern equivalents"** — establishes the historical material context for period-accurate simulation.
+
+**"Atmospheric haze fabric diffusion, tungsten-lit sheen, warm spectral interaction with natural fibers"** — connects the fabric physics to the specific lighting environment of the Velvet Strawberry.
+
+---
+
+*Chapters 14–16 complete. The Cinématique Physics and Wardrobe Bible now contains sixteen chapters. Chapters 14–16 add: the full pbrt mathematical foundation for volumetric light transport and subsurface scattering with specific optical parameters for all Velvet Strawberry materials; Pixar's dual-mesh cloth pipeline with the Blended UV artistic control system and production continuity techniques; and measured KES-FB mechanical parameters for all 1940s Velvet Strawberry fabrics with direct Chaos Cloth parameter mappings.*
+
+*Sources consulted for Chapters 14–16:*
+- *Pharr, M., Jakob, W., & Humphreys, G. (2023). Physically Based Rendering: From Theory to Implementation (4th ed.). pbrt.org*
+- *"Revamping the Cloth Tailoring Pipeline at Pixar," SIGGRAPH 2022*
+- *"Directing Cloth Draping through Blended UVs," Pixar Research*
+- *Kim, J. H., & Lee, J.-S. (2024). "Investigating parameters affecting the real and virtual drapability of silk fabrics," Fashion and Textiles, 11(21)*
+- *IEEE SA Industry Connections Program (2020). "3DBP — Measurement of Fabric Properties for Virtual Simulation"*
+- *Duncan, M. (2026). "Chaos Cloth Demystified," Epic Developer Community*
