@@ -326,7 +326,8 @@ export const appRouter = router({
           isPublic: false,
         });
 
-        const insertId = (result as any).insertId as number;
+        // Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] — insertId is at index 0
+        const insertId = (result as any)[0]?.insertId as number;
 
         // Add characters
         for (const char of input.characters) {

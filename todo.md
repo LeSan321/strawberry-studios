@@ -118,3 +118,6 @@
 - [x] BUG: concert_characters insert fails — DIAGNOSED: no mismatch; error was from first attempt before fix; DB columns match schema correctly
 - [x] BUG: Wizard creates duplicate concerts — FIXED: added submitted flag + early return guard in handleSubmit; button disabled on pending/submitted
 - [x] BUG: Video generation fails with Poe API — FIXED: old code sent 10s duration (unsupported); new code sends 8s (supported: 4/6/8); error.code field added to type; 40 tests passing
+
+## Bug Fixes — Live Test Round 2
+- [x] BUG: concert_characters insert fails — FIXED: Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] array; insertId is at result[0].insertId not result.insertId; 40 tests passing
