@@ -28,7 +28,7 @@ import { storagePut } from "./storage";
 export type VideoGenerationRequest = {
   /** The fully-assembled 10-layer Cinématique prompt */
   prompt: string;
-  /** Duration in seconds (default: 8 for Veo, 4 for Sora) */
+  /** Duration in seconds (default: 8 for all models) */
   durationSeconds?: number;
   /** Aspect ratio (default: "16:9") */
   aspectRatio?: "16:9" | "9:16" | "1:1";
@@ -72,8 +72,8 @@ async function generatePoe(req: VideoGenerationRequest): Promise<VideoGeneration
   };
   const size = sizeMap[req.aspectRatio ?? "16:9"] ?? "1280x720";
 
-  // Veo models default to 8s; Sora defaults to 4s
-  const seconds = req.durationSeconds ?? (model.startsWith("Veo") ? 8 : 4);
+  // Default to 8s for all models (Kling v3 supports up to 10s, Veo supports 4/6/8)
+  const seconds = req.durationSeconds ?? 8;
 
   const body: Record<string, unknown> = {
     model,
