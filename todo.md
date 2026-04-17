@@ -129,3 +129,8 @@
 - [x] Add Delete Concert button to Library (two-click confirm, hard delete via deleteConcert helper)
 - [x] Add progress percentage to video badge (polls progress from Runway API, shown as "Processing 42%")
 - [x] 40 tests passing across 4 test files
+
+## Bug Fix — Runway 400 promptText Too Long
+- [x] Rewrite cinematiquePromptBuilder to produce ≤1000-char Runway-optimised prompt (max 929 chars)
+- [x] Verify all preset combinations stay under 1000 chars (60 combos tested, all pass)
+- [x] Run tests and save checkpoint — 40/40 passing
