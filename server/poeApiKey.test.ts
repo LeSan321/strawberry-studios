@@ -18,7 +18,7 @@ describe("Poe API key validation", () => {
 
   it("POE_VIDEO_MODEL is set to a supported cinematic video model", () => {
     // Valid cinematic video models available via Poe API
-    // Switched from Veo-3.1 to kling-v3-pro (no Vertex AI content restrictions)
+    // Switched from kling-v3-pro to runway-gen-4.5 (Poe /content endpoint confirmed working for Runway)
     const validModels = [
       "Veo-3.1", "Veo-3.1-Fast", "veo-3.1", "veo-3.1-fast",
       "kling-v3-pro", "kling-v3", "kling-2.6-pro",
