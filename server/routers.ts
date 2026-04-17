@@ -419,8 +419,8 @@ export const appRouter = router({
         concertId: z.number().int(),
         /** Optional: override the primary shot index (0-based) */
         primaryShotIndex: z.number().int().min(0).max(6).optional(),
-        /** Duration in seconds (default: 10) */
-        durationSeconds: z.number().int().min(5).max(30).optional(),
+        /** Duration in seconds (default: 8 — Veo-3.1 supports 4, 6, or 8 only) */
+        durationSeconds: z.number().int().min(4).max(8).optional(),
         /** Aspect ratio */
         aspectRatio: z.enum(["16:9", "9:16", "1:1"]).optional(),
       }))
@@ -438,7 +438,7 @@ export const appRouter = router({
           const videoPrompt = buildCinématiqueVideoPrompt({
             directorsPackage: concert.directorsPackage as any,
             primaryShotIndex: input.primaryShotIndex ?? 0,
-            durationSeconds: input.durationSeconds ?? 10,
+            durationSeconds: input.durationSeconds ?? 8,
           });
 
           // Store the assembled prompt before calling the API
@@ -450,7 +450,7 @@ export const appRouter = router({
           // Call the video generation API
           const result = await generateVideo({
             prompt: videoPrompt,
-            durationSeconds: input.durationSeconds ?? 10,
+            durationSeconds: input.durationSeconds ?? 8,
             aspectRatio: input.aspectRatio ?? "16:9",
           });
 
