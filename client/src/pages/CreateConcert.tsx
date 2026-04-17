@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { Link, useLocation, useParams } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -139,12 +139,15 @@ export default function CreateConcert() {
     audioTitle: "",
   });
 
+  const [submitted, setSubmitted] = useState(false);
+
   const createConcertMutation = trpc.concerts.create.useMutation({
     onSuccess: (data) => {
       toast.success("Concert created! Consulting the Expert Council...");
       navigate(`/library`);
     },
     onError: (err) => {
+      setSubmitted(false);
       toast.error("Failed to create concert: " + err.message);
     }
   });
@@ -181,6 +184,8 @@ export default function CreateConcert() {
       toast.error("Please enter a concert title");
       return;
     }
+    if (submitted || createConcertMutation.isPending) return;
+    setSubmitted(true);
     await createConcertMutation.mutateAsync({
       title: state.title,
       artistName: state.artistName,
@@ -527,7 +532,7 @@ export default function CreateConcert() {
           ) : (
             <button
               onClick={handleSubmit}
-              disabled={createConcertMutation.isPending || !state.title}
+              disabled={createConcertMutation.isPending || submitted || !state.title}
               className="px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase hover:bg-primary/90 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed glow-crimson">
               {createConcertMutation.isPending ? "Consulting the Council..." : "Produce Concert →"}
             </button>

@@ -113,3 +113,8 @@
 - [x] Set VIDEO_PROVIDER=poe, POE_API_KEY, POE_VIDEO_MODEL=Veo-3.1 via secrets
 - [x] Validate API key against /v1/models endpoint (4/4 tests passing, Veo-3.1 confirmed available)
 - [x] 40 tests passing across 4 test files
+
+## Bug Fixes — Live Test Round 1
+- [x] BUG: concert_characters insert fails — DIAGNOSED: no mismatch; error was from first attempt before fix; DB columns match schema correctly
+- [x] BUG: Wizard creates duplicate concerts — FIXED: added submitted flag + early return guard in handleSubmit; button disabled on pending/submitted
+- [x] BUG: Video generation fails with Poe API — FIXED: old code sent 10s duration (unsupported); new code sends 8s (supported: 4/6/8); error.code field added to type; 40 tests passing

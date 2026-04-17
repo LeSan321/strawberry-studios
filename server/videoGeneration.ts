@@ -121,7 +121,8 @@ async function pollPoeStatus(jobId: string): Promise<VideoStatusResult> {
   const data = (await res.json()) as {
     id: string;
     status: "queued" | "in_progress" | "completed" | "failed";
-    error?: { message?: string };
+    error?: { code?: number; message?: string };
+    progress?: number;
   };
 
   if (data.status === "completed") {
