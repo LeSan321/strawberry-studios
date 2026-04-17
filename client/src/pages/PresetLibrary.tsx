@@ -5,7 +5,7 @@ const STATIC_PRESETS = [
   {
     slug: "shadow-and-smoke",
     name: "Shadow and Smoke",
-    description: "Deep noir blacks, cigarette smoke, chiaroscuro lighting. The club breathes.",
+    description: "Deep noir blacks, atmospheric haze, chiaroscuro lighting. The club breathes.",
     fabricPhysics: "Velvet absorbs light completely at 0-5° angle; silk catches rim glow at 15° with visible sheen. Avoid polyester — it creates unwanted specular highlights in low-key lighting.",
     lightingKelvin: 1800,
     cameraPsychology: "Low-key chiaroscuro creates psychological tension. The viewer leans in. Shadow conceals as much as light reveals — the unseen is as powerful as the seen.",

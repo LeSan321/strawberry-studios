@@ -181,7 +181,7 @@ export default function Home() {
               </h2>
               <div className="w-16 h-px bg-primary/60 mb-6" />
               <p className="text-muted-foreground leading-relaxed mb-8 font-serif text-lg">
-                A subterranean jazz club draped in velvet and shadow. Venetian cage lighting casts geometric patterns across the stage as cigarette smoke curls toward the ceiling. This is where noir meets music — and where your performance becomes cinema.
+                A subterranean jazz club draped in velvet and shadow. Venetian cage lighting casts geometric patterns across the stage as atmospheric haze drifts toward the ceiling. This is where noir meets music — and where your performance becomes cinema.
               </p>
 
               {/* Preset tags */}

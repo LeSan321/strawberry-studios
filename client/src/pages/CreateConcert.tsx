@@ -55,7 +55,7 @@ const VISUAL_PRESETS = [
   {
     id: "shadow_and_smoke",
     label: "Shadow and Smoke",
-    desc: "Deep noir blacks, cigarette smoke, chiaroscuro lighting. The club breathes.",
+    desc: "Deep noir blacks, atmospheric haze, chiaroscuro lighting. The club breathes.",
     kelvin: 1800,
     fabric: "Velvet absorbs light; silk catches rim glow at 15° angle"
   },

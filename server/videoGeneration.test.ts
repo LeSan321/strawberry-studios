@@ -209,7 +209,8 @@ describe("buildCinématiqueVideoPrompt", () => {
       concert: { ...MOCK_DIRECTORS_PACKAGE.concert, visualPreset: "shadow_and_smoke" },
     };
     const prompt = buildCinématiqueVideoPrompt({ directorsPackage: pkg });
-    expect(prompt.toLowerCase()).toContain("smoke");
+    // shadow_and_smoke preset uses atmospheric haze (cigarette refs removed for Vertex AI compliance)
+    expect(prompt.toLowerCase()).toContain("haze");
   });
 
   it("applies Red Head Singer wardrobe layer when character is singer", () => {

@@ -89,7 +89,7 @@ vi.mock("./_core/llm", () => ({
             fabricPhysics: "Velvet absorbs light at 0-5°",
             lightingSetup: "1800K tungsten footlights",
             cameraPsychology: "Low-key chiaroscuro",
-            atmosphericElements: "Cigarette smoke diffusion"
+            atmosphericElements: "Atmospheric haze diffusion"
           },
           directorStatement: "This concert lives in shadow and revelation."
         })

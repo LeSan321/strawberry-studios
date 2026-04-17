@@ -92,7 +92,7 @@ This world is governed by real physical law, but shaped by emotional gravity. No
 The Velvet Strawberry is a subterranean 1940s jazz club. Intimate space, 30ft depth maximum, 9–12ft ceiling. Tungsten practical lighting only — no fill, no overhead wash. Oil-based theatrical haze at medium density (0.4–0.6). Velvet and brass surfaces dominate. The physics of this world are non-negotiable:
 - Light source: Tungsten practicals at 2200–2700K. No cool sources. No fill.
 - Fabric: Deep crimson bias-cut silk charmeuse (lead vocalist), dark wool gabardine (fedora figure), velvet drapes throughout.
-- Atmosphere: Oil-based haze, medium density, stratifies at 4–6ft height. Cigarette smoke adds micro-turbulence.
+- Atmosphere: Oil-based haze, medium density, stratifies at 4–6ft height. Atmospheric micro-turbulence from heat sources.
 - Camera: 35–85mm lenses. f/1.4–f/2.0 for close-ups. Slow push-ins (0.5–2cm/sec). Never handheld unless motivated.
 - Shadow: Minimum 70% shadow coverage. Hard shadow edges only. Chiaroscuro ratio minimum 8:1.
 
@@ -105,11 +105,11 @@ Motivated sources only. Every light must have a practical source visible or impl
 - Stage footlights: 2200K, low angle, creates upward shadow on performer faces
 - Single overhead spot: 2500K, 45° angle, creates hard brim shadow on fedora
 - Bar practicals: 2700K Edison bulbs, warm fill for background depth
-- Cigarette practical: 1800K, extreme close-up only, maximum intimacy
+- Candle/flame practical: 1800K, extreme close-up only, maximum intimacy
 Forbidden: fluorescent, LED cool-white, overhead wash, soft boxes, any source above 3200K.
 
 ## VELVET STRAWBERRY — ATMOSPHERIC BRIEF
-Oil-based haze at 0.4–0.6 density. Stratifies at 4–6ft height — below this line, haze is denser; above, it thins. Under a narrow spotlight beam, haze creates visible light columns (Mie forward scattering). Cigarette smoke adds micro-turbulence within 2ft of the source. Haze particle size: 1–5 microns. Forward scattering ratio: 0.85.
+Oil-based haze at 0.4–0.6 density. Stratifies at 4–6ft height — below this line, haze is denser; above, it thins. Under a narrow spotlight beam, haze creates visible light columns (Mie forward scattering). Atmospheric micro-turbulence from heat sources within 2ft creates dynamic haze movement. Haze particle size: 1–5 microns. Forward scattering ratio: 0.85.
 
 ## VELVET STRAWBERRY — CAMERA BRIEF
 The camera is a participant, not an observer. It moves with emotional logic, not mechanical logic. The canonical camera grammar:
@@ -174,7 +174,7 @@ Use these specific phrases in generated prompts:
 Fabric: "bias-cut silk charmeuse catches the light at the hip", "velvet pile direction creates gradient shadow", "wool gabardine holds its shape against the body", "fabric lag 0.3 seconds behind movement"
 Light: "single tungsten practical at 2200K", "hard shadow edge at 45 degrees", "motivated source only", "footlight upwash", "match-flare at 1800K"
 Camera: "slow push-in, emotional gravity", "85mm compression dissolves the background", "low angle establishes authority", "camera participates, does not observe"
-Atmosphere: "oil-based haze stratifies at chest height", "Mie forward scattering creates light column", "cigarette micro-turbulence", "haze density 0.5"
+Atmosphere: "oil-based haze stratifies at chest height", "Mie forward scattering creates light column", "atmospheric micro-turbulence near heat sources", "haze density 0.5"
 Presence: "darkness as active content", "negative space implies depth", "four depth planes visible", "acoustic intimacy visual grammar"
 
 ## PSYCHOLOGICAL BRIEF — THE EMOTIONAL ARCHITECTURE
@@ -600,11 +600,11 @@ export const appRouter = router({
         {
           name: "Shadow and Smoke",
           slug: "shadow-and-smoke",
-          description: "Deep noir blacks, cigarette smoke, chiaroscuro lighting. The club breathes.",
+          description: "Deep noir blacks, atmospheric haze, chiaroscuro lighting. The club breathes.",
           fabricPhysics: "Velvet absorbs light completely at 0-5° angle; silk catches rim glow at 15° with visible sheen. Avoid polyester — it creates unwanted specular highlights in low-key lighting.",
           lightingKelvin: 1800,
           cameraPsychology: "Low-key chiaroscuro creates psychological tension. The viewer leans in. Shadow conceals as much as light reveals — the unseen is as powerful as the seen.",
-          promptTemplate: "Cinematic noir jazz club interior, 1800K tungsten footlights, deep chiaroscuro shadows, cigarette smoke diffusing amber light, velvet curtains absorbing shadow at zero degrees, silk catching rim glow at fifteen degrees, venetian cage shadow patterns on performer, shallow depth of field, film grain texture, anamorphic lens flare",
+          promptTemplate: "Cinematic noir jazz club interior, 1800K tungsten footlights, deep chiaroscuro shadows, atmospheric haze diffusing amber light, velvet curtains absorbing shadow at zero degrees, silk catching rim glow at fifteen degrees, venetian cage shadow patterns on performer, shallow depth of field, film grain texture, anamorphic lens flare",
           sortOrder: 1,
         },
         {

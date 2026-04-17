@@ -74,7 +74,7 @@ const VISUAL_PRESET_OVERRIDES: Record<string, {
 }> = {
   shadow_and_smoke: {
     lightLayer: "single tungsten practical at 1800K, hard shadow edge at 45 degrees, motivated source only, footlight upwash, 70% of frame in deep shadow",
-    atmosphereLayer: "oil-based haze stratifies at chest height, Mie forward scattering creates light column, cigarette micro-turbulence, haze density 0.5, smoke curl visible in beam",
+    atmosphereLayer: "oil-based haze stratifies at chest height, Mie forward scattering creates light column, atmospheric micro-turbulence near heat sources, haze density 0.5, haze curl visible in beam",
     contrastLayer: "extreme chiaroscuro, warm amber dominant, cinematic realism, film grain texture, anamorphic lens flare",
   },
   golden_rim: {
@@ -89,7 +89,7 @@ const VISUAL_PRESET_OVERRIDES: Record<string, {
   },
   match_flare: {
     lightLayer: "single match or lighter flame at 1600K, extreme chiaroscuro, intimate close-up framing, flame not illuminating face, match flame casting negligible illumination on features",
-    atmosphereLayer: "breath-close proximity, minimal haze, smoke from extinguished match rising",
+    atmosphereLayer: "breath-close proximity, minimal haze, atmospheric wisps rising from warm candlelight",
     contrastLayer: "extreme contrast, dangerous beauty, film grain, ultra-warm micro-light",
   },
   none: {

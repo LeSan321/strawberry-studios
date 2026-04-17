@@ -8,7 +8,7 @@ const VENUES = [
     name: "Velvet Strawberry Jazz Club",
     status: "active" as const,
     tagline: "Subterranean noir. Venetian shadows. Velvet and smoke.",
-    description: "A subterranean jazz club draped in velvet and shadow. Venetian cage lighting casts geometric patterns across the stage as cigarette smoke curls toward the ceiling. This is where noir meets music.",
+    description: "A subterranean jazz club draped in velvet and shadow. Venetian cage lighting casts geometric patterns across the stage as atmospheric haze drifts toward the ceiling. This is where noir meets music.",
     presets: ["Shadow and Smoke", "Golden Rim", "Venetian Cage", "Match Flare"],
     moods: ["Intimate Jazz", "High Energy", "Noir Smoke", "Custom"],
     characters: ["The Red Head Singer", "The Fedora Man"],
