@@ -6,17 +6,17 @@
  *
  * Supported providers:
  *   - "mock"   — returns a placeholder immediately (no API key required)
- *   - "poe"    — Poe API (Veo-3.1 / Veo-3 / Sora-2 etc.) — RECOMMENDED
- *   - "runway" — Runway ML Gen-3 Alpha API
+ *   - "runway" — Runway ML Gen-4.5 direct API (api.dev.runwayml.com) — ACTIVE
+ *   - "poe"    — Poe API (legacy, kept for reference)
  *   - "kling"  — Kling AI video generation API
  *   - "luma"   — Luma Dream Machine API
  *
- * Poe API setup:
- *   - Set VIDEO_PROVIDER=poe and POE_API_KEY to your Poe API key
- *   - Optionally set POE_VIDEO_MODEL (default: "Veo-3.1")
- *   - Video is generated async: POST /v1/videos → poll GET /v1/videos/{id}
- *   - When complete, GET /v1/videos/{id}/content streams the MP4 bytes
- *   - We upload those bytes to S3 and store the permanent CDN URL
+ * Runway ML setup:
+ *   - Set VIDEO_PROVIDER=runway and RUNWAY_API_KEY to your Runway API key
+ *   - Uses model gen4.5, duration 5s, ratio 1280:720 (landscape HD)
+ *   - Submit: POST /v1/text_to_video → returns { id: "task-uuid" }
+ *   - Poll:   GET  /v1/tasks/{id}    → { status: "RUNNING"|"SUCCEEDED"|"FAILED", progress, output? }
+ *   - On SUCCEEDED: video URL is in output[0] — no S3 download needed
  *
  * Architecture: all providers share the same VideoGenerationRequest /
  * VideoGenerationResult contract so the tRPC procedure never needs to
@@ -28,7 +28,7 @@ import { storagePut } from "./storage";
 export type VideoGenerationRequest = {
   /** The fully-assembled 10-layer Cinématique prompt */
   prompt: string;
-  /** Duration in seconds (default: 8 for all models) */
+  /** Duration in seconds (gen4.5 supports 5 or 10; default: 5) */
   durationSeconds?: number;
   /** Aspect ratio (default: "16:9") */
   aspectRatio?: "16:9" | "9:16" | "1:1";
@@ -54,7 +54,116 @@ async function generateMock(req: VideoGenerationRequest): Promise<VideoGeneratio
   };
 }
 
-// ─── Provider: Poe API (Veo-3.1) ─────────────────────────────────────────────
+// ─── Provider: Runway ML (Direct API) ────────────────────────────────────────
+
+const RUNWAY_API_BASE = "https://api.dev.runwayml.com/v1";
+const RUNWAY_VERSION_HEADER = "2024-11-06";
+
+/**
+ * Map our aspect ratio enum to Runway's ratio format (WIDTHxHEIGHT).
+ * gen4.5 supports: "1280:720" (landscape) and "720:1280" (portrait).
+ */
+function runwayRatio(aspectRatio?: string): string {
+  switch (aspectRatio) {
+    case "9:16":
+      return "720:1280";
+    case "1:1":
+      return "1280:720"; // gen4.5 doesn't support square; fall back to landscape
+    case "16:9":
+    default:
+      return "1280:720";
+  }
+}
+
+/**
+ * gen4.5 only accepts duration values of 5 or 10.
+ * We default to 5 to keep costs low; caller can pass 10 for longer clips.
+ */
+function runwayDuration(durationSeconds?: number): number {
+  if (durationSeconds && durationSeconds >= 8) return 10;
+  return 5;
+}
+
+async function generateRunway(req: VideoGenerationRequest): Promise<VideoGenerationResult> {
+  const apiKey = process.env.RUNWAY_API_KEY;
+  if (!apiKey) throw new Error("RUNWAY_API_KEY is not configured");
+
+  const duration = runwayDuration(req.durationSeconds);
+  const ratio = runwayRatio(req.aspectRatio);
+
+  const body: Record<string, unknown> = {
+    model: "gen4.5",
+    promptText: req.prompt,
+    duration,
+    ratio,
+  };
+
+  console.log(
+    `[Runway Video] Submitting: model=gen4.5 duration=${duration}s ratio=${ratio} promptLength=${req.prompt.length}`
+  );
+
+  const res = await fetch(`${RUNWAY_API_BASE}/text_to_video`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+      "X-Runway-Version": RUNWAY_VERSION_HEADER,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Runway API error (${res.status}): ${detail}`);
+  }
+
+  const data = (await res.json()) as { id: string };
+  console.log(`[Runway Video] Task submitted: id=${data.id}`);
+  return { status: "queued", jobId: data.id };
+}
+
+async function pollRunwayStatus(jobId: string): Promise<VideoStatusResult> {
+  const apiKey = process.env.RUNWAY_API_KEY;
+  if (!apiKey) throw new Error("RUNWAY_API_KEY is not configured");
+
+  const res = await fetch(`${RUNWAY_API_BASE}/tasks/${jobId}`, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "X-Runway-Version": RUNWAY_VERSION_HEADER,
+    },
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Runway poll error (${res.status}): ${detail}`);
+  }
+
+  const data = (await res.json()) as {
+    id: string;
+    status: "RUNNING" | "SUCCEEDED" | "FAILED" | "PENDING" | "THROTTLED" | "CANCELLED";
+    progress?: number;
+    output?: string[];
+    failure?: string;
+    failureCode?: string;
+  };
+
+  console.log(
+    `[Runway Poll] id=${data.id} status=${data.status} progress=${((data.progress ?? 0) * 100).toFixed(1)}%`
+  );
+
+  if (data.status === "SUCCEEDED" && data.output?.[0]) {
+    // Video URL is returned directly in output[0] — no S3 download needed
+    return { status: "complete", videoUrl: data.output[0] };
+  }
+  if (data.status === "FAILED" || data.status === "CANCELLED") {
+    const reason = data.failure ?? data.failureCode ?? "Runway generation failed";
+    return { status: "failed", error: reason };
+  }
+  // RUNNING, PENDING, THROTTLED → still in progress
+  return { status: "generating", progress: data.progress };
+}
+
+// ─── Provider: Poe API (legacy) ───────────────────────────────────────────────
 
 const POE_API_BASE = "https://api.poe.com/v1";
 
@@ -62,27 +171,19 @@ async function generatePoe(req: VideoGenerationRequest): Promise<VideoGeneration
   const apiKey = process.env.POE_API_KEY;
   if (!apiKey) throw new Error("POE_API_KEY is not configured");
 
-  const model = process.env.POE_VIDEO_MODEL ?? "Veo-3.1";
+  const model = process.env.POE_VIDEO_MODEL ?? "runway-gen-4.5";
 
-  // Map aspect ratio to Poe size format (WIDTHxHEIGHT)
   const sizeMap: Record<string, string> = {
     "16:9": "1280x720",
     "9:16": "720x1280",
     "1:1": "720x720",
   };
   const size = sizeMap[req.aspectRatio ?? "16:9"] ?? "1280x720";
+  const seconds = req.durationSeconds ?? 5;
 
-  // Default to 8s for all models (Kling v3 supports up to 10s, Veo supports 4/6/8)
-  const seconds = req.durationSeconds ?? 8;
+  const body: Record<string, unknown> = { model, prompt: req.prompt, seconds, size };
 
-  const body: Record<string, unknown> = {
-    model,
-    prompt: req.prompt,
-    seconds,
-    size,
-  };
-
-  console.log(`[Poe Video] Sending request: model=${model} seconds=${seconds} size=${size} promptLength=${req.prompt.length}`);
+  console.log(`[Poe Video] Sending request: model=${model} seconds=${seconds} size=${size}`);
 
   const res = await fetch(`${POE_API_BASE}/videos`, {
     method: "POST",
@@ -100,7 +201,6 @@ async function generatePoe(req: VideoGenerationRequest): Promise<VideoGeneration
   }
 
   const data = (await res.json()) as { id: string; status: string };
-  // Poe always returns queued immediately
   return { status: "queued", jobId: data.id };
 }
 
@@ -109,10 +209,7 @@ async function pollPoeStatus(jobId: string): Promise<VideoStatusResult> {
   if (!apiKey) throw new Error("POE_API_KEY is not configured");
 
   const res = await fetch(`${POE_API_BASE}/videos/${jobId}`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      Accept: "application/json",
-    },
+    headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
   });
 
   if (!res.ok) {
@@ -124,27 +221,21 @@ async function pollPoeStatus(jobId: string): Promise<VideoStatusResult> {
     id: string;
     status: "queued" | "in_progress" | "completed" | "failed";
     error?: { code?: number; message?: string };
-    progress?: number;
   };
 
   if (data.status === "completed") {
-    // Download the MP4 bytes from Poe and upload to S3 for a permanent CDN URL
     const videoUrl = await downloadPoeVideoToS3(jobId, apiKey);
     return { status: "complete", videoUrl };
   }
   if (data.status === "failed") {
     return { status: "failed", error: data.error?.message ?? "Poe video generation failed" };
   }
-  // queued or in_progress
   return { status: "generating" };
 }
 
 async function downloadPoeVideoToS3(jobId: string, apiKey: string): Promise<string> {
   const res = await fetch(`${POE_API_BASE}/videos/${jobId}/content`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      Accept: "video/mp4",
-    },
+    headers: { Authorization: `Bearer ${apiKey}`, Accept: "video/mp4" },
   });
 
   if (!res.ok) {
@@ -158,41 +249,6 @@ async function downloadPoeVideoToS3(jobId: string, apiKey: string): Promise<stri
   return url;
 }
 
-// ─── Provider: Runway ML ──────────────────────────────────────────────────────
-
-async function generateRunway(req: VideoGenerationRequest): Promise<VideoGenerationResult> {
-  const apiKey = process.env.RUNWAY_API_KEY;
-  if (!apiKey) throw new Error("RUNWAY_API_KEY is not configured");
-
-  const body: Record<string, unknown> = {
-    promptText: req.prompt,
-    model: "gen3a_turbo",
-    duration: req.durationSeconds ?? 10,
-    ratio: req.aspectRatio ?? "1280:768",
-  };
-  if (req.referenceImageUrl) {
-    body.promptImage = req.referenceImageUrl;
-  }
-
-  const res = await fetch("https://api.dev.runwayml.com/v1/image_to_video", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      "X-Runway-Version": "2024-11-06",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`Runway API error (${res.status}): ${detail}`);
-  }
-
-  const data = (await res.json()) as { id: string };
-  return { status: "queued", jobId: data.id };
-}
-
 // ─── Provider: Kling AI ───────────────────────────────────────────────────────
 
 async function generateKling(req: VideoGenerationRequest): Promise<VideoGenerationResult> {
@@ -201,14 +257,11 @@ async function generateKling(req: VideoGenerationRequest): Promise<VideoGenerati
 
   const res = await fetch("https://api.klingai.com/v1/videos/text2video", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
       model: "kling-v1",
       prompt: req.prompt,
-      duration: req.durationSeconds ?? 10,
+      duration: req.durationSeconds ?? 5,
       aspect_ratio: req.aspectRatio ?? "16:9",
     }),
   });
@@ -220,95 +273,6 @@ async function generateKling(req: VideoGenerationRequest): Promise<VideoGenerati
 
   const data = (await res.json()) as { data: { task_id: string } };
   return { status: "queued", jobId: data.data.task_id };
-}
-
-// ─── Provider: Luma Dream Machine ────────────────────────────────────────────
-
-async function generateLuma(req: VideoGenerationRequest): Promise<VideoGenerationResult> {
-  const apiKey = process.env.LUMA_API_KEY;
-  if (!apiKey) throw new Error("LUMA_API_KEY is not configured");
-
-  const res = await fetch("https://api.lumalabs.ai/dream-machine/v1/generations", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      prompt: req.prompt,
-      aspect_ratio: req.aspectRatio ?? "16:9",
-      loop: false,
-    }),
-  });
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`Luma API error (${res.status}): ${detail}`);
-  }
-
-  const data = (await res.json()) as { id: string };
-  return { status: "queued", jobId: data.id };
-}
-
-// ─── Status Polling ───────────────────────────────────────────────────────────
-
-export type VideoStatusResult =
-  | { status: "complete"; videoUrl: string }
-  | { status: "generating" | "queued" }
-  | { status: "failed"; error: string };
-
-export async function pollVideoStatus(
-  provider: string,
-  jobId: string
-): Promise<VideoStatusResult> {
-  switch (provider) {
-    case "poe":
-      return pollPoeStatus(jobId);
-    case "runway":
-      return pollRunwayStatus(jobId);
-    case "kling":
-      return pollKlingStatus(jobId);
-    case "luma":
-      return pollLumaStatus(jobId);
-    case "mock":
-    default:
-      // Mock is always immediately complete
-      return {
-        status: "complete",
-        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      };
-  }
-}
-
-async function pollRunwayStatus(jobId: string): Promise<VideoStatusResult> {
-  const apiKey = process.env.RUNWAY_API_KEY;
-  if (!apiKey) throw new Error("RUNWAY_API_KEY is not configured");
-
-  const res = await fetch(`https://api.dev.runwayml.com/v1/tasks/${jobId}`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "X-Runway-Version": "2024-11-06",
-    },
-  });
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`Runway poll error (${res.status}): ${detail}`);
-  }
-
-  const data = (await res.json()) as {
-    status: string;
-    output?: string[];
-    failure?: string;
-  };
-
-  if (data.status === "SUCCEEDED" && data.output?.[0]) {
-    return { status: "complete", videoUrl: data.output[0] };
-  }
-  if (data.status === "FAILED") {
-    return { status: "failed", error: data.failure ?? "Runway generation failed" };
-  }
-  return { status: "generating" };
 }
 
 async function pollKlingStatus(jobId: string): Promise<VideoStatusResult> {
@@ -336,6 +300,27 @@ async function pollKlingStatus(jobId: string): Promise<VideoStatusResult> {
     return { status: "failed", error: "Kling generation failed" };
   }
   return { status: "generating" };
+}
+
+// ─── Provider: Luma Dream Machine ────────────────────────────────────────────
+
+async function generateLuma(req: VideoGenerationRequest): Promise<VideoGenerationResult> {
+  const apiKey = process.env.LUMA_API_KEY;
+  if (!apiKey) throw new Error("LUMA_API_KEY is not configured");
+
+  const res = await fetch("https://api.lumalabs.ai/dream-machine/v1/generations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ prompt: req.prompt, aspect_ratio: req.aspectRatio ?? "16:9", loop: false }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Luma API error (${res.status}): ${detail}`);
+  }
+
+  const data = (await res.json()) as { id: string };
+  return { status: "queued", jobId: data.id };
 }
 
 async function pollLumaStatus(jobId: string): Promise<VideoStatusResult> {
@@ -366,6 +351,35 @@ async function pollLumaStatus(jobId: string): Promise<VideoStatusResult> {
   return { status: "generating" };
 }
 
+// ─── Status Polling ───────────────────────────────────────────────────────────
+
+export type VideoStatusResult =
+  | { status: "complete"; videoUrl: string }
+  | { status: "generating" | "queued"; progress?: number }
+  | { status: "failed"; error: string };
+
+export async function pollVideoStatus(
+  provider: string,
+  jobId: string
+): Promise<VideoStatusResult> {
+  switch (provider) {
+    case "runway":
+      return pollRunwayStatus(jobId);
+    case "poe":
+      return pollPoeStatus(jobId);
+    case "kling":
+      return pollKlingStatus(jobId);
+    case "luma":
+      return pollLumaStatus(jobId);
+    case "mock":
+    default:
+      return {
+        status: "complete",
+        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      };
+  }
+}
+
 // ─── Main Entry Point ─────────────────────────────────────────────────────────
 
 export function getActiveProvider(): string {
@@ -376,10 +390,10 @@ export async function generateVideo(req: VideoGenerationRequest): Promise<VideoG
   const provider = getActiveProvider();
 
   switch (provider) {
-    case "poe":
-      return generatePoe(req);
     case "runway":
       return generateRunway(req);
+    case "poe":
+      return generatePoe(req);
     case "kling":
       return generateKling(req);
     case "luma":

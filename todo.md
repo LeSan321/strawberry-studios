@@ -121,3 +121,11 @@
 
 ## Bug Fixes — Live Test Round 2
 - [x] BUG: concert_characters insert fails — FIXED: Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] array; insertId is at result[0].insertId not result.insertId; 40 tests passing
+
+## Runway ML Direct API Integration — COMPLETE
+- [x] Write direct Runway ML adapter in videoGeneration.ts (text_to_video endpoint, gen4.5, 5s duration)
+- [x] Replace poeApiKey.test.ts with runwayApiKey.test.ts (validates RUNWAY_API_KEY via known task ID)
+- [x] Fix secondary text readability (muted-foreground bumped from 0.55 to 0.70)
+- [x] Add Delete Concert button to Library (two-click confirm, hard delete via deleteConcert helper)
+- [x] Add progress percentage to video badge (polls progress from Runway API, shown as "Processing 42%")
+- [x] 40 tests passing across 4 test files

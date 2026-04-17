@@ -30,7 +30,7 @@ const STATUS_STYLES: Record<string, { label: string; color: string }> = {
 const VIDEO_STATUS_STYLES: Record<string, { label: string; color: string; icon: string }> = {
   none: { label: "No Video", color: "oklch(0.45 0.02 270)", icon: "○" },
   queued: { label: "Video Queued", color: "oklch(0.62 0.14 55)", icon: "◌" },
-  generating: { label: "Video Generating...", color: "oklch(0.62 0.14 55)", icon: "◎" },
+  generating: { label: "Video Generating", color: "oklch(0.62 0.14 55)", icon: "◎" },
   complete: { label: "Video Ready", color: "oklch(0.55 0.15 145)", icon: "●" },
   failed: { label: "Video Failed", color: "oklch(0.52 0.22 18)", icon: "✕" },
 };
@@ -61,6 +61,7 @@ function ConcertCard({ concert }: { concert: any }) {
   const utils = trpc.useUtils();
   const [generatingId, setGeneratingId] = useState<number | null>(null);
   const [generatingVideoId, setGeneratingVideoId] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   // Use a ref to prevent double-clicks even across re-renders
   const generatingRef = useRef(false);
   const videoStatus = concert.videoStatus ?? "none";
@@ -69,20 +70,21 @@ function ConcertCard({ concert }: { concert: any }) {
   const isGeneratingPackage = concert.status === "generating" || generatingId === concert.id;
   const statusStyle = STATUS_STYLES[isGeneratingPackage ? "generating" : concert.status] ?? STATUS_STYLES.draft;
   // Poll while video is in progress
-  useVideoPolling(concert.id, videoStatus);
+  const pollData = useVideoPolling(concert.id, videoStatus);
   // Also poll while package is generating so the card updates automatically
   const isPackagePolling = concert.status === "generating" || generatingId === concert.id;
-  const { data: pollData } = trpc.concerts.get.useQuery(
+  const { data: packagePollData } = trpc.concerts.get.useQuery(
     { id: concert.id },
     { enabled: isPackagePolling, refetchInterval: isPackagePolling ? 3000 : false }
   );
   useEffect(() => {
-    if (pollData?.status === "complete" || pollData?.status === "failed") {
+    if (packagePollData?.status === "complete" || packagePollData?.status === "failed") {
       generatingRef.current = false;
       setGeneratingId(null);
       utils.concerts.list.invalidate();
     }
-  }, [pollData?.status]);
+  }, [packagePollData?.status]);
+
   const generateMutation = trpc.concerts.generate.useMutation({
     onSuccess: () => {
       toast.success("Director's Package generated!");
@@ -114,6 +116,17 @@ function ConcertCard({ concert }: { concert: any }) {
     },
   });
 
+  const deleteMutation = trpc.concerts.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Concert deleted.");
+      utils.concerts.list.invalidate();
+    },
+    onError: (err) => {
+      toast.error("Delete failed: " + err.message);
+      setConfirmDelete(false);
+    },
+  });
+
   const handleGenerate = async () => {
     // Prevent double-click even if button re-enables between renders
     if (generatingRef.current || isGeneratingPackage) return;
@@ -126,6 +139,22 @@ function ConcertCard({ concert }: { concert: any }) {
     setGeneratingVideoId(concert.id);
     await generateVideoMutation.mutateAsync({ concertId: concert.id });
   };
+
+  const handleDelete = async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      // Auto-reset confirm state after 4 seconds
+      setTimeout(() => setConfirmDelete(false), 4000);
+      return;
+    }
+    await deleteMutation.mutateAsync({ id: concert.id });
+  };
+
+  // Extract progress from poll data
+  const videoProgress = (pollData as any)?.progress;
+  const progressLabel = videoProgress != null
+    ? ` ${Math.round(videoProgress * 100)}%`
+    : "";
 
   return (
     <div className="noir-card p-6">
@@ -145,7 +174,7 @@ function ConcertCard({ concert }: { concert: any }) {
                   {videoStatusStyle.icon}
                 </span>
                 <span className="text-xs tracking-widest uppercase font-light" style={{ color: videoStatusStyle.color }}>
-                  {videoStatusStyle.label}
+                  {videoStatusStyle.label}{(videoStatus === "generating" || videoStatus === "queued") ? progressLabel : ""}
                 </span>
               </>
             )}
@@ -222,7 +251,7 @@ function ConcertCard({ concert }: { concert: any }) {
           {(videoStatus === "queued" || videoStatus === "generating") && (
             <div className="px-4 py-2 border border-accent/30 text-accent/50 font-display text-xs tracking-widest uppercase flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-accent/50 animate-pulse" />
-              Processing...
+              Processing{progressLabel}
             </div>
           )}
 
@@ -237,13 +266,25 @@ function ConcertCard({ concert }: { concert: any }) {
             <button
               onClick={() => {
                 const url = `${window.location.origin}/concert/${concert.ticketSlug}`;
-                navigator.clipboard.writeText(url);
+                navigator.clipboard.writeText(url).catch(() => {});
                 toast.success("Concert link copied!");
               }}
               className="px-4 py-2 border border-border/30 text-muted-foreground/60 hover:border-border/60 hover:text-muted-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase">
               Copy Link
             </button>
           )}
+
+          {/* Delete Concert */}
+          <button
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending}
+            className={`px-4 py-2 border font-display text-xs tracking-widest uppercase transition-all duration-300 disabled:opacity-40 ${
+              confirmDelete
+                ? "border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                : "border-border/20 text-muted-foreground/40 hover:border-destructive/50 hover:text-destructive/70"
+            }`}>
+            {deleteMutation.isPending ? "Deleting..." : confirmDelete ? "Confirm Delete" : "Delete"}
+          </button>
         </div>
       </div>
 

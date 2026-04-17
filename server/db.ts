@@ -167,3 +167,14 @@ export async function upsertPreset(data: InsertCinématiquePreset) {
     }
   });
 }
+
+// ─── Concert Deletion ─────────────────────────────────────────────────────────
+
+export async function deleteConcert(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Hard delete — also removes associated characters via FK cascade (if configured)
+  // or we delete characters first then the concert
+  await db.delete(concertCharacters).where(eq(concertCharacters.concertId, id));
+  await db.delete(concerts).where(eq(concerts.id, id));
+}

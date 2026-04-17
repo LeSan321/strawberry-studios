@@ -21,6 +21,7 @@ import {
   getAllPresets,
   getPresetBySlug,
   upsertPreset,
+  deleteConcert,
 } from "./db";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -409,7 +410,7 @@ export const appRouter = router({
         const concert = await getConcertById(input.id);
         if (!concert) throw new Error("Concert not found");
         if (concert.userId !== ctx.user.id) throw new Error("Unauthorized");
-        await updateConcert(input.id, { status: "failed" }); // soft delete via status
+        await deleteConcert(input.id);
         return { success: true };
       }),
 
@@ -532,10 +533,10 @@ export const appRouter = router({
             });
             return { status: "failed" as const, error: result.error };
           }
-          return { status: "generating" as const, jobId: concert.videoJobId };
+          return { status: "generating" as const, jobId: concert.videoJobId, progress: (result as any).progress ?? null };
         }
 
-        return { status: concert.videoStatus as "queued" | "generating" };
+        return { status: concert.videoStatus as "queued" | "generating", progress: null };
       }),
   }),
 
