@@ -135,3 +135,11 @@
 - [x] Verify all preset combinations stay under 1000 chars (60 combos tested, all pass)
 - [x] Run tests and save checkpoint — 40/40 passing
 - [x] Fix typo in Library.tsx: ffunction → function
+
+
+## Video Generation — COMPLETE ✅
+- [x] End-to-end video generation working (Runway gen4.5)
+- [x] Live progress polling (shows % during generation)
+- [x] Video URL with JWT token captured and stored
+- [x] Inline video player on Library card
+- [x] Full Cinématique pipeline: Expert Council → Prompt → Video → Display

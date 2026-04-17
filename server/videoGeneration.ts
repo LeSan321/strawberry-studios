@@ -114,6 +114,8 @@ async function generateRunway(req: VideoGenerationRequest): Promise<VideoGenerat
 
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
+    console.error(`[Runway Video] ERROR (${res.status}):`, detail);
+    console.error(`[Runway Video] Request body was:`, JSON.stringify(body, null, 2));
     throw new Error(`Runway API error (${res.status}): ${detail}`);
   }
 
