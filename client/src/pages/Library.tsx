@@ -61,22 +61,38 @@ function ConcertCard({ concert }: { concert: any }) {
   const utils = trpc.useUtils();
   const [generatingId, setGeneratingId] = useState<number | null>(null);
   const [generatingVideoId, setGeneratingVideoId] = useState<number | null>(null);
-
+  // Use a ref to prevent double-clicks even across re-renders
+  const generatingRef = useRef(false);
   const videoStatus = concert.videoStatus ?? "none";
   const videoStatusStyle = VIDEO_STATUS_STYLES[videoStatus] ?? VIDEO_STATUS_STYLES.none;
-  const statusStyle = STATUS_STYLES[concert.status] ?? STATUS_STYLES.draft;
-
+  // Show generating state if status is 'generating' from DB OR local state is active
+  const isGeneratingPackage = concert.status === "generating" || generatingId === concert.id;
+  const statusStyle = STATUS_STYLES[isGeneratingPackage ? "generating" : concert.status] ?? STATUS_STYLES.draft;
   // Poll while video is in progress
   useVideoPolling(concert.id, videoStatus);
-
+  // Also poll while package is generating so the card updates automatically
+  const isPackagePolling = concert.status === "generating" || generatingId === concert.id;
+  const { data: pollData } = trpc.concerts.get.useQuery(
+    { id: concert.id },
+    { enabled: isPackagePolling, refetchInterval: isPackagePolling ? 3000 : false }
+  );
+  useEffect(() => {
+    if (pollData?.status === "complete" || pollData?.status === "failed") {
+      generatingRef.current = false;
+      setGeneratingId(null);
+      utils.concerts.list.invalidate();
+    }
+  }, [pollData?.status]);
   const generateMutation = trpc.concerts.generate.useMutation({
     onSuccess: () => {
       toast.success("Director's Package generated!");
+      generatingRef.current = false;
       setGeneratingId(null);
       utils.concerts.list.invalidate();
     },
     onError: (err) => {
       toast.error("Generation failed: " + err.message);
+      generatingRef.current = false;
       setGeneratingId(null);
     },
   });
@@ -99,6 +115,9 @@ function ConcertCard({ concert }: { concert: any }) {
   });
 
   const handleGenerate = async () => {
+    // Prevent double-click even if button re-enables between renders
+    if (generatingRef.current || isGeneratingPackage) return;
+    generatingRef.current = true;
     setGeneratingId(concert.id);
     await generateMutation.mutateAsync({ concertId: concert.id });
   };
@@ -155,13 +174,25 @@ function ConcertCard({ concert }: { concert: any }) {
 
         <div className="flex flex-col gap-2 flex-shrink-0">
           {/* Director's Package generation */}
-          {concert.status === "draft" && (
-            <button
-              onClick={handleGenerate}
-              disabled={generatingId === concert.id}
-              className="px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase disabled:opacity-40">
-              {generatingId === concert.id ? "Generating..." : "Generate Package"}
-            </button>
+          {(concert.status === "draft" || concert.status === "generating") && (
+            <>
+              <button
+                onClick={handleGenerate}
+                disabled={isGeneratingPackage}
+                className="px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-display text-xs tracking-widest uppercase disabled:opacity-40 disabled:cursor-not-allowed">
+                {isGeneratingPackage ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    Consulting Council...
+                  </span>
+                ) : "Generate Package"}
+              </button>
+              {isGeneratingPackage && (
+                <p className="text-xs text-muted-foreground/60 text-right max-w-[160px] leading-tight">
+                  Expert Council reviewing (~45s)
+                </p>
+              )}
+            </>
           )}
           {concert.status === "failed" && (
             <button

@@ -82,6 +82,8 @@ async function generatePoe(req: VideoGenerationRequest): Promise<VideoGeneration
     size,
   };
 
+  console.log(`[Poe Video] Sending request: model=${model} seconds=${seconds} size=${size} promptLength=${req.prompt.length}`);
+
   const res = await fetch(`${POE_API_BASE}/videos`, {
     method: "POST",
     headers: {
