@@ -134,3 +134,4 @@
 - [x] Rewrite cinematiquePromptBuilder to produce ≤1000-char Runway-optimised prompt (max 929 chars)
 - [x] Verify all preset combinations stay under 1000 chars (60 combos tested, all pass)
 - [x] Run tests and save checkpoint — 40/40 passing
+- [x] Fix typo in Library.tsx: ffunction → function

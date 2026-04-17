@@ -57,8 +57,7 @@ function useVideoPolling(concertId: number, videoStatus: string | null) {
   return data;
 }
 
-function ConcertCard({ concert }: { concert: any }) {
-  const utils = trpc.useUtils();
+function ConcertCard({ concert }: { concert: any }) {  const utils = trpc.useUtils();
   const [generatingId, setGeneratingId] = useState<number | null>(null);
   const [generatingVideoId, setGeneratingVideoId] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
