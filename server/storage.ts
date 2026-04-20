@@ -100,3 +100,34 @@ export async function storageGet(relKey: string): Promise<{ key: string; url: st
     url: await buildDownloadUrl(baseUrl, key, apiKey),
   };
 }
+
+/**
+ * Extract the S3 key from a video URL with JWT token.
+ * URL format: https://dnznrvs05pmza.cloudfront.net/{uuid}.mp4?_jwt={token}
+ * Returns: {uuid}.mp4
+ */
+export function extractS3KeyFromVideoUrl(videoUrl: string): string | null {
+  try {
+    const url = new URL(videoUrl);
+    // Get the pathname and remove leading slash
+    const pathname = url.pathname.replace(/^\//, '');
+    return pathname || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Regenerate a fresh JWT token for a video URL.
+ * Takes an old video URL (with expired JWT) and returns a new URL with fresh token.
+ */
+export async function regenerateVideoUrl(oldVideoUrl: string): Promise<string> {
+  const s3Key = extractS3KeyFromVideoUrl(oldVideoUrl);
+  if (!s3Key) {
+    throw new Error(`Invalid video URL format: ${oldVideoUrl}`);
+  }
+  
+  // Use storageGet to regenerate a fresh JWT token
+  const { url } = await storageGet(s3Key);
+  return url;
+}

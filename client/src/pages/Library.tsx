@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+
 
 const MOOD_LABELS: Record<string, string> = {
   intimate_jazz: "Intimate Jazz",
@@ -57,10 +58,12 @@ function useVideoPolling(concertId: number, videoStatus: string | null) {
   return data;
 }
 
-function ConcertCard({ concert }: { concert: any }) {  const utils = trpc.useUtils();
+function ConcertCard({ concert }: { concert: any }) {
+  const utils = trpc.useUtils();
   const [generatingId, setGeneratingId] = useState<number | null>(null);
   const [generatingVideoId, setGeneratingVideoId] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [freshVideoUrl, setFreshVideoUrl] = useState<string | null>(null);
   // Use a ref to prevent double-clicks even across re-renders
   const generatingRef = useRef(false);
   const videoStatus = concert.videoStatus ?? "none";
@@ -68,6 +71,18 @@ function ConcertCard({ concert }: { concert: any }) {  const utils = trpc.useUti
   // Show generating state if status is 'generating' from DB OR local state is active
   const isGeneratingPackage = concert.status === "generating" || generatingId === concert.id;
   const statusStyle = STATUS_STYLES[isGeneratingPackage ? "generating" : concert.status] ?? STATUS_STYLES.draft;
+  // Fetch fresh video URL when video is complete
+  const { data: videoUrlData } = trpc.concerts.getVideoUrl.useQuery(
+    { concertId: concert.id },
+    { enabled: videoStatus === "complete" && !freshVideoUrl }
+  );
+
+  useEffect(() => {
+    if (videoUrlData?.videoUrl) {
+      setFreshVideoUrl(videoUrlData.videoUrl);
+    }
+  }, [videoUrlData?.videoUrl]);
+
   // Poll while video is in progress
   const pollData = useVideoPolling(concert.id, videoStatus);
   // Also poll while package is generating so the card updates automatically
@@ -288,11 +303,11 @@ function ConcertCard({ concert }: { concert: any }) {  const utils = trpc.useUti
       </div>
 
       {/* Video preview (when complete) */}
-      {videoStatus === "complete" && concert.videoUrl && (
+      {videoStatus === "complete" && (freshVideoUrl || concert.videoUrl) && (
         <div className="mt-4 pt-4 border-t border-border/20">
           <p className="text-xs tracking-[0.3em] uppercase text-accent/60 mb-3 font-light">Cinématique Video</p>
           <video
-            src={concert.videoUrl}
+            src={freshVideoUrl || concert.videoUrl}
             controls
             className="w-full max-h-48 object-cover"
             style={{ background: "oklch(0.08 0.01 270)" }}

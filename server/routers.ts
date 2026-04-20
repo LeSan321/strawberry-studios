@@ -1,10 +1,11 @@
-import { z } from "zod";
+
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
-import { storagePut } from "./storage";
+import { storagePut, regenerateVideoUrl } from "./storage";
+import { z } from "zod";
 import { generateVideo, pollVideoStatus, getActiveProvider } from "./videoGeneration";
 import { buildCinématiqueVideoPrompt } from "./cinematiquePromptBuilder";
 import {
@@ -537,6 +538,29 @@ export const appRouter = router({
         }
 
         return { status: concert.videoStatus as "queued" | "generating", progress: null };
+      }),
+
+    getVideoUrl: protectedProcedure
+      .input(z.object({ concertId: z.number().int() }))
+      .query(async ({ ctx, input }) => {
+        const concert = await getConcertById(input.concertId);
+        if (!concert) throw new Error("Concert not found");
+        if (concert.userId !== ctx.user.id) throw new Error("Unauthorized");
+
+        // If no video URL, return null
+        if (!concert.videoUrl) {
+          return { videoUrl: null };
+        }
+
+        try {
+          // Regenerate a fresh JWT token for the video URL
+          const freshVideoUrl = await regenerateVideoUrl(concert.videoUrl);
+          return { videoUrl: freshVideoUrl };
+        } catch (error) {
+          console.error(`[getVideoUrl] Failed to regenerate token for concert ${input.concertId}:`, error);
+          // Fall back to the old URL (may still work if token hasn't expired)
+          return { videoUrl: concert.videoUrl };
+        }
       }),
   }),
 
