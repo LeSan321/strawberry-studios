@@ -104,8 +104,6 @@ export const concerts = mysqlTable("concerts", {
   videoJobId: varchar("videoJobId", { length: 255 }),
   /** Video generation error message if failed */
   videoError: text("videoError"),
-  /** Timestamp when video URL JWT token was last refreshed */
-  videoUrlRefreshedAt: timestamp("videoUrlRefreshedAt"),
   /** Unique shareable ticket slug */
   ticketSlug: varchar("ticketSlug", { length: 64 }).unique(),
   /** Whether the concert is publicly shareable */

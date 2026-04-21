@@ -29,6 +29,13 @@
       "when": 1776734602614,
       "tag": "0003_loose_paper_doll",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1776735572638,
+      "tag": "0004_new_maddog",
+      "breakpoints": true
     }
   ]
 }
