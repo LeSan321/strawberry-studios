@@ -118,6 +118,17 @@ export function extractS3KeyFromVideoUrl(videoUrl: string): string | null {
 }
 
 /**
+ * Generate a public URL for a video (no JWT token, always accessible).
+ * This is used for videos that should be permanently accessible.
+ */
+export function getPublicVideoUrl(s3Key: string): string {
+  // CloudFront CDN URL for public access
+  // Videos are stored in S3 and served through CloudFront
+  const baseUrl = "https://dnznrvs05pmza.cloudfront.net";
+  return `${baseUrl}/${s3Key}`;
+}
+
+/**
  * Regenerate a fresh JWT token for a video URL.
  * Takes an old video URL (with expired JWT) and returns a new URL with fresh token.
  */
@@ -129,12 +140,12 @@ export async function regenerateVideoUrl(oldVideoUrl: string): Promise<string> {
   }
   
   try {
-    // Use storageGet to regenerate a fresh JWT token
-    const { url } = await storageGet(s3Key);
-    console.log(`[regenerateVideoUrl] Successfully regenerated token for key: ${s3Key}`);
-    return url;
+    // Return public URL (no JWT token needed)
+    const publicUrl = getPublicVideoUrl(s3Key);
+    console.log(`[regenerateVideoUrl] Generated public URL for key: ${s3Key}`);
+    return publicUrl;
   } catch (error) {
-    console.error(`[regenerateVideoUrl] Failed to regenerate token for key ${s3Key}:`, error);
+    console.error(`[regenerateVideoUrl] Failed to generate URL for key ${s3Key}:`, error);
     throw error;
   }
 }
