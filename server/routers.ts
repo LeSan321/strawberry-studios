@@ -4,7 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
-import { storagePut, regenerateVideoUrl } from "./storage";
+import { storagePut, regenerateVideoUrl, isRunwayUrl } from "./storage";
 import { z } from "zod";
 import { generateVideo, pollVideoStatus, getActiveProvider } from "./videoGeneration";
 import { buildCinématiqueVideoPrompt } from "./cinematiquePromptBuilder";
@@ -553,17 +553,31 @@ export const appRouter = router({
           return { videoUrl: null };
         }
 
-        try {
-          console.log(`[getVideoUrl] Regenerating token for concert ${input.concertId}`);
-          // Regenerate a fresh JWT token for the video URL
-          const freshVideoUrl = await regenerateVideoUrl(concert.videoUrl);
-          console.log(`[getVideoUrl] Successfully regenerated token for concert ${input.concertId}`);
-          return { videoUrl: freshVideoUrl };
-        } catch (error) {
-          console.error(`[getVideoUrl] Failed to regenerate token for concert ${input.concertId}:`, error);
-          // Fall back to the old URL (may still work if token hasn't expired)
-          console.log(`[getVideoUrl] Falling back to stored URL for concert ${input.concertId}`);
+        // If URL is from our own S3 (not Runway CDN), it's already permanent
+        if (!isRunwayUrl(concert.videoUrl)) {
+          console.log(`[getVideoUrl] Concert ${input.concertId} already has permanent S3 URL`);
           return { videoUrl: concert.videoUrl };
+        }
+
+        // URL is a Runway CDN URL — try to re-download and save to our S3
+        try {
+          console.log(`[getVideoUrl] Downloading Runway video to S3 for concert ${input.concertId}`);
+          const res = await fetch(concert.videoUrl);
+          if (!res.ok) {
+            // JWT token has expired, can't download anymore
+            console.error(`[getVideoUrl] Runway URL expired (${res.status}) for concert ${input.concertId}`);
+            return { videoUrl: null };
+          }
+          const buffer = Buffer.from(await res.arrayBuffer());
+          const key = `cinematique-videos/concert-${input.concertId}-${Date.now()}.mp4`;
+          const { url: permanentUrl } = await storagePut(key, buffer, "video/mp4");
+          // Update the database with the permanent URL
+          await updateConcert(input.concertId, { videoUrl: permanentUrl });
+          console.log(`[getVideoUrl] Saved permanent URL for concert ${input.concertId}`);
+          return { videoUrl: permanentUrl };
+        } catch (error) {
+          console.error(`[getVideoUrl] Failed to migrate video for concert ${input.concertId}:`, error);
+          return { videoUrl: null };
         }
       }),
   }),

@@ -124,6 +124,20 @@ async function generateRunway(req: VideoGenerationRequest): Promise<VideoGenerat
   return { status: "queued", jobId: data.id };
 }
 
+async function downloadRunwayVideoToS3(jobId: string, runwayUrl: string): Promise<string> {
+  const res = await fetch(runwayUrl);
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Runway video download error (${res.status}): ${detail}`);
+  }
+
+  const buffer = Buffer.from(await res.arrayBuffer());
+  const key = `cinematique-videos/runway-${jobId}-${Date.now()}.mp4`;
+  const { url } = await storagePut(key, buffer, "video/mp4");
+  return url;
+}
+
 async function pollRunwayStatus(jobId: string): Promise<VideoStatusResult> {
   const apiKey = process.env.RUNWAY_API_KEY;
   if (!apiKey) throw new Error("RUNWAY_API_KEY is not configured");
@@ -154,8 +168,13 @@ async function pollRunwayStatus(jobId: string): Promise<VideoStatusResult> {
   );
 
   if (data.status === "SUCCEEDED" && data.output?.[0]) {
-    // Video URL is returned directly in output[0] — no S3 download needed
-    return { status: "complete", videoUrl: data.output[0] };
+    // Download the video from Runway's temporary URL and upload to our own S3
+    // This ensures the video is permanently accessible (Runway URLs expire after 24-48 hours)
+    const runwayUrl = data.output[0];
+    console.log(`[Runway Poll] Downloading video to S3: ${runwayUrl.substring(0, 60)}...`);
+    const permanentUrl = await downloadRunwayVideoToS3(jobId, runwayUrl);
+    console.log(`[Runway Poll] Video saved to S3: ${permanentUrl.substring(0, 60)}...`);
+    return { status: "complete", videoUrl: permanentUrl };
   }
   if (data.status === "FAILED" || data.status === "CANCELLED") {
     const reason = data.failure ?? data.failureCode ?? "Runway generation failed";

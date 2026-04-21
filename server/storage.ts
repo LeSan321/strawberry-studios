@@ -102,6 +102,13 @@ export async function storageGet(relKey: string): Promise<{ key: string; url: st
 }
 
 /**
+ * Check if a URL is a Runway CDN URL (which requires JWT tokens and expires).
+ */
+export function isRunwayUrl(url: string): boolean {
+  return url.includes('dnznrvs05pmza.cloudfront.net') || url.includes('runwayml.com');
+}
+
+/**
  * Extract the S3 key from a video URL with JWT token.
  * URL format: https://dnznrvs05pmza.cloudfront.net/{uuid}.mp4?_jwt={token}
  * Returns: {uuid}.mp4
