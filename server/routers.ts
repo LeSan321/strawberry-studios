@@ -549,16 +549,20 @@ export const appRouter = router({
 
         // If no video URL, return null
         if (!concert.videoUrl) {
+          console.log(`[getVideoUrl] Concert ${input.concertId} has no video URL`);
           return { videoUrl: null };
         }
 
         try {
+          console.log(`[getVideoUrl] Regenerating token for concert ${input.concertId}`);
           // Regenerate a fresh JWT token for the video URL
           const freshVideoUrl = await regenerateVideoUrl(concert.videoUrl);
+          console.log(`[getVideoUrl] Successfully regenerated token for concert ${input.concertId}`);
           return { videoUrl: freshVideoUrl };
         } catch (error) {
           console.error(`[getVideoUrl] Failed to regenerate token for concert ${input.concertId}:`, error);
           // Fall back to the old URL (may still work if token hasn't expired)
+          console.log(`[getVideoUrl] Falling back to stored URL for concert ${input.concertId}`);
           return { videoUrl: concert.videoUrl };
         }
       }),

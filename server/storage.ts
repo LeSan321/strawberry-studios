@@ -124,10 +124,17 @@ export function extractS3KeyFromVideoUrl(videoUrl: string): string | null {
 export async function regenerateVideoUrl(oldVideoUrl: string): Promise<string> {
   const s3Key = extractS3KeyFromVideoUrl(oldVideoUrl);
   if (!s3Key) {
+    console.error(`[regenerateVideoUrl] Invalid URL format: ${oldVideoUrl}`);
     throw new Error(`Invalid video URL format: ${oldVideoUrl}`);
   }
   
-  // Use storageGet to regenerate a fresh JWT token
-  const { url } = await storageGet(s3Key);
-  return url;
+  try {
+    // Use storageGet to regenerate a fresh JWT token
+    const { url } = await storageGet(s3Key);
+    console.log(`[regenerateVideoUrl] Successfully regenerated token for key: ${s3Key}`);
+    return url;
+  } catch (error) {
+    console.error(`[regenerateVideoUrl] Failed to regenerate token for key ${s3Key}:`, error);
+    throw error;
+  }
 }
