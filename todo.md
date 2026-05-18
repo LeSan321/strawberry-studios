@@ -188,3 +188,9 @@
 - [x] BUG: Campaign shots stuck at 5% forever — campaigns.get was DB-read-only, never called Runway API
 - [x] FIX: Moved Runway inline polling into campaigns.get — every 5s refetch now checks Runway for all generating shots, downloads completed videos to S3, marks them complete
 - [x] Rescued 5 stuck shots (all SUCCEEDED on Runway) — downloaded to S3, DB updated to complete
+
+### Phase G: Prompt Editing & Regeneration
+- [x] editShotPrompt tRPC procedure (update videoPrompt on a shot, reset status to none OR regenerate immediately)
+- [x] Prompt edit modal in shot card UI (shows current prompt, character counter ≤1000, Save Only / Save & Regenerate buttons)
+- [x] "Edit Prompt" pencil button on every shot card (available on none/complete/failed, hidden during generating/queued)
+- [x] Character counter with colour warning (amber >800, red >950)

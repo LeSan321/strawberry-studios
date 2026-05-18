@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Film, Plus, ChevronRight, Clapperboard, Palette, Camera, Zap, Music, Clock, Target, Trash2, Download, Share2, Eye, RefreshCw } from "lucide-react";
+import { Film, Plus, ChevronRight, Clapperboard, Palette, Camera, Zap, Music, Clock, Target, Trash2, Download, Share2, Eye, RefreshCw, Pencil } from "lucide-react";
 
 // ── Genre definitions (mirrors server) ───────────────────────────────────────
 
@@ -370,7 +370,7 @@ function CampaignCard({ campaign, onSelect, onDelete }: {
 
 // ── Shot Card ─────────────────────────────────────────────────────────────────
 
-function ShotCard({ shot, campaignId, onGenerate, onRetry }: {
+function ShotCard({ shot, campaignId, onGenerate, onRetry, onEditPrompt }: {
   shot: {
     id: number; shotNumber: number; description?: string | null; shotType?: string | null;
     cameraMovement?: string | null; lightingNote?: string | null; durationSeconds?: number | null;
@@ -379,6 +379,7 @@ function ShotCard({ shot, campaignId, onGenerate, onRetry }: {
   campaignId: number;
   onGenerate: (shotId: number) => void;
   onRetry?: (shotId: number) => void;
+  onEditPrompt?: (shot: { id: number; shotNumber: number; videoPrompt?: string | null }) => void;
 }) {
   const statusColors: Record<string, string> = {
     none: "text-zinc-500",
@@ -414,6 +415,17 @@ function ShotCard({ shot, campaignId, onGenerate, onRetry }: {
           {shot.videoStatus === "failed" && onRetry && (
             <Button size="sm" onClick={() => onRetry(shot.id)} className="bg-amber-800 hover:bg-amber-700 text-xs h-7 px-3">
               <RefreshCw className="w-3 h-3 mr-1" /> Retry
+            </Button>
+          )}
+          {onEditPrompt && shot.videoStatus !== "generating" && shot.videoStatus !== "queued" && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onEditPrompt(shot)}
+              className="text-zinc-400 hover:text-white h-7 w-7 p-0"
+              title="Edit prompt"
+            >
+              <Pencil className="w-3 h-3" />
             </Button>
           )}
         </div>
@@ -459,6 +471,10 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
 
   const { data, isLoading, refetch } = trpc.campaigns.get.useQuery({ id: campaignId });
 
+  // Prompt edit modal state
+  const [editingShot, setEditingShot] = useState<{ id: number; shotNumber: number; videoPrompt?: string | null } | null>(null);
+  const [editedPrompt, setEditedPrompt] = useState("");
+
   const generatePackageMutation = trpc.campaigns.generatePackage.useMutation({
     onSuccess: () => {
       refetch();
@@ -481,6 +497,19 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
       toast.success("Shot retrying — video generation restarted.");
     },
     onError: (err) => toast.error(`Retry failed: ${err.message}`),
+  });
+
+  const editShotPromptMutation = trpc.campaigns.editShotPrompt.useMutation({
+    onSuccess: (result, variables) => {
+      refetch();
+      setEditingShot(null);
+      if (variables.regenerate) {
+        toast.success("Prompt updated — regenerating shot with new instructions.");
+      } else {
+        toast.success("Prompt saved — click Generate when ready.");
+      }
+    },
+    onError: (err) => toast.error(`Prompt edit failed: ${err.message}`),
   });
 
   const retryAllMutation = trpc.campaigns.retryAllFailed.useMutation({
@@ -520,6 +549,7 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
   const genre = GENRES.find(g => g.id === campaign.genre);
 
   return (
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -701,12 +731,73 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
                 campaignId={campaignId}
                 onGenerate={(shotId) => generateShotMutation.mutate({ campaignId, shotId })}
                 onRetry={(shotId) => retryShotMutation.mutate({ campaignId, shotId })}
+                onEditPrompt={(s) => { setEditingShot(s); setEditedPrompt(s.videoPrompt ?? ""); }}
               />
             ))}
           </div>
         </div>
       )}
     </div>
+
+    {/* Prompt Edit Modal */}
+    {editingShot && (
+      <Dialog open={true} onOpenChange={(open) => { if (!open) setEditingShot(null); }}>
+        <DialogContent className="bg-zinc-950 border-zinc-800 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-rose-300 font-cinzel">
+              Edit Prompt — Shot {editingShot.shotNumber}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-xs text-zinc-500">
+              This is the exact prompt sent to Runway. Edit it to change camera movement, lighting, atmosphere, subject, or any visual element. Keep it under 1000 characters.
+            </p>
+            <div className="relative">
+              <Textarea
+                value={editedPrompt}
+                onChange={(e) => setEditedPrompt(e.target.value)}
+                rows={8}
+                maxLength={1000}
+                className="bg-zinc-900 border-zinc-700 text-white text-sm font-mono resize-none focus:border-rose-700"
+                placeholder="Describe the shot in cinematic terms — camera movement, lighting, subject, atmosphere..."
+              />
+              <div className={`absolute bottom-2 right-3 text-xs ${
+                editedPrompt.length > 950 ? "text-red-400" :
+                editedPrompt.length > 800 ? "text-amber-400" : "text-zinc-500"
+              }`}>
+                {editedPrompt.length} / 1000
+              </div>
+            </div>
+            <div className="flex items-center gap-3 justify-end">
+              <Button
+                variant="ghost"
+                onClick={() => setEditingShot(null)}
+                className="text-zinc-400 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => editShotPromptMutation.mutate({ campaignId, shotId: editingShot.id, prompt: editedPrompt, regenerate: false })}
+                disabled={editShotPromptMutation.isPending || editedPrompt.trim().length === 0}
+                className="border-zinc-700 text-zinc-300 hover:text-white"
+              >
+                Save Prompt Only
+              </Button>
+              <Button
+                onClick={() => editShotPromptMutation.mutate({ campaignId, shotId: editingShot.id, prompt: editedPrompt, regenerate: true })}
+                disabled={editShotPromptMutation.isPending || editedPrompt.trim().length === 0 || editedPrompt.length > 1000}
+                className="bg-rose-700 hover:bg-rose-600"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                {editShotPromptMutation.isPending ? "Submitting..." : "Save & Regenerate"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )}
+    </>
   );
 }
 

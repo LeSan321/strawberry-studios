@@ -554,6 +554,72 @@ Generate the complete Director's Package as a JSON object. Every field is requir
     }),
 
   /**
+   * Edit the prompt for a shot and optionally regenerate immediately.
+   * If regenerate=true, the shot is submitted to Runway with the new prompt.
+   * If regenerate=false, the prompt is saved and the shot status is reset to 'none'
+   * so the user can generate it manually when ready.
+   */
+  editShotPrompt: protectedProcedure
+    .input(
+      z.object({
+        campaignId: z.number(),
+        shotId: z.number(),
+        prompt: z.string().min(1).max(1000),
+        regenerate: z.boolean().default(false),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const campaign = await getCampaignById(input.campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      const shots = await getCampaignShots(input.campaignId);
+      const shot = shots.find((s) => s.id === input.shotId);
+      if (!shot) throw new TRPCError({ code: "NOT_FOUND", message: "Shot not found" });
+
+      if (!input.regenerate) {
+        // Save prompt only — reset to 'none' so user can generate when ready
+        await updateCampaignShot(input.shotId, {
+          videoPrompt: input.prompt,
+          videoStatus: "none",
+          videoUrl: null,
+          videoJobId: null,
+          videoError: null,
+          progress: 0,
+        });
+        return { saved: true, jobId: null };
+      }
+
+      // Save prompt and immediately submit to Runway
+      await updateCampaignShot(input.shotId, {
+        videoPrompt: input.prompt,
+        videoStatus: "queued",
+        videoUrl: null,
+        videoJobId: null,
+        videoError: null,
+        progress: 0,
+      });
+      try {
+        const result = await generateVideo({
+          prompt: input.prompt,
+          durationSeconds: shot.durationSeconds ?? 5,
+        });
+        if (result.status === "failed") throw new Error(result.error ?? "Video generation failed");
+        const jobId = result.jobId ?? "";
+        await updateCampaignShot(input.shotId, { videoStatus: "generating", videoJobId: jobId, progress: 5 });
+        return { saved: true, jobId };
+      } catch (err) {
+        await updateCampaignShot(input.shotId, {
+          videoStatus: "failed",
+          videoError: err instanceof Error ? err.message : String(err),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to regenerate shot: ${err instanceof Error ? err.message : String(err)}`,
+        });
+      }
+    }),
+
+  /**
    * Get all available genres with their visual grammar summaries.
    */
   getGenres: publicProcedure.query(() => {
