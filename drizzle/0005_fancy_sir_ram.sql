@@ -1,0 +1,41 @@
+CREATE TABLE `campaign_shots` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`campaignId` int NOT NULL,
+	`shotNumber` int NOT NULL,
+	`description` text,
+	`shotType` varchar(64),
+	`cameraMovement` varchar(128),
+	`lightingNote` text,
+	`durationSeconds` int,
+	`videoPrompt` text,
+	`videoStatus` enum('none','queued','generating','complete','failed') NOT NULL DEFAULT 'none',
+	`videoUrl` text,
+	`videoJobId` varchar(255),
+	`videoError` text,
+	`progress` int DEFAULT 0,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `campaign_shots_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `campaigns` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`userId` int NOT NULL,
+	`audioTrackId` int,
+	`title` varchar(255) NOT NULL,
+	`artistName` varchar(255),
+	`genre` enum('psychedelic_vaporwave','noir_jazz','indie_folk','hip_hop','electronic','punk_rock','soul_rnb','country','experimental') NOT NULL DEFAULT 'noir_jazz',
+	`durationMode` enum('15s','30s','60s','full_song') NOT NULL DEFAULT '30s',
+	`campaignGoal` enum('awareness','engagement','conversion','artist_brand') NOT NULL DEFAULT 'awareness',
+	`brief` text,
+	`characterNotes` text,
+	`status` enum('draft','generating_package','package_ready','generating_shots','complete','failed') NOT NULL DEFAULT 'draft',
+	`directorsPackage` json,
+	`campaignPrompt` text,
+	`shareSlug` varchar(64),
+	`isPublic` boolean DEFAULT false,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `campaigns_id` PRIMARY KEY(`id`),
+	CONSTRAINT `campaigns_shareSlug_unique` UNIQUE(`shareSlug`)
+);

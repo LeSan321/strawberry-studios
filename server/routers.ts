@@ -8,6 +8,7 @@ import { storagePut, regenerateVideoUrl, isRunwayUrl } from "./storage";
 import { z } from "zod";
 import { generateVideo, pollVideoStatus, getActiveProvider } from "./videoGeneration";
 import { buildCinématiqueVideoPrompt } from "./cinematiquePromptBuilder";
+import { campaignsRouter } from "./routers/campaigns";
 import {
   createConcert,
   getConcertsByUser,
@@ -690,6 +691,11 @@ export const appRouter = router({
       return { success: true, count: PRESET_DATA.length };
     }),
   }),
+
+  // ─── Campaigns ────────────────────────────────────────────────────────────────────────────────
+
+  campaigns: campaignsRouter,
 });
 
 export type AppRouter = typeof appRouter;
+

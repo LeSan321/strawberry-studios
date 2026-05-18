@@ -143,3 +143,37 @@
 - [x] Video URL with JWT token captured and stored
 - [x] Inline video player on Library card
 - [x] Full Cinématique pipeline: Expert Council → Prompt → Video → Display
+
+## Campaign / Advertising Video Workflow — IN PROGRESS
+
+### Phase A: Database & Backend
+- [x] Add campaigns table to schema (genre, brief, duration mode, song, shots, status)
+- [x] Add campaign_shots table (shot number, prompt, video_url, status, duration)
+- [x] Run DB migration for campaigns tables
+- [x] Build multi-genre Expert Council prompt engine (campaignPromptBuilder.ts)
+- [x] Genre presets: Psychedelic/Vaporwave, Noir Jazz, Indie Folk, Hip Hop, Electronic, Punk/Rock, Soul/R&B, Country, Experimental/Art
+- [x] Duration modes: 15s, 30s, 60s, Full Song
+- [x] tRPC procedures: campaigns.create, campaigns.generatePackage, campaigns.generateShot, campaigns.pollShot, campaigns.list, campaigns.get, campaigns.delete
+
+### Phase B: Campaign UI
+- [x] Campaign entry point in navigation (sidebar + home page CTA)
+- [x] Genre selector page with visual previews per genre
+- [x] Campaign brief form (song, genre, duration, campaign goal, artist/character notes)
+- [x] Director's Package review page (storyboard, shot list, color palette, character design, set design, art dept notes)
+- [x] Shot-by-shot generation UI with progress tracking
+- [x] Campaign Library page (separate from Concert Library)
+
+### Phase C: Production Design Guide PDF
+- [x] PDF generator server route (campaignPdfGenerator.ts)
+- [x] Title card section (campaign name, artist, genre, logline)
+- [x] Character design section (wardrobe specs, material notes)
+- [x] Color palette section (swatches with Kelvin values and emotional notes)
+- [x] Set design section (key environments with lighting notes)
+- [x] Shot storyboard section (numbered shots with descriptions)
+- [x] Art department notes section
+- [x] Download button on Director's Package page
+
+### Phase D: Music Video Grammar Bible Integration
+- [x] Music Video Grammar Bible v1.0 written and saved (impressionistic, narrative, performance modes + 9 genre chapters)
+- [x] Genre visual grammar tables integrated into campaignPromptBuilder.ts
+- [x] Impressionistic mode, narrative mode, performance mode all supported

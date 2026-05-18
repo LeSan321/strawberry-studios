@@ -6,10 +6,16 @@ import {
   InsertConcert,
   InsertConcertCharacter,
   audioTracks,
+  campaignShots,
+  campaigns,
   cinematiquePresets,
   concertCharacters,
   concerts,
   users,
+  type Campaign,
+  type CampaignShot,
+  type InsertCampaign,
+  type InsertCampaignShot,
   type InsertUser,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -166,6 +172,71 @@ export async function upsertPreset(data: InsertCinématiquePreset) {
       thumbnailUrl: data.thumbnailUrl,
     }
   });
+}
+
+// ─── Campaigns ───────────────────────────────────────────────────────────────
+
+export async function createCampaign(data: InsertCampaign): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(campaigns).values(data);
+  return (result as unknown as { insertId: number }).insertId;
+}
+
+export async function getCampaignsByUser(userId: number): Promise<Campaign[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(campaigns).where(eq(campaigns.userId, userId)).orderBy(desc(campaigns.createdAt));
+}
+
+export async function getCampaignById(id: number): Promise<Campaign | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function getCampaignBySlug(slug: string): Promise<Campaign | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(campaigns).where(eq(campaigns.shareSlug, slug)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function updateCampaign(id: number, data: Partial<InsertCampaign>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(campaigns).set(data).where(eq(campaigns.id, id));
+}
+
+export async function deleteCampaign(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(campaignShots).where(eq(campaignShots.campaignId, id));
+  await db.delete(campaigns).where(eq(campaigns.id, id));
+}
+
+// ─── Campaign Shots ───────────────────────────────────────────────────────────
+
+export async function createCampaignShot(data: InsertCampaignShot): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(campaignShots).values(data);
+  return (result as unknown as { insertId: number }).insertId;
+}
+
+export async function getCampaignShots(campaignId: number): Promise<CampaignShot[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(campaignShots)
+    .where(eq(campaignShots.campaignId, campaignId))
+    .orderBy(campaignShots.shotNumber);
+}
+
+export async function updateCampaignShot(id: number, data: Partial<InsertCampaignShot>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(campaignShots).set(data).where(eq(campaignShots.id, id));
 }
 
 // ─── Concert Deletion ─────────────────────────────────────────────────────────

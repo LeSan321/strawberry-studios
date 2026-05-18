@@ -32,6 +32,11 @@ export default function Home() {
             </Link>
           ) : null}
           {user ? (
+            <Link href="/campaigns" className="text-muted-foreground hover:text-foreground text-sm tracking-wider transition-colors uppercase font-light">
+              Campaigns
+            </Link>
+          ) : null}
+          {user ? (
             <Link href="/create"
               className="px-5 py-2 text-sm tracking-widest uppercase font-medium border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
               Produce

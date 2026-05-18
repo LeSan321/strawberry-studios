@@ -187,3 +187,110 @@ export const expertCouncilSessions = mysqlTable("expert_council_sessions", {
 
 export type ExpertCouncilSession = typeof expertCouncilSessions.$inferSelect;
 export type InsertExpertCouncilSession = typeof expertCouncilSessions.$inferInsert;
+
+/**
+ * Campaigns — advertising / music video production sessions.
+ * Each campaign is a multi-shot video production with a genre, brief, and duration mode.
+ */
+export const campaigns = mysqlTable("campaigns", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  audioTrackId: int("audioTrackId"),
+  title: varchar("title", { length: 255 }).notNull(),
+  artistName: varchar("artistName", { length: 255 }),
+  /** Genre determines the visual grammar system used */
+  genre: mysqlEnum("genre", [
+    "psychedelic_vaporwave",
+    "noir_jazz",
+    "indie_folk",
+    "hip_hop",
+    "electronic",
+    "punk_rock",
+    "soul_rnb",
+    "country",
+    "experimental",
+  ]).notNull().default("noir_jazz"),
+  /** Duration mode determines shot count and structure */
+  durationMode: mysqlEnum("durationMode", [
+    "15s",
+    "30s",
+    "60s",
+    "full_song",
+  ]).notNull().default("30s"),
+  /** Campaign goal for the advertising brief */
+  campaignGoal: mysqlEnum("campaignGoal", [
+    "awareness",
+    "engagement",
+    "conversion",
+    "artist_brand",
+  ]).notNull().default("awareness"),
+  /** Free-text campaign brief */
+  brief: text("brief"),
+  /** Character/artist appearance notes */
+  characterNotes: text("characterNotes"),
+  /** Overall production status */
+  status: mysqlEnum("status", [
+    "draft",
+    "generating_package",
+    "package_ready",
+    "generating_shots",
+    "complete",
+    "failed",
+  ]).default("draft").notNull(),
+  /** The assembled Director's Package JSON (storyboard, color palette, character design) */
+  directorsPackage: json("directorsPackage"),
+  /** Generated campaign prompt / logline */
+  campaignPrompt: text("campaignPrompt"),
+  /** Unique shareable slug */
+  shareSlug: varchar("shareSlug", { length: 64 }).unique(),
+  /** Whether the campaign is publicly shareable */
+  isPublic: boolean("isPublic").default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type InsertCampaign = typeof campaigns.$inferInsert;
+
+/**
+ * Campaign shots — individual video shots within a campaign.
+ * Each shot is generated separately and assembled into the final video sequence.
+ */
+export const campaignShots = mysqlTable("campaign_shots", {
+  id: int("id").autoincrement().primaryKey(),
+  campaignId: int("campaignId").notNull(),
+  shotNumber: int("shotNumber").notNull(),
+  /** Shot description from the Director's Package */
+  description: text("description"),
+  /** Shot type (establishing, close-up, medium, etc.) */
+  shotType: varchar("shotType", { length: 64 }),
+  /** Camera movement directive */
+  cameraMovement: varchar("cameraMovement", { length: 128 }),
+  /** Lighting note */
+  lightingNote: text("lightingNote"),
+  /** Target duration in seconds */
+  durationSeconds: int("durationSeconds"),
+  /** The exact prompt sent to the video generation API */
+  videoPrompt: text("videoPrompt"),
+  /** Video generation status */
+  videoStatus: mysqlEnum("videoStatus", [
+    "none",
+    "queued",
+    "generating",
+    "complete",
+    "failed",
+  ]).default("none").notNull(),
+  /** URL of the generated video (S3) */
+  videoUrl: text("videoUrl"),
+  /** External job ID from the video generation API */
+  videoJobId: varchar("videoJobId", { length: 255 }),
+  /** Video generation error message if failed */
+  videoError: text("videoError"),
+  /** Generation progress percentage (0-100) */
+  progress: int("progress").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CampaignShot = typeof campaignShots.$inferSelect;
+export type InsertCampaignShot = typeof campaignShots.$inferInsert;

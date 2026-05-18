@@ -36,6 +36,13 @@
       "when": 1776735572638,
       "tag": "0004_new_maddog",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1779128880005,
+      "tag": "0005_fancy_sir_ram",
+      "breakpoints": true
     }
   ]
 }
