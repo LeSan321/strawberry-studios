@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, shotNumber, videoStatus, progress, LEFT(videoUrl, 80) as url_preview FROM campaign_shots ORDER BY shotNumber;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT id, shotNumber, videoStatus, progress, LEFT(videoUrl, 80) as url_preview FROM campaign_shots ORDER BY shotNumber;",
+  "rows": [
+    {
+      "id": "1",
+      "shotNumber": "1",
+      "videoStatus": "complete",
+      "progress": "100",
+      "url_preview": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/"
+    },
+    {
+      "id": "2",
+      "shotNumber": "2",
+      "videoStatus": "complete",
+      "progress": "100",
+      "url_preview": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/"
+    },
+    {
+      "id": "3",
+      "shotNumber": "3",
+      "videoStatus": "complete",
+      "progress": "100",
+      "url_preview": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/"
+    },
+    {
+      "id": "4",
+      "shotNumber": "4",
+      "videoStatus": "complete",
+      "progress": "100",
+      "url_preview": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/"
+    },
+    {
+      "id": "5",
+      "shotNumber": "5",
+      "videoStatus": "complete",
+      "progress": "100",
+      "url_preview": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tshotNumber\tvideoStatus\tprogress\turl_preview\n1\t1\tcomplete\t100\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/\n2\t2\tcomplete\t100\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/\n3\t3\tcomplete\t100\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/\n4\t4\tcomplete\t100\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/\n5\t5\tcomplete\t100\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/\n",
+  "stderr": "",
+  "execution_time_ms": 262
+}

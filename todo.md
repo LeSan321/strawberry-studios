@@ -183,3 +183,8 @@
 - [x] retryAllFailed tRPC procedure (bulk reset all failed shots in a campaign)
 - [x] Per-shot Retry button (amber, appears on failed shots in shot list)
 - [x] "Retry All Failed" bulk button (red, appears in shot list header when any shot has failed)
+
+### Phase F: Polling Bug Fix
+- [x] BUG: Campaign shots stuck at 5% forever — campaigns.get was DB-read-only, never called Runway API
+- [x] FIX: Moved Runway inline polling into campaigns.get — every 5s refetch now checks Runway for all generating shots, downloads completed videos to S3, marks them complete
+- [x] Rescued 5 stuck shots (all SUCCEEDED on Runway) — downloaded to S3, DB updated to complete

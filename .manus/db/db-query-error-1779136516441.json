@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, campaign_id, shot_number, video_status, video_job_id, progress, LEFT(video_prompt, 60) as prompt_preview, updated_at FROM campaign_shots ORDER BY campaign_id, shot_number LIMIT 30;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT id, campaign_id, shot_number, video_status, video_job_id, progress, LEFT(video_prompt, 60) as prompt_preview, updated_at FROM campaign_shots ORDER BY campaign_id, shot_number LIMIT 30;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'campaign_id' in 'field list'"
+  ]
+}

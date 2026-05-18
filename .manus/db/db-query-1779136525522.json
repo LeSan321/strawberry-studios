@@ -1,0 +1,60 @@
+{
+  "query": "SELECT id, campaignId, shotNumber, videoStatus, videoJobId, progress, videoError, updatedAt FROM campaign_shots ORDER BY campaignId, shotNumber LIMIT 30;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT id, campaignId, shotNumber, videoStatus, videoJobId, progress, videoError, updatedAt FROM campaign_shots ORDER BY campaignId, shotNumber LIMIT 30;",
+  "rows": [
+    {
+      "id": "1",
+      "campaignId": "1",
+      "shotNumber": "1",
+      "videoStatus": "generating",
+      "videoJobId": "052a8f94-316f-48d6-8ba3-3f5545d463bc",
+      "progress": "5",
+      "videoError": "NULL",
+      "updatedAt": "2026-05-18 19:21:19"
+    },
+    {
+      "id": "2",
+      "campaignId": "1",
+      "shotNumber": "2",
+      "videoStatus": "generating",
+      "videoJobId": "9ce4d318-6dd2-419f-bd52-eb7ba8047476",
+      "progress": "5",
+      "videoError": "NULL",
+      "updatedAt": "2026-05-18 20:24:18"
+    },
+    {
+      "id": "3",
+      "campaignId": "1",
+      "shotNumber": "3",
+      "videoStatus": "generating",
+      "videoJobId": "ea3c709f-7ac1-4c1d-8604-377aac226e16",
+      "progress": "5",
+      "videoError": "NULL",
+      "updatedAt": "2026-05-18 20:24:18"
+    },
+    {
+      "id": "4",
+      "campaignId": "1",
+      "shotNumber": "4",
+      "videoStatus": "generating",
+      "videoJobId": "79ed4d02-87e8-4c81-b398-3a6ff3a4d6ef",
+      "progress": "5",
+      "videoError": "NULL",
+      "updatedAt": "2026-05-18 19:24:15"
+    },
+    {
+      "id": "5",
+      "campaignId": "1",
+      "shotNumber": "5",
+      "videoStatus": "generating",
+      "videoJobId": "db710ad2-124d-4735-ad52-66ec3514affc",
+      "progress": "5",
+      "videoError": "NULL",
+      "updatedAt": "2026-05-18 20:24:19"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcampaignId\tshotNumber\tvideoStatus\tvideoJobId\tprogress\tvideoError\tupdatedAt\n1\t1\t1\tgenerating\t052a8f94-316f-48d6-8ba3-3f5545d463bc\t5\tNULL\t2026-05-18 19:21:19\n2\t1\t2\tgenerating\t9ce4d318-6dd2-419f-bd52-eb7ba8047476\t5\tNULL\t2026-05-18 20:24:18\n3\t1\t3\tgenerating\tea3c709f-7ac1-4c1d-8604-377aac226e16\t5\tNULL\t2026-05-18 20:24:18\n4\t1\t4\tgenerating\t79ed4d02-87e8-4c81-b398-3a6ff3a4d6ef\t5\tNULL\t2026-05-18 19:24:15\n5\t1\t5\tgenerating\tdb710ad2-124d-4735-ad52-66ec3514affc\t5\tNULL\t2026-05-18 20:24:19\n",
+  "stderr": "",
+  "execution_time_ms": 258
+}

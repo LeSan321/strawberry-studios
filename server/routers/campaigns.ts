@@ -133,6 +133,48 @@ export const campaignsRouter = router({
       if (!campaign) throw new TRPCError({ code: "NOT_FOUND", message: "Campaign not found" });
       if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
       const shots = await getCampaignShots(input.id);
+
+      // Inline-poll Runway for any shots currently generating
+      const generatingShots = shots.filter(
+        (s) => s.videoStatus === "generating" && s.videoJobId
+      );
+      if (generatingShots.length > 0) {
+        const provider = getActiveProvider();
+        await Promise.allSettled(
+          generatingShots.map(async (shot) => {
+            try {
+              const result = await pollVideoStatus(provider, shot.videoJobId!);
+              if (result.status === "complete" && result.videoUrl) {
+                const videoResponse = await fetch(result.videoUrl);
+                if (videoResponse.ok) {
+                  const buffer = Buffer.from(await videoResponse.arrayBuffer());
+                  const fileKey = `campaign-shots/${input.id}-shot${shot.shotNumber}-${Date.now()}.mp4`;
+                  const { url: s3Url } = await storagePut(fileKey, buffer, "video/mp4");
+                  await updateCampaignShot(shot.id, {
+                    videoStatus: "complete",
+                    videoUrl: s3Url,
+                    progress: 100,
+                  });
+                }
+              } else if (result.status === "failed") {
+                await updateCampaignShot(shot.id, {
+                  videoStatus: "failed",
+                  videoError: "error" in result ? result.error : "Generation failed",
+                });
+              } else {
+                const progress = ("progress" in result ? result.progress : undefined) ?? shot.progress ?? 10;
+                await updateCampaignShot(shot.id, { progress });
+              }
+            } catch (err) {
+              console.error(`[campaigns.get] Error polling shot ${shot.id}:`, err);
+            }
+          })
+        );
+        // Re-fetch shots after updates
+        const updatedShots = await getCampaignShots(input.id);
+        return { campaign, shots: updatedShots };
+      }
+
       return { campaign, shots };
     }),
 
