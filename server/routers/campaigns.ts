@@ -437,6 +437,81 @@ Generate the complete Director's Package as a JSON object. Every field is requir
     }),
 
   /**
+   * Retry a single failed or stuck shot.
+   */
+  retryShot: protectedProcedure
+    .input(z.object({ campaignId: z.number(), shotId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const campaign = await getCampaignById(input.campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      const shots = await getCampaignShots(input.campaignId);
+      const shot = shots.find((s) => s.id === input.shotId);
+      if (!shot) throw new TRPCError({ code: "NOT_FOUND", message: "Shot not found" });
+      if (!shot.videoPrompt) throw new TRPCError({ code: "BAD_REQUEST", message: "Shot has no video prompt" });
+      await updateCampaignShot(input.shotId, {
+        videoStatus: "queued",
+        videoError: null,
+        videoJobId: null,
+        progress: 0,
+      });
+      try {
+        const result = await generateVideo({
+          prompt: shot.videoPrompt,
+          durationSeconds: shot.durationSeconds ?? 5,
+        });
+        if (result.status === "failed") throw new Error(result.error ?? "Video generation failed");
+        const jobId = result.jobId ?? "";
+        await updateCampaignShot(input.shotId, { videoStatus: "generating", videoJobId: jobId, progress: 5 });
+        return { jobId };
+      } catch (err) {
+        await updateCampaignShot(input.shotId, {
+          videoStatus: "failed",
+          videoError: err instanceof Error ? err.message : String(err),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to retry shot: ${err instanceof Error ? err.message : String(err)}`,
+        });
+      }
+    }),
+
+  /**
+   * Retry all failed or stuck shots in a campaign at once.
+   */
+  retryAllFailed: protectedProcedure
+    .input(z.object({ campaignId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const campaign = await getCampaignById(input.campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      const shots = await getCampaignShots(input.campaignId);
+      const failedShots = shots.filter(
+        (s) => s.videoStatus === "failed" || (s.videoStatus === "generating" && !s.videoJobId)
+      );
+      if (failedShots.length === 0) return { retried: 0, errors: [] };
+      let retried = 0;
+      const errors: string[] = [];
+      for (const shot of failedShots) {
+        if (!shot.videoPrompt) continue;
+        await updateCampaignShot(shot.id, { videoStatus: "queued", videoError: null, videoJobId: null, progress: 0 });
+        try {
+          const result = await generateVideo({ prompt: shot.videoPrompt, durationSeconds: shot.durationSeconds ?? 5 });
+          if (result.status === "failed") throw new Error(result.error ?? "Generation failed");
+          const jobId = result.jobId ?? "";
+          await updateCampaignShot(shot.id, { videoStatus: "generating", videoJobId: jobId, progress: 5 });
+          retried++;
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          errors.push(`Shot ${shot.shotNumber}: ${msg}`);
+          await updateCampaignShot(shot.id, { videoStatus: "failed", videoError: msg });
+        }
+      }
+      if (retried > 0) await updateCampaign(input.campaignId, { status: "generating_shots" });
+      return { retried, errors };
+    }),
+
+  /**
    * Get all available genres with their visual grammar summaries.
    */
   getGenres: publicProcedure.query(() => {

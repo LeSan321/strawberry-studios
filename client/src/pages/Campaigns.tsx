@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Film, Plus, ChevronRight, Clapperboard, Palette, Camera, Zap, Music, Clock, Target, Trash2, Download, Share2, Eye } from "lucide-react";
+import { Film, Plus, ChevronRight, Clapperboard, Palette, Camera, Zap, Music, Clock, Target, Trash2, Download, Share2, Eye, RefreshCw } from "lucide-react";
 
 // ── Genre definitions (mirrors server) ───────────────────────────────────────
 
@@ -370,7 +370,7 @@ function CampaignCard({ campaign, onSelect, onDelete }: {
 
 // ── Shot Card ─────────────────────────────────────────────────────────────────
 
-function ShotCard({ shot, campaignId, onGenerate }: {
+function ShotCard({ shot, campaignId, onGenerate, onRetry }: {
   shot: {
     id: number; shotNumber: number; description?: string | null; shotType?: string | null;
     cameraMovement?: string | null; lightingNote?: string | null; durationSeconds?: number | null;
@@ -378,6 +378,7 @@ function ShotCard({ shot, campaignId, onGenerate }: {
   };
   campaignId: number;
   onGenerate: (shotId: number) => void;
+  onRetry?: (shotId: number) => void;
 }) {
   const statusColors: Record<string, string> = {
     none: "text-zinc-500",
@@ -408,6 +409,11 @@ function ShotCard({ shot, campaignId, onGenerate }: {
           {shot.videoStatus === "none" && (
             <Button size="sm" onClick={() => onGenerate(shot.id)} className="bg-rose-700 hover:bg-rose-600 text-xs h-7 px-3">
               <Zap className="w-3 h-3 mr-1" /> Generate
+            </Button>
+          )}
+          {shot.videoStatus === "failed" && onRetry && (
+            <Button size="sm" onClick={() => onRetry(shot.id)} className="bg-amber-800 hover:bg-amber-700 text-xs h-7 px-3">
+              <RefreshCw className="w-3 h-3 mr-1" /> Retry
             </Button>
           )}
         </div>
@@ -467,6 +473,29 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
       toast.success("Shot queued — video generation started.");
     },
     onError: (err) => toast.error(err.message),
+  });
+
+  const retryShotMutation = trpc.campaigns.retryShot.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success("Shot retrying — video generation restarted.");
+    },
+    onError: (err) => toast.error(`Retry failed: ${err.message}`),
+  });
+
+  const retryAllMutation = trpc.campaigns.retryAllFailed.useMutation({
+    onSuccess: (result) => {
+      refetch();
+      if (result.retried > 0) {
+        toast.success(`Retrying ${result.retried} shot${result.retried > 1 ? "s" : ""}...`);
+      } else {
+        toast.info("No failed shots to retry.");
+      }
+      if (result.errors.length > 0) {
+        toast.error(`${result.errors.length} shot(s) still failing: ${result.errors[0]}`);
+      }
+    },
+    onError: (err) => toast.error(`Retry all failed: ${err.message}`),
   });
 
   // Poll for generating shots
@@ -646,8 +675,22 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
             <h3 className="text-sm uppercase tracking-wider text-zinc-400 flex items-center gap-2">
               <Clapperboard className="w-4 h-4" /> Shot List ({shots.length} shots)
             </h3>
-            <div className="text-xs text-zinc-500">
-              {shots.filter(s => s.videoStatus === "complete").length} / {shots.length} complete
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500">
+                {shots.filter(s => s.videoStatus === "complete").length} / {shots.length} complete
+              </span>
+              {shots.some(s => s.videoStatus === "failed") && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => retryAllMutation.mutate({ campaignId })}
+                  disabled={retryAllMutation.isPending}
+                  className="text-xs h-7 px-3 border-red-800 text-red-400 hover:text-red-300 hover:border-red-600"
+                >
+                  <RefreshCw className="w-3 h-3 mr-1" />
+                  {retryAllMutation.isPending ? "Retrying..." : "Retry All Failed"}
+                </Button>
+              )}
             </div>
           </div>
           <div className="space-y-3">
@@ -657,6 +700,7 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
                 shot={shot}
                 campaignId={campaignId}
                 onGenerate={(shotId) => generateShotMutation.mutate({ campaignId, shotId })}
+                onRetry={(shotId) => retryShotMutation.mutate({ campaignId, shotId })}
               />
             ))}
           </div>

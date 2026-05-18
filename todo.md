@@ -177,3 +177,9 @@
 - [x] Music Video Grammar Bible v1.0 written and saved (impressionistic, narrative, performance modes + 9 genre chapters)
 - [x] Genre visual grammar tables integrated into campaignPromptBuilder.ts
 - [x] Impressionistic mode, narrative mode, performance mode all supported
+
+### Phase E: Retry & Resilience
+- [x] retryShot tRPC procedure (reset single failed shot to none, re-queue generation)
+- [x] retryAllFailed tRPC procedure (bulk reset all failed shots in a campaign)
+- [x] Per-shot Retry button (amber, appears on failed shots in shot list)
+- [x] "Retry All Failed" bulk button (red, appears in shot list header when any shot has failed)
