@@ -1,0 +1,9 @@
+{
+  "query": "\nUPDATE campaigns c\nINNER JOIN campaign_mood_board_images mb ON mb.campaignId = c.id AND mb.isPrimary = 1\nSET c.moodBoardPrimaryImageUrl = mb.imageUrl\nWHERE c.moodBoardPrimaryImageUrl IS NULL;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute \nUPDATE campaigns c\nINNER JOIN campaign_mood_board_images mb ON mb.campaignId = c.id AND mb.isPrimary = 1\nSET c.moodBoardPrimaryImageUrl = mb.imageUrl\nWHERE c.moodBoardPrimaryImageUrl IS NULL;\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 267
+}

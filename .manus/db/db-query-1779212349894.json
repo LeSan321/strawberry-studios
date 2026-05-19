@@ -1,0 +1,50 @@
+{
+  "query": "SELECT id, campaignId, imageUrl, label, isPrimary, sortOrder FROM campaign_mood_board_images WHERE campaignId = 90001;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT id, campaignId, imageUrl, label, isPrimary, sortOrder FROM campaign_mood_board_images WHERE campaignId = 90001;",
+  "rows": [
+    {
+      "id": "30001",
+      "campaignId": "90001",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/swe50nvf.jpg",
+      "label": "NULL",
+      "isPrimary": "0",
+      "sortOrder": "0"
+    },
+    {
+      "id": "30002",
+      "campaignId": "90001",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/o8utlmtx.jpg",
+      "label": "NULL",
+      "isPrimary": "0",
+      "sortOrder": "1"
+    },
+    {
+      "id": "60001",
+      "campaignId": "90001",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/zlu4gbfk.png",
+      "label": "NULL",
+      "isPrimary": "0",
+      "sortOrder": "3"
+    },
+    {
+      "id": "90001",
+      "campaignId": "90001",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/e0oaaxe3.png",
+      "label": "NULL",
+      "isPrimary": "0",
+      "sortOrder": "4"
+    },
+    {
+      "id": "90002",
+      "campaignId": "90001",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/irno8zny.jpg",
+      "label": "NULL",
+      "isPrimary": "0",
+      "sortOrder": "4"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcampaignId\timageUrl\tlabel\tisPrimary\tsortOrder\n30001\t90001\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/swe50nvf.jpg\tNULL\t0\t0\n30002\t90001\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/o8utlmtx.jpg\tNULL\t0\t1\n60001\t90001\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/zlu4gbfk.png\tNULL\t0\t3\n90001\t90001\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/e0oaaxe3.png\tNULL\t0\t4\n90002\t90001\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/mood-board/1/irno8zny.jpg\tNULL\t0\t4\n",
+  "stderr": "",
+  "execution_time_ms": 270
+}

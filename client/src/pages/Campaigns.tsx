@@ -777,59 +777,85 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
           {moodBoardOpen && (
             <div className="p-4 pt-0 space-y-4">
               <p className="text-xs text-zinc-500">
-                Pin reference images to anchor the visual style of every shot in this campaign. The <span className="text-rose-400">* Primary</span> image is sent to Runway alongside each prompt as a style reference.
+                Upload reference images to anchor the visual style of every shot. <span className="text-rose-400 font-medium">Click any image to make it the active reference</span> — Runway will use it as the first frame when generating shots.
               </p>
 
-              {/* Image grid */}
+              {/* Active reference preview strip */}
+              {moodBoardImages && moodBoardImages.length > 0 && (() => {
+                const primary = moodBoardImages.find(i => i.isPrimary);
+                return primary ? (
+                  <div className="flex items-center gap-3 bg-rose-950/40 border border-rose-800/50 rounded-lg p-3">
+                    <img src={primary.imageUrl} alt="Active reference" className="w-16 h-10 object-cover rounded border border-rose-700" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 text-rose-300 text-xs font-medium">
+                        <Star className="w-3 h-3 fill-current" /> Active Reference
+                      </div>
+                      <p className="text-zinc-400 text-xs mt-0.5 truncate">{primary.label ?? "This image will be used as the first frame of every generated shot"}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => moodBoardClearPrimaryMutation.mutate({ campaignId })}
+                      className="text-zinc-500 hover:text-zinc-300 text-xs h-7 px-2 shrink-0"
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 bg-amber-950/30 border border-amber-800/40 rounded-lg p-3">
+                    <span className="text-amber-400 text-xs">No active reference selected. Click an image below to activate it.</span>
+                  </div>
+                );
+              })()}
+
+              {/* Image grid — click to select active reference */}
               {moodBoardImages && moodBoardImages.length > 0 && (
                 <div className="grid grid-cols-3 gap-3">
                   {moodBoardImages.map((img) => (
-                    <div key={img.id} className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
-                      img.isPrimary ? "border-rose-500" : "border-zinc-700 hover:border-zinc-500"
-                    }`}>
+                    <div
+                      key={img.id}
+                      className={`relative group rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                        img.isPrimary
+                          ? "border-rose-500 ring-2 ring-rose-500/30"
+                          : "border-zinc-700 hover:border-rose-600/60"
+                      }`}
+                      onClick={() => {
+                        if (!img.isPrimary) {
+                          moodBoardSetPrimaryMutation.mutate({ campaignId, imageId: img.id });
+                        }
+                      }}
+                    >
                       <img
                         src={img.imageUrl}
                         alt={img.label ?? "Mood board reference"}
                         className="w-full aspect-video object-cover"
                         onError={(e) => { (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Crect fill='%23333' width='100' height='60'/%3E%3Ctext fill='%23666' x='50' y='35' text-anchor='middle' font-size='10'%3EImage error%3C/text%3E%3C/svg%3E"; }}
                       />
+                      {/* Always-visible active badge */}
                       {img.isPrimary && (
-                        <div className="absolute top-1 left-1 bg-rose-700/90 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
-                          <Star className="w-2.5 h-2.5 fill-current" /> Primary
+                        <div className="absolute top-1 left-1 bg-rose-600 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1 shadow-lg">
+                          <Star className="w-2.5 h-2.5 fill-current" /> Active
+                        </div>
+                      )}
+                      {/* Click-to-activate hint on non-primary images */}
+                      {!img.isPrimary && (
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-rose-700/90 px-2 py-1 rounded">
+                            Click to activate
+                          </span>
                         </div>
                       )}
                       {img.label && (
                         <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-xs text-zinc-300 px-2 py-1 truncate">{img.label}</div>
                       )}
-                      {/* Hover actions */}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        {!img.isPrimary && (
-                          <Button
-                            size="sm"
-                            onClick={() => moodBoardSetPrimaryMutation.mutate({ campaignId, imageId: img.id })}
-                            className="bg-rose-700 hover:bg-rose-600 text-xs h-7 px-2"
-                          >
-                            <Star className="w-3 h-3 mr-1" /> Set Primary
-                          </Button>
-                        )}
-                        {img.isPrimary && (
-                          <Button
-                            size="sm"
-                            onClick={() => moodBoardClearPrimaryMutation.mutate({ campaignId })}
-                            className="bg-zinc-700 hover:bg-zinc-600 text-xs h-7 px-2"
-                          >
-                            Clear
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => moodBoardRemoveMutation.mutate({ campaignId, imageId: img.id })}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-900/30 h-7 w-7 p-0"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
+                      {/* Remove button — always visible in corner */}
+                      <button
+                        className="absolute top-1 right-1 bg-black/60 hover:bg-red-900/80 text-zinc-400 hover:text-red-300 rounded p-0.5 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); moodBoardRemoveMutation.mutate({ campaignId, imageId: img.id }); }}
+                        title="Remove image"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
                     </div>
                   ))}
                 </div>

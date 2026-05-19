@@ -214,3 +214,13 @@
 - [x] FIX: Switch to image_to_video endpoint when primary image is present (image becomes first frame, prompt guides motion)
 - [x] Keep text_to_video as fallback when no mood board primary image is pinned
 - [x] Update Runway adapter in videoGeneration.ts to handle both modes
+
+### Phase J: Mood Board UX Redesign
+- [x] Auto-fix: set first mood board image as primary for all campaigns where images exist but moodBoardPrimaryImageUrl is NULL (DB migration applied)
+- [x] Remove hidden hover-only "Set Primary" button -- replaced with click-to-select interaction
+- [x] Clicking any image immediately makes it the active reference (calls moodBoardSetPrimary inline)
+- [x] Active reference image shows prominent rose border + ring + always-visible "Active" badge
+- [x] Non-primary images show "Click to activate" hint on hover
+- [x] Active Reference preview strip at top of mood board panel (thumbnail + label + Clear button)
+- [x] Amber warning strip shown when images exist but none is active
+- [x] Remove button always visible in top-right corner of each image (no hover required)

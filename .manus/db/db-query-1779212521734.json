@@ -1,0 +1,38 @@
+{
+  "query": "\nSELECT c.id, c.title, \n  CASE WHEN c.moodBoardPrimaryImageUrl IS NULL THEN 'NO PRIMARY' ELSE 'HAS PRIMARY' END as primary_status,\n  COUNT(mb.id) as total_images,\n  SUM(mb.isPrimary) as primary_count\nFROM campaigns c\nLEFT JOIN campaign_mood_board_images mb ON mb.campaignId = c.id\nGROUP BY c.id, c.title, c.moodBoardPrimaryImageUrl\nORDER BY c.createdAt DESC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute \nSELECT c.id, c.title, \n  CASE WHEN c.moodBoardPrimaryImageUrl IS NULL THEN 'NO PRIMARY' ELSE 'HAS PRIMARY' END as primary_status,\n  COUNT(mb.id) as total_images,\n  SUM(mb.isPrimary) as primary_count\nFROM campaigns c\nLEFT JOIN campaign_mood_board_images mb ON mb.campaignId = c.id\nGROUP BY c.id, c.title, c.moodBoardPrimaryImageUrl\nORDER BY c.createdAt DESC;\n",
+  "rows": [
+    {
+      "id": "90001",
+      "title": "Sonic Insurrection 4",
+      "primary_status": "HAS PRIMARY",
+      "total_images": "5",
+      "primary_count": "1"
+    },
+    {
+      "id": "60001",
+      "title": "Sonic Insurrection 3",
+      "primary_status": "HAS PRIMARY",
+      "total_images": "2",
+      "primary_count": "1"
+    },
+    {
+      "id": "30001",
+      "title": "Sonic Insurrection 2",
+      "primary_status": "NO PRIMARY",
+      "total_images": "0",
+      "primary_count": "NULL"
+    },
+    {
+      "id": "1",
+      "title": "Sonic Insurrection",
+      "primary_status": "NO PRIMARY",
+      "total_images": "0",
+      "primary_count": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tprimary_status\ttotal_images\tprimary_count\n90001\tSonic Insurrection 4\tHAS PRIMARY\t5\t1\n60001\tSonic Insurrection 3\tHAS PRIMARY\t2\t1\n30001\tSonic Insurrection 2\tNO PRIMARY\t0\tNULL\n1\tSonic Insurrection\tNO PRIMARY\t0\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 328
+}

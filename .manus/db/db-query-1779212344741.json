@@ -1,0 +1,34 @@
+{
+  "query": "\nSELECT c.id, c.title, c.moodBoardPrimaryImageUrl, COUNT(mb.id) as mood_images\nFROM campaigns c\nLEFT JOIN campaign_mood_board_images mb ON mb.campaignId = c.id\nGROUP BY c.id, c.title, c.moodBoardPrimaryImageUrl\nORDER BY c.createdAt DESC\nLIMIT 5;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute \nSELECT c.id, c.title, c.moodBoardPrimaryImageUrl, COUNT(mb.id) as mood_images\nFROM campaigns c\nLEFT JOIN campaign_mood_board_images mb ON mb.campaignId = c.id\nGROUP BY c.id, c.title, c.moodBoardPrimaryImageUrl\nORDER BY c.createdAt DESC\nLIMIT 5;\n",
+  "rows": [
+    {
+      "id": "90001",
+      "title": "Sonic Insurrection 4",
+      "moodBoardPrimaryImageUrl": "NULL",
+      "mood_images": "5"
+    },
+    {
+      "id": "60001",
+      "title": "Sonic Insurrection 3",
+      "moodBoardPrimaryImageUrl": "NULL",
+      "mood_images": "2"
+    },
+    {
+      "id": "30001",
+      "title": "Sonic Insurrection 2",
+      "moodBoardPrimaryImageUrl": "NULL",
+      "mood_images": "0"
+    },
+    {
+      "id": "1",
+      "title": "Sonic Insurrection",
+      "moodBoardPrimaryImageUrl": "NULL",
+      "mood_images": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tmoodBoardPrimaryImageUrl\tmood_images\n90001\tSonic Insurrection 4\tNULL\t5\n60001\tSonic Insurrection 3\tNULL\t2\n30001\tSonic Insurrection 2\tNULL\t0\n1\tSonic Insurrection\tNULL\t0\n",
+  "stderr": "",
+  "execution_time_ms": 362
+}

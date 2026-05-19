@@ -1,0 +1,9 @@
+{
+  "query": "\n-- For each campaign that has mood board images but no primary set,\n-- mark the image with the lowest sortOrder as primary\nUPDATE campaign_mood_board_images mb\nINNER JOIN (\n  SELECT MIN(id) as min_id, campaignId\n  FROM campaign_mood_board_images\n  WHERE campaignId IN (\n    SELECT c.id FROM campaigns c\n    WHERE c.moodBoardPrimaryImageUrl IS NULL\n      AND EXISTS (SELECT 1 FROM campaign_mood_board_images WHERE campaignId = c.id)\n  )\n  GROUP BY campaignId\n) first_img ON mb.id = first_img.min_id\nSET mb.isPrimary = 1;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute \n-- For each campaign that has mood board images but no primary set,\n-- mark the image with the lowest sortOrder as primary\nUPDATE campaign_mood_board_images mb\nINNER JOIN (\n  SELECT MIN(id) as min_id, campaignId\n  FROM campaign_mood_board_images\n  WHERE campaignId IN (\n    SELECT c.id FROM campaigns c\n    WHERE c.moodBoardPrimaryImageUrl IS NULL\n      AND EXISTS (SELECT 1 FROM campaign_mood_board_images WHERE campaignId = c.id)\n  )\n  GROUP BY campaignId\n) first_img ON mb.id = first_img.min_id\nSET mb.isPrimary = 1;\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1177
+}
