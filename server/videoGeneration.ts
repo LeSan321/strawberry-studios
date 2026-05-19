@@ -91,6 +91,12 @@ async function generateRunway(req: VideoGenerationRequest): Promise<VideoGenerat
   const duration = runwayDuration(req.durationSeconds);
   const ratio = runwayRatio(req.aspectRatio);
 
+  // When a mood board primary image is present, use image_to_video so the
+  // reference image becomes the literal first frame of the shot (matching
+  // Runway's direct UI behaviour). Without an image, fall back to text_to_video.
+  const useImageToVideo = !!req.referenceImageUrl;
+  const endpoint = useImageToVideo ? "image_to_video" : "text_to_video";
+
   const body: Record<string, unknown> = {
     model: "gen4.5",
     promptText: req.prompt,
@@ -98,17 +104,21 @@ async function generateRunway(req: VideoGenerationRequest): Promise<VideoGenerat
     ratio,
   };
 
-  // Attach mood board reference image if provided
-  if (req.referenceImageUrl) {
-    body.promptImage = req.referenceImageUrl;
-    console.log(`[Runway Video] Using mood board reference image: ${req.referenceImageUrl.substring(0, 60)}...`);
+  if (useImageToVideo) {
+    // Pass as array with position:"first" so Runway uses it as the opening frame
+    body.promptImage = [
+      { uri: req.referenceImageUrl, position: "first" }
+    ];
+    console.log(`[Runway Video] Mode: image_to_video (first frame) — ref: ${req.referenceImageUrl!.substring(0, 60)}...`);
+  } else {
+    console.log(`[Runway Video] Mode: text_to_video (no reference image)`);
   }
 
   console.log(
-    `[Runway Video] Submitting: model=gen4.5 duration=${duration}s ratio=${ratio} promptLength=${req.prompt.length}${req.referenceImageUrl ? " +imageRef" : ""}`
+    `[Runway Video] Submitting: model=gen4.5 duration=${duration}s ratio=${ratio} promptLength=${req.prompt.length} endpoint=${endpoint}`
   );
 
-  const res = await fetch(`${RUNWAY_API_BASE}/text_to_video`, {
+  const res = await fetch(`${RUNWAY_API_BASE}/${endpoint}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

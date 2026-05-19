@@ -208,3 +208,9 @@
 - [x] Primary image badge + "Active Reference" indicator in panel header
 - [x] Pass primary mood board image URL to Runway on every shot generation (generateShot, retryShot, retryAllFailed, editShotPrompt regenerate)
 - [x] Fix: pencil edit icon now always visible (zinc-300 bg-zinc-800/60) instead of ghost/invisible
+
+### Phase I: Runway Image-to-Video Fix
+- [x] BUG: Mood board primary image used as loose style hint (text_to_video + image reference) — Runway ignores it visually
+- [x] FIX: Switch to image_to_video endpoint when primary image is present (image becomes first frame, prompt guides motion)
+- [x] Keep text_to_video as fallback when no mood board primary image is pinned
+- [x] Update Runway adapter in videoGeneration.ts to handle both modes
