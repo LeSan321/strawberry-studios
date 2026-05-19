@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Film, Plus, ChevronRight, Clapperboard, Palette, Camera, Zap, Music, Clock, Target, Trash2, Download, Share2, Eye, RefreshCw, Pencil } from "lucide-react";
+import { Film, Plus, ChevronRight, Clapperboard, Palette, Camera, Zap, Music, Clock, Target, Trash2, Download, Share2, Eye, RefreshCw, Pencil, ImagePlus, X, Star, Link, Upload } from "lucide-react";
 
 // ── Genre definitions (mirrors server) ───────────────────────────────────────
 
@@ -422,7 +422,7 @@ function ShotCard({ shot, campaignId, onGenerate, onRetry, onEditPrompt }: {
               size="sm"
               variant="ghost"
               onClick={() => onEditPrompt(shot)}
-              className="text-zinc-400 hover:text-white h-7 w-7 p-0"
+              className="text-zinc-300 hover:text-white bg-zinc-800/60 hover:bg-zinc-700 h-7 w-7 p-0"
               title="Edit prompt"
             >
               <Pencil className="w-3 h-3" />
@@ -474,6 +474,62 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
   // Prompt edit modal state
   const [editingShot, setEditingShot] = useState<{ id: number; shotNumber: number; videoPrompt?: string | null } | null>(null);
   const [editedPrompt, setEditedPrompt] = useState("");
+
+  // Mood board state
+  const [moodBoardOpen, setMoodBoardOpen] = useState(false);
+  const [moodBoardUrlInput, setMoodBoardUrlInput] = useState("");
+  const [moodBoardLabelInput, setMoodBoardLabelInput] = useState("");
+  const [moodBoardAddMode, setMoodBoardAddMode] = useState<"url" | "upload" | null>(null);
+  const [moodBoardUploading, setMoodBoardUploading] = useState(false);
+
+  const { data: moodBoardImages, refetch: refetchMoodBoard } = trpc.campaigns.moodBoardList.useQuery(
+    { campaignId },
+    { enabled: moodBoardOpen }
+  );
+
+  const moodBoardAddByUrlMutation = trpc.campaigns.moodBoardAddByUrl.useMutation({
+    onSuccess: () => { refetchMoodBoard(); refetch(); setMoodBoardUrlInput(""); setMoodBoardLabelInput(""); setMoodBoardAddMode(null); toast.success("Reference image added."); },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const moodBoardSaveUploadMutation = trpc.campaigns.moodBoardSaveUpload.useMutation({
+    onSuccess: () => { refetchMoodBoard(); refetch(); setMoodBoardLabelInput(""); setMoodBoardAddMode(null); toast.success("Reference image uploaded."); },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const moodBoardRemoveMutation = trpc.campaigns.moodBoardRemove.useMutation({
+    onSuccess: () => { refetchMoodBoard(); refetch(); toast.success("Reference image removed."); },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const moodBoardSetPrimaryMutation = trpc.campaigns.moodBoardSetPrimary.useMutation({
+    onSuccess: () => { refetchMoodBoard(); refetch(); toast.success("Primary reference updated — new shots will use this image."); },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const moodBoardClearPrimaryMutation = trpc.campaigns.moodBoardClearPrimary.useMutation({
+    onSuccess: () => { refetchMoodBoard(); refetch(); toast.success("Primary reference cleared."); },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handleMoodBoardFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMoodBoardUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/mood-board/upload", { method: "POST", body: formData });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error ?? "Upload failed"); }
+      const { url, key } = await res.json();
+      await moodBoardSaveUploadMutation.mutateAsync({ campaignId, imageUrl: url, imageKey: key, label: moodBoardLabelInput || undefined });
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed");
+    } finally {
+      setMoodBoardUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const generatePackageMutation = trpc.campaigns.generatePackage.useMutation({
     onSuccess: () => {
@@ -698,6 +754,165 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
         </div>
       )}
 
+      {/* Mood Board Panel */}
+      {pkg && (
+        <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg overflow-hidden">
+          <button
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/30 transition-colors"
+            onClick={() => setMoodBoardOpen(o => !o)}
+          >
+            <div className="flex items-center gap-2">
+              <ImagePlus className="w-4 h-4 text-rose-400" />
+              <span className="text-sm uppercase tracking-wider text-zinc-300">Mood Board</span>
+              {data?.campaign?.moodBoardPrimaryImageUrl && (
+                <Badge className="bg-rose-900/50 text-rose-300 text-xs border-rose-800">Active Reference</Badge>
+              )}
+              {moodBoardImages && moodBoardImages.length > 0 && (
+                <span className="text-xs text-zinc-500">{moodBoardImages.length} image{moodBoardImages.length !== 1 ? "s" : ""}</span>
+              )}
+            </div>
+            <span className="text-zinc-500 text-xs">{moodBoardOpen ? "^" : "v"}</span>
+          </button>
+
+          {moodBoardOpen && (
+            <div className="p-4 pt-0 space-y-4">
+              <p className="text-xs text-zinc-500">
+                Pin reference images to anchor the visual style of every shot in this campaign. The <span className="text-rose-400">* Primary</span> image is sent to Runway alongside each prompt as a style reference.
+              </p>
+
+              {/* Image grid */}
+              {moodBoardImages && moodBoardImages.length > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {moodBoardImages.map((img) => (
+                    <div key={img.id} className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
+                      img.isPrimary ? "border-rose-500" : "border-zinc-700 hover:border-zinc-500"
+                    }`}>
+                      <img
+                        src={img.imageUrl}
+                        alt={img.label ?? "Mood board reference"}
+                        className="w-full aspect-video object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Crect fill='%23333' width='100' height='60'/%3E%3Ctext fill='%23666' x='50' y='35' text-anchor='middle' font-size='10'%3EImage error%3C/text%3E%3C/svg%3E"; }}
+                      />
+                      {img.isPrimary && (
+                        <div className="absolute top-1 left-1 bg-rose-700/90 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
+                          <Star className="w-2.5 h-2.5 fill-current" /> Primary
+                        </div>
+                      )}
+                      {img.label && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-xs text-zinc-300 px-2 py-1 truncate">{img.label}</div>
+                      )}
+                      {/* Hover actions */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        {!img.isPrimary && (
+                          <Button
+                            size="sm"
+                            onClick={() => moodBoardSetPrimaryMutation.mutate({ campaignId, imageId: img.id })}
+                            className="bg-rose-700 hover:bg-rose-600 text-xs h-7 px-2"
+                          >
+                            <Star className="w-3 h-3 mr-1" /> Set Primary
+                          </Button>
+                        )}
+                        {img.isPrimary && (
+                          <Button
+                            size="sm"
+                            onClick={() => moodBoardClearPrimaryMutation.mutate({ campaignId })}
+                            className="bg-zinc-700 hover:bg-zinc-600 text-xs h-7 px-2"
+                          >
+                            Clear
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => moodBoardRemoveMutation.mutate({ campaignId, imageId: img.id })}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-900/30 h-7 w-7 p-0"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add image controls */}
+              {(!moodBoardImages || moodBoardImages.length < 6) && (
+                <div className="space-y-3">
+                  {moodBoardAddMode === null && (
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setMoodBoardAddMode("url")} className="border-zinc-700 text-zinc-300 hover:text-white text-xs gap-1">
+                        <Link className="w-3 h-3" /> Add by URL
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setMoodBoardAddMode("upload")} className="border-zinc-700 text-zinc-300 hover:text-white text-xs gap-1">
+                        <Upload className="w-3 h-3" /> Upload Image
+                      </Button>
+                    </div>
+                  )}
+
+                  {moodBoardAddMode === "url" && (
+                    <div className="space-y-2">
+                      <Input
+                        value={moodBoardUrlInput}
+                        onChange={(e) => setMoodBoardUrlInput(e.target.value)}
+                        placeholder="https://example.com/reference-image.jpg"
+                        className="bg-zinc-900 border-zinc-700 text-white text-sm"
+                      />
+                      <Input
+                        value={moodBoardLabelInput}
+                        onChange={(e) => setMoodBoardLabelInput(e.target.value)}
+                        placeholder="Label (optional - e.g. Lighting reference)"
+                        className="bg-zinc-900 border-zinc-700 text-white text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => moodBoardAddByUrlMutation.mutate({ campaignId, imageUrl: moodBoardUrlInput, label: moodBoardLabelInput || undefined })}
+                          disabled={!moodBoardUrlInput || moodBoardAddByUrlMutation.isPending}
+                          className="bg-rose-700 hover:bg-rose-600 text-xs"
+                        >
+                          {moodBoardAddByUrlMutation.isPending ? "Adding..." : "Add Image"}
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setMoodBoardAddMode(null); setMoodBoardUrlInput(""); }} className="text-zinc-400 text-xs">Cancel</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {moodBoardAddMode === "upload" && (
+                    <div className="space-y-2">
+                      <Input
+                        value={moodBoardLabelInput}
+                        onChange={(e) => setMoodBoardLabelInput(e.target.value)}
+                        placeholder="Label (optional - e.g. Color reference)"
+                        className="bg-zinc-900 border-zinc-700 text-white text-sm"
+                      />
+                      <div className="flex gap-2 items-center">
+                        <label className="cursor-pointer">
+                          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleMoodBoardFileUpload} disabled={moodBoardUploading} />
+                          <span className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-md border transition-colors ${
+                            moodBoardUploading
+                              ? "border-zinc-700 text-zinc-500 cursor-not-allowed"
+                              : "border-zinc-600 text-zinc-300 hover:text-white hover:border-zinc-400 cursor-pointer"
+                          }`}>
+                            <Upload className="w-3 h-3" />
+                            {moodBoardUploading ? "Uploading..." : "Choose File"}
+                          </span>
+                        </label>
+                        <Button size="sm" variant="ghost" onClick={() => { setMoodBoardAddMode(null); setMoodBoardLabelInput(""); }} className="text-zinc-400 text-xs">Cancel</Button>
+                      </div>
+                      <p className="text-xs text-zinc-600">Supported: JPG, PNG, WEBP, GIF - max 10MB</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {moodBoardImages && moodBoardImages.length >= 6 && (
+                <p className="text-xs text-zinc-500">Maximum 6 reference images reached. Remove one to add another.</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Shot List */}
       {shots.length > 0 && (
         <div className="space-y-3">
@@ -745,7 +960,7 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
         <DialogContent className="bg-zinc-950 border-zinc-800 text-white max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-rose-300 font-cinzel">
-              Edit Prompt — Shot {editingShot.shotNumber}
+              Edit Prompt - Shot {editingShot.shotNumber}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
@@ -759,7 +974,7 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
                 rows={8}
                 maxLength={1000}
                 className="bg-zinc-900 border-zinc-700 text-white text-sm font-mono resize-none focus:border-rose-700"
-                placeholder="Describe the shot in cinematic terms — camera movement, lighting, subject, atmosphere..."
+                placeholder="Describe the shot in cinematic terms - camera movement, lighting, subject, atmosphere..."
               />
               <div className={`absolute bottom-2 right-3 text-xs ${
                 editedPrompt.length > 950 ? "text-red-400" :

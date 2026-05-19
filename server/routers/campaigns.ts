@@ -22,6 +22,8 @@ import {
   type CampaignGoal,
 } from "../campaignPromptBuilder";
 import {
+  addMoodBoardImage,
+  clearPrimaryMoodBoardImage,
   createCampaign,
   createCampaignShot,
   deleteCampaign,
@@ -29,6 +31,9 @@ import {
   getCampaignBySlug,
   getCampaignShots,
   getCampaignsByUser,
+  getMoodBoardImages,
+  removeMoodBoardImage,
+  setPrimaryMoodBoardImage,
   updateCampaign,
   updateCampaignShot,
 } from "../db";
@@ -361,6 +366,7 @@ Generate the complete Director's Package as a JSON object. Every field is requir
         const result = await generateVideo({
           prompt: shot.videoPrompt,
           durationSeconds: shot.durationSeconds ?? 5,
+          referenceImageUrl: campaign.moodBoardPrimaryImageUrl ?? undefined,
         });
         if (result.status === "failed") {
           throw new Error(result.error ?? "Video generation failed");
@@ -501,6 +507,7 @@ Generate the complete Director's Package as a JSON object. Every field is requir
         const result = await generateVideo({
           prompt: shot.videoPrompt,
           durationSeconds: shot.durationSeconds ?? 5,
+          referenceImageUrl: campaign.moodBoardPrimaryImageUrl ?? undefined,
         });
         if (result.status === "failed") throw new Error(result.error ?? "Video generation failed");
         const jobId = result.jobId ?? "";
@@ -538,7 +545,11 @@ Generate the complete Director's Package as a JSON object. Every field is requir
         if (!shot.videoPrompt) continue;
         await updateCampaignShot(shot.id, { videoStatus: "queued", videoError: null, videoJobId: null, progress: 0 });
         try {
-          const result = await generateVideo({ prompt: shot.videoPrompt, durationSeconds: shot.durationSeconds ?? 5 });
+          const result = await generateVideo({
+            prompt: shot.videoPrompt,
+            durationSeconds: shot.durationSeconds ?? 5,
+            referenceImageUrl: campaign.moodBoardPrimaryImageUrl ?? undefined,
+          });
           if (result.status === "failed") throw new Error(result.error ?? "Generation failed");
           const jobId = result.jobId ?? "";
           await updateCampaignShot(shot.id, { videoStatus: "generating", videoJobId: jobId, progress: 5 });
@@ -602,6 +613,7 @@ Generate the complete Director's Package as a JSON object. Every field is requir
         const result = await generateVideo({
           prompt: input.prompt,
           durationSeconds: shot.durationSeconds ?? 5,
+          referenceImageUrl: campaign.moodBoardPrimaryImageUrl ?? undefined,
         });
         if (result.status === "failed") throw new Error(result.error ?? "Video generation failed");
         const jobId = result.jobId ?? "";
@@ -633,4 +645,125 @@ Generate the complete Director's Package as a JSON object. Every field is requir
       psychologicalBrief: grammar.psychologicalBrief,
     }));
   }),
+
+  // ── Mood Board ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * List all mood board images for a campaign.
+   */
+  moodBoardList: protectedProcedure
+    .input(z.object({ campaignId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const campaign = await getCampaignById(input.campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      return getMoodBoardImages(input.campaignId);
+    }),
+
+  /**
+   * Add a mood board image by URL.
+   */
+  moodBoardAddByUrl: protectedProcedure
+    .input(
+      z.object({
+        campaignId: z.number(),
+        imageUrl: z.string().url(),
+        label: z.string().max(128).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const campaign = await getCampaignById(input.campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      const existing = await getMoodBoardImages(input.campaignId);
+      if (existing.length >= 6) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Maximum 6 mood board images per campaign" });
+      }
+      const id = await addMoodBoardImage({
+        campaignId: input.campaignId,
+        imageUrl: input.imageUrl,
+        label: input.label ?? null,
+        isPrimary: existing.length === 0, // first image auto-becomes primary
+        sortOrder: existing.length,
+      });
+      // If this is the first image, also cache as primary on the campaign
+      if (existing.length === 0) {
+        await setPrimaryMoodBoardImage(id, input.campaignId);
+      }
+      return { id };
+    }),
+
+  /**
+   * Add a mood board image that was already uploaded to S3.
+   * The frontend POSTs to /api/mood-board/upload first, then calls this to save metadata.
+   */
+  moodBoardSaveUpload: protectedProcedure
+    .input(
+      z.object({
+        campaignId: z.number(),
+        imageUrl: z.string().url(),
+        imageKey: z.string(),
+        label: z.string().max(128).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const campaign = await getCampaignById(input.campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      const existing = await getMoodBoardImages(input.campaignId);
+      if (existing.length >= 6) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Maximum 6 mood board images per campaign" });
+      }
+      const id = await addMoodBoardImage({
+        campaignId: input.campaignId,
+        imageUrl: input.imageUrl,
+        imageKey: input.imageKey,
+        label: input.label ?? null,
+        isPrimary: existing.length === 0,
+        sortOrder: existing.length,
+      });
+      if (existing.length === 0) {
+        await setPrimaryMoodBoardImage(id, input.campaignId);
+      }
+      return { id };
+    }),
+
+  /**
+   * Remove a mood board image.
+   */
+  moodBoardRemove: protectedProcedure
+    .input(z.object({ campaignId: z.number(), imageId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const campaign = await getCampaignById(input.campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      await removeMoodBoardImage(input.imageId, input.campaignId);
+      return { removed: true };
+    }),
+
+  /**
+   * Set the primary mood board image (the one passed to Runway as a style reference).
+   */
+  moodBoardSetPrimary: protectedProcedure
+    .input(z.object({ campaignId: z.number(), imageId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const campaign = await getCampaignById(input.campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      await setPrimaryMoodBoardImage(input.imageId, input.campaignId);
+      return { primary: true };
+    }),
+
+  /**
+   * Clear the primary mood board image (no reference image will be used).
+   */
+  moodBoardClearPrimary: protectedProcedure
+    .input(z.object({ campaignId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const campaign = await getCampaignById(input.campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      await clearPrimaryMoodBoardImage(input.campaignId);
+      return { cleared: true };
+    }),
 });

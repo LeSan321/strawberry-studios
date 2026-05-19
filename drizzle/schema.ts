@@ -245,12 +245,37 @@ export const campaigns = mysqlTable("campaigns", {
   shareSlug: varchar("shareSlug", { length: 64 }).unique(),
   /** Whether the campaign is publicly shareable */
   isPublic: boolean("isPublic").default(false),
+  /** URL of the primary mood board image used as Runway visual reference */
+  moodBoardPrimaryImageUrl: text("moodBoardPrimaryImageUrl"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type Campaign = typeof campaigns.$inferSelect;
 export type InsertCampaign = typeof campaigns.$inferInsert;
+
+/**
+ * Campaign mood board images — reference images pinned to a campaign.
+ * The primary image is passed to Runway as a visual style anchor.
+ */
+export const campaignMoodBoardImages = mysqlTable("campaign_mood_board_images", {
+  id: int("id").autoincrement().primaryKey(),
+  campaignId: int("campaignId").notNull(),
+  /** Public URL of the image (S3 or external) */
+  imageUrl: text("imageUrl").notNull(),
+  /** S3 key if uploaded (null if added by URL) */
+  imageKey: varchar("imageKey", { length: 512 }),
+  /** Optional director label for this reference */
+  label: varchar("label", { length: 128 }),
+  /** Whether this is the active primary reference sent to Runway */
+  isPrimary: boolean("isPrimary").default(false).notNull(),
+  /** Display order */
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CampaignMoodBoardImage = typeof campaignMoodBoardImages.$inferSelect;
+export type InsertCampaignMoodBoardImage = typeof campaignMoodBoardImages.$inferInsert;
 
 /**
  * Campaign shots — individual video shots within a campaign.

@@ -98,8 +98,14 @@ async function generateRunway(req: VideoGenerationRequest): Promise<VideoGenerat
     ratio,
   };
 
+  // Attach mood board reference image if provided
+  if (req.referenceImageUrl) {
+    body.promptImage = req.referenceImageUrl;
+    console.log(`[Runway Video] Using mood board reference image: ${req.referenceImageUrl.substring(0, 60)}...`);
+  }
+
   console.log(
-    `[Runway Video] Submitting: model=gen4.5 duration=${duration}s ratio=${ratio} promptLength=${req.prompt.length}`
+    `[Runway Video] Submitting: model=gen4.5 duration=${duration}s ratio=${ratio} promptLength=${req.prompt.length}${req.referenceImageUrl ? " +imageRef" : ""}`
   );
 
   const res = await fetch(`${RUNWAY_API_BASE}/text_to_video`, {

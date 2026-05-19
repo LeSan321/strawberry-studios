@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerAudioUploadRoute } from "../audioUploadRoute";
 import { registerCampaignPdfRoute } from "../campaignPdfRoute";
+import { registerMoodBoardUploadRoute } from "../moodBoardUploadRoute";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -41,6 +42,8 @@ async function startServer() {
   registerAudioUploadRoute(app);
   // Campaign PDF download
   registerCampaignPdfRoute(app);
+  // Mood board image upload
+  registerMoodBoardUploadRoute(app);
   // tRPC API
   app.use(
     "/api/trpc",

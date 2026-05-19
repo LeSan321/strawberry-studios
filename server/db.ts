@@ -6,6 +6,7 @@ import {
   InsertConcert,
   InsertConcertCharacter,
   audioTracks,
+  campaignMoodBoardImages,
   campaignShots,
   campaigns,
   cinematiquePresets,
@@ -13,8 +14,10 @@ import {
   concerts,
   users,
   type Campaign,
+  type CampaignMoodBoardImage,
   type CampaignShot,
   type InsertCampaign,
+  type InsertCampaignMoodBoardImage,
   type InsertCampaignShot,
   type InsertUser,
 } from "../drizzle/schema";
@@ -248,4 +251,67 @@ export async function deleteConcert(id: number): Promise<void> {
   // or we delete characters first then the concert
   await db.delete(concertCharacters).where(eq(concertCharacters.concertId, id));
   await db.delete(concerts).where(eq(concerts.id, id));
+}
+
+// ─── Mood Board Images ────────────────────────────────────────────────────────
+
+export async function getMoodBoardImages(campaignId: number): Promise<CampaignMoodBoardImage[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(campaignMoodBoardImages)
+    .where(eq(campaignMoodBoardImages.campaignId, campaignId))
+    .orderBy(campaignMoodBoardImages.sortOrder, campaignMoodBoardImages.createdAt);
+}
+
+export async function addMoodBoardImage(data: InsertCampaignMoodBoardImage): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(campaignMoodBoardImages).values(data);
+  return (result as unknown as { insertId: number }).insertId;
+}
+
+export async function removeMoodBoardImage(id: number, campaignId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(campaignMoodBoardImages)
+    .where(eq(campaignMoodBoardImages.id, id));
+  // If this was the primary, clear the campaign's cached primary URL
+  const remaining = await getMoodBoardImages(campaignId);
+  const stillHasPrimary = remaining.some(i => i.isPrimary);
+  if (!stillHasPrimary) {
+    await db.update(campaigns).set({ moodBoardPrimaryImageUrl: null }).where(eq(campaigns.id, campaignId));
+  }
+}
+
+export async function setPrimaryMoodBoardImage(id: number, campaignId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Clear all primaries for this campaign
+  await db.update(campaignMoodBoardImages)
+    .set({ isPrimary: false })
+    .where(eq(campaignMoodBoardImages.campaignId, campaignId));
+  // Set the new primary
+  await db.update(campaignMoodBoardImages)
+    .set({ isPrimary: true })
+    .where(eq(campaignMoodBoardImages.id, id));
+  // Cache the URL on the campaign row for fast access during generation
+  const image = await db.select().from(campaignMoodBoardImages)
+    .where(eq(campaignMoodBoardImages.id, id))
+    .limit(1);
+  if (image[0]) {
+    await db.update(campaigns)
+      .set({ moodBoardPrimaryImageUrl: image[0].imageUrl })
+      .where(eq(campaigns.id, campaignId));
+  }
+}
+
+export async function clearPrimaryMoodBoardImage(campaignId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(campaignMoodBoardImages)
+    .set({ isPrimary: false })
+    .where(eq(campaignMoodBoardImages.campaignId, campaignId));
+  await db.update(campaigns)
+    .set({ moodBoardPrimaryImageUrl: null })
+    .where(eq(campaigns.id, campaignId));
 }

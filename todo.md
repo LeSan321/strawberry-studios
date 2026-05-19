@@ -194,3 +194,17 @@
 - [x] Prompt edit modal in shot card UI (shows current prompt, character counter ≤1000, Save Only / Save & Regenerate buttons)
 - [x] "Edit Prompt" pencil button on every shot card (available on none/complete/failed, hidden during generating/queued)
 - [x] Character counter with colour warning (amber >800, red >950)
+
+### Phase H: Campaign Mood Board
+- [x] DB schema: campaign_mood_board_images table (id, campaignId, imageUrl, imageKey, label, isPrimary, sortOrder, createdAt)
+- [x] DB schema: moodBoardPrimaryImageUrl column on campaigns table
+- [x] DB helpers: getMoodBoardImages, addMoodBoardImage, removeMoodBoardImage, setPrimaryMoodBoardImage, clearPrimaryMoodBoardImage
+- [x] S3 upload route: POST /api/mood-board/upload (multer, 10MB, image types only)
+- [x] tRPC: moodBoardList, moodBoardAddByUrl, moodBoardSaveUpload, moodBoardRemove, moodBoardSetPrimary, moodBoardClearPrimary
+- [x] Mood Board panel in campaign detail UI (collapsible, after Director's Package, before Shot List)
+- [x] Image grid with primary badge, hover actions (Set Primary / Clear / Remove)
+- [x] Add by URL mode with label input
+- [x] Upload mode with file picker, progress, label input (max 6 images)
+- [x] Primary image badge + "Active Reference" indicator in panel header
+- [x] Pass primary mood board image URL to Runway on every shot generation (generateShot, retryShot, retryAllFailed, editShotPrompt regenerate)
+- [x] Fix: pencil edit icon now always visible (zinc-300 bg-zinc-800/60) instead of ghost/invisible
