@@ -12,14 +12,19 @@ import {
   cinematiquePresets,
   concertCharacters,
   concerts,
+  creatorFrequencies,
+  platformDefaultVocabulary,
   users,
   type Campaign,
   type CampaignMoodBoardImage,
   type CampaignShot,
+  type CreatorFrequency,
   type InsertCampaign,
   type InsertCampaignMoodBoardImage,
   type InsertCampaignShot,
+  type InsertCreatorFrequency,
   type InsertUser,
+  type PlatformDefaultVocabulary,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -314,4 +319,115 @@ export async function clearPrimaryMoodBoardImage(campaignId: number): Promise<vo
   await db.update(campaigns)
     .set({ moodBoardPrimaryImageUrl: null })
     .where(eq(campaigns.id, campaignId));
+}
+
+// ─── Visual Universe — Creator Frequencies ────────────────────────────────────
+
+/**
+ * Get the active (default) frequency for a user.
+ * Returns null if the user has not completed Find Your Frequency.
+ */
+export async function getDefaultCreatorFrequency(userId: number): Promise<CreatorFrequency | null> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await db.select()
+    .from(creatorFrequencies)
+    .where(and(eq(creatorFrequencies.userId, userId), eq(creatorFrequencies.isDefault, true)))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/**
+ * Get a specific frequency by ID.
+ */
+export async function getCreatorFrequency(id: number): Promise<CreatorFrequency | null> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await db.select()
+    .from(creatorFrequencies)
+    .where(eq(creatorFrequencies.id, id))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/**
+ * Get all frequencies for a user (most recently created first).
+ */
+export async function listCreatorFrequencies(userId: number): Promise<CreatorFrequency[]> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.select()
+    .from(creatorFrequencies)
+    .where(eq(creatorFrequencies.userId, userId))
+    .orderBy(desc(creatorFrequencies.createdAt));
+}
+
+/**
+ * Save a new creator frequency.
+ * If isDefault is true, clears the isDefault flag on all other frequencies for this user first.
+ * Returns the inserted row ID.
+ */
+export async function saveCreatorFrequency(data: InsertCreatorFrequency): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // If this is being set as default, clear existing defaults for this user
+  if (data.isDefault && data.userId) {
+    await db.update(creatorFrequencies)
+      .set({ isDefault: false })
+      .where(eq(creatorFrequencies.userId, data.userId));
+  }
+  const result = await db.insert(creatorFrequencies).values(data);
+  const insertResult = result as unknown as [{ insertId: number }];
+  return insertResult[0].insertId;
+}
+
+/**
+ * Set a frequency as the active default for a user.
+ * Clears isDefault on all other frequencies for this user.
+ */
+export async function setDefaultCreatorFrequency(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(creatorFrequencies)
+    .set({ isDefault: false })
+    .where(eq(creatorFrequencies.userId, userId));
+  await db.update(creatorFrequencies)
+    .set({ isDefault: true })
+    .where(and(eq(creatorFrequencies.id, id), eq(creatorFrequencies.userId, userId)));
+}
+
+// ─── Visual Universe — Platform Default Vocabulary ───────────────────────────
+
+/**
+ * Get the current platform default vocabulary.
+ * Returns the single record (always version 1+). Returns null if not seeded yet.
+ */
+export async function getPlatformDefaultVocabulary(): Promise<PlatformDefaultVocabulary | null> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await db.select()
+    .from(platformDefaultVocabulary)
+    .orderBy(desc(platformDefaultVocabulary.version))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/**
+ * Upsert the platform default vocabulary.
+ * If a record exists, updates it and increments the version.
+ * If no record exists, inserts the first record at version 1.
+ */
+export async function upsertPlatformDefaultVocabulary(
+  vocabularyJson: Record<string, unknown>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await getPlatformDefaultVocabulary();
+  if (existing) {
+    await db.update(platformDefaultVocabulary)
+      .set({ vocabularyJson, version: existing.version + 1 })
+      .where(eq(platformDefaultVocabulary.id, existing.id));
+  } else {
+    await db.insert(platformDefaultVocabulary).values({ vocabularyJson, version: 1 });
+  }
 }

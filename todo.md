@@ -224,3 +224,15 @@
 - [x] Active Reference preview strip at top of mood board panel (thumbnail + label + Clear button)
 - [x] Amber warning strip shown when images exist but none is active
 - [x] Remove button always visible in top-right corner of each image (no hover required)
+
+### Phase K: Visual Universe Data Model
+- [x] Add creator_frequencies table to schema (userId, frequencyName, arcType, vocabularyJson, synthesisFingerprint, diagnosticAnswersJson, isDefault)
+- [x] Add platform_default_vocabulary table to schema (vocabularyJson, version)
+- [x] Add arcPosition column to campaigns table (gathering/arriving/open, default arriving)
+- [x] Add frequencyId column to campaigns table (optional FK to creator_frequencies)
+- [x] Generate migration SQL via pnpm drizzle-kit generate
+- [x] Apply migration via webdev_execute_sql
+- [x] Add DB helpers: getCreatorFrequency, saveCreatorFrequency, getDefaultCreatorFrequency, getPlatformDefaultVocabulary, upsertPlatformDefaultVocabulary
+- [x] Seed platform default vocabulary record
+- [x] Seed Blooming Frontier frequency record for owner
+- [x] Write vitest coverage for all new DB helpers

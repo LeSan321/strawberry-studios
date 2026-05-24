@@ -247,6 +247,14 @@ export const campaigns = mysqlTable("campaigns", {
   isPublic: boolean("isPublic").default(false),
   /** URL of the primary mood board image used as Runway visual reference */
   moodBoardPrimaryImageUrl: text("moodBoardPrimaryImageUrl"),
+  /**
+   * Arc position for this campaign — controls the scale and temperature at which
+   * the creator's vocabulary is expressed. Defaults to 'arriving' (threshold).
+   * gathering = compression/intimate, arriving = threshold/expanding, open = vast/resolved
+   */
+  arcPosition: mysqlEnum("arcPosition", ["gathering", "arriving", "open"]).default("arriving").notNull(),
+  /** Optional link to the creator's active frequency used for this campaign */
+  frequencyId: int("frequencyId"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -319,3 +327,55 @@ export const campaignShots = mysqlTable("campaign_shots", {
 
 export type CampaignShot = typeof campaignShots.$inferSelect;
 export type InsertCampaignShot = typeof campaignShots.$inferInsert;
+
+/**
+ * Creator frequencies — the Visual Universe for a creator.
+ * Each record is a named frequency (e.g. "Blooming Frontier") with a full
+ * structured vocabulary used to generate cover art and inform campaigns.
+ * Most creators will have one frequency; the isDefault flag marks the active one.
+ */
+export const creatorFrequencies = mysqlTable("creator_frequencies", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** Human-readable name for this frequency, e.g. "Blooming Frontier" */
+  frequencyName: varchar("frequencyName", { length: 100 }).notNull(),
+  /** Arc type from the Listening Bible Chapter 2 taxonomy */
+  arcType: mysqlEnum("arcType", [
+    "expansive_mythic",
+    "witnessing_lateral",
+    "intimate_relational",
+    "sustained_ambient",
+    "erosive_revelatory",
+    "cyclical_return",
+  ]).notNull().default("expansive_mythic"),
+  /** Structured vocabulary JSON: { environment, emotionalRegister, arcTerms, forbiddenTerms, relationshipGeometry, colorLight } */
+  vocabularyJson: json("vocabularyJson").notNull(),
+  /** One-paragraph human-readable description of the frequency */
+  synthesisFingerprint: text("synthesisFingerprint"),
+  /** Raw Q1-Q4 answers and Q5 reflection text from the diagnostic */
+  diagnosticAnswersJson: json("diagnosticAnswersJson"),
+  /** Whether this is the active/default frequency for this creator */
+  isDefault: boolean("isDefault").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CreatorFrequency = typeof creatorFrequencies.$inferSelect;
+export type InsertCreatorFrequency = typeof creatorFrequencies.$inferInsert;
+
+/**
+ * Platform default vocabulary — the fallback visual vocabulary used when a
+ * creator has not completed Find Your Frequency.
+ * A single record is maintained; version is incremented on updates.
+ */
+export const platformDefaultVocabulary = mysqlTable("platform_default_vocabulary", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Structured vocabulary JSON: same format as creatorFrequencies.vocabularyJson */
+  vocabularyJson: json("vocabularyJson").notNull(),
+  /** Version number — increment when vocabulary is updated */
+  version: int("version").default(1).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PlatformDefaultVocabulary = typeof platformDefaultVocabulary.$inferSelect;
+export type InsertPlatformDefaultVocabulary = typeof platformDefaultVocabulary.$inferInsert;
