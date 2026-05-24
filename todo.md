@@ -236,3 +236,14 @@
 - [x] Seed platform default vocabulary record
 - [x] Seed Blooming Frontier frequency record for owner
 - [x] Write vitest coverage for all new DB helpers
+
+### Phase L: Cover Art Prompt Builder
+- [x] Create server/coverArt/ directory
+- [x] Write coverArtPromptBuilder.ts — ArcPosition types, VocabularyJson types, CoverArtPromptInput/Output types
+- [x] Implement ARC_FRAMING sentences for gathering / arriving / open
+- [x] Implement ARC_WEIGHTS — per-category term counts for each arc position
+- [x] Implement buildCoverArtPrompt() — 8-layer assembly with 900-char truncation guard
+- [x] Implement extractLyricPhrases() — LLM-based lyric pre-processing (async, graceful fallback)
+- [x] Implement resolveVocabulary() — fallback hierarchy (personal → platform default)
+- [x] Write 34 vitest tests covering arc framing, weighting, lyric phrases, production context, char limit, vocabulary integrity, and full pipeline smoke tests
+- [x] All 122 tests passing (34 new Phase L tests)
