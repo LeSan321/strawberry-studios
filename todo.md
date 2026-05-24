@@ -267,3 +267,15 @@
 - [x] Regenerate flow — isRegeneration: true, blocked when limit reached with Lock icon
 - [x] Integrate CoverArtCard into Campaigns detail page — sidebar layout alongside campaign brief
 - [x] Loading overlay (spinner), error toasts, empty placeholder state
+
+### Phase O: Find Your Frequency Onboarding
+- [x] Build frequency.synthesize tRPC procedure (LLM vocabulary synthesis from 4 diagnostic answers)
+- [x] Build frequency.save tRPC procedure (persist CreatorFrequency record, set as default)
+- [x] Build frequency.getDefault tRPC procedure (return current default frequency for user)
+- [x] Build FindYourFrequency 5-screen UI: Question 1 (sound/space), Question 2 (light/color), Question 3 (world/texture), Question 4 (arc/time)
+- [x] Build Reflection screen — LLM-generated paragraph from the 4 answers
+- [x] Build Vocabulary Preview screen — 6-category vocabulary display with edit capability
+- [x] Build Name Your Frequency screen — text input + save button
+- [x] Add entry point to UI — "My Frequency" nav link in Home.tsx navigation
+- [x] Wire completed frequency into coverArt.generate procedure (resolveVocabulary already uses user's default — confirmed)
+- [x] Write vitest coverage for synthesize procedure and vocabulary structure validation (13 tests)

@@ -10,6 +10,7 @@ import { generateVideo, pollVideoStatus, getActiveProvider } from "./videoGenera
 import { buildCinématiqueVideoPrompt } from "./cinematiquePromptBuilder";
 import { campaignsRouter } from "./routers/campaigns";
 import { coverArtRouter } from "./routers/coverArt";
+import { frequencyRouter } from "./routers/frequency";
 import {
   createConcert,
   getConcertsByUser,
@@ -697,6 +698,7 @@ export const appRouter = router({
 
   campaigns: campaignsRouter,
   coverArt: coverArtRouter,
+  frequency: frequencyRouter,
 });
 
 export type AppRouter = typeof appRouter;

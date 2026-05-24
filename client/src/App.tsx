@@ -11,6 +11,7 @@ import Library from "./pages/Library";
 import PresetLibrary from "./pages/PresetLibrary";
 import ConcertTicket from "./pages/ConcertTicket";
 import Campaigns from "./pages/Campaigns";
+import FindYourFrequency from "./pages/FindYourFrequency";
 
 function Router() {
   return (
@@ -23,6 +24,7 @@ function Router() {
       <Route path={"/presets"} component={PresetLibrary} />
       <Route path={"/concert/:slug"} component={ConcertTicket} />
       <Route path={"/campaigns"} component={Campaigns} />
+      <Route path={"/frequency"} component={FindYourFrequency} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
