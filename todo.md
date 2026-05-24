@@ -256,3 +256,14 @@
 - [x] Implement 3-regeneration cap (no reset) in generate procedure — atomic SQL LEAST() increment
 - [x] Wire coverArt router into main routers.ts
 - [x] Write vitest coverage for generation procedure and regeneration cap (16 tests, upload-to-reset loop prevention verified)
+
+### Phase N: Cover Art UI
+- [x] Build CoverArtCard component — cover art display (1:1 square), placeholder state, loading overlay
+- [x] Arc position selector — Gathering / Arriving / Open three-button toggle with tooltips
+- [x] Edit menu — three-option dropdown: Upload Image, Generate Cover Art, Regenerate
+- [x] Regeneration limit indicator — dot bar shows used/remaining regenerations
+- [x] Upload flow — file input, S3 upload via /api/mood-board/upload, setFromUpload mutation
+- [x] Generate flow — calls coverArt.generate with arc position, lyrics, genre
+- [x] Regenerate flow — isRegeneration: true, blocked when limit reached with Lock icon
+- [x] Integrate CoverArtCard into Campaigns detail page — sidebar layout alongside campaign brief
+- [x] Loading overlay (spinner), error toasts, empty placeholder state

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Film, Plus, ChevronRight, Clapperboard, Palette, Camera, Zap, Music, Clock, Target, Trash2, Download, Share2, Eye, RefreshCw, Pencil, ImagePlus, X, Star, Link, Upload } from "lucide-react";
+import { CoverArtCard } from "@/components/CoverArtCard";
 
 // ── Genre definitions (mirrors server) ───────────────────────────────────────
 
@@ -645,6 +646,48 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
               <Clapperboard className="w-4 h-4" />
               {generatePackageMutation.isPending ? "Generating Package..." : "Generate Director's Package"}
             </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Cover Art + Campaign Info — side by side */}
+      <div className="flex gap-6 items-start">
+        {/* Cover Art Card */}
+        <div className="shrink-0 w-[280px]">
+          <div className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Cover Art</div>
+          <CoverArtCard
+            campaignId={campaignId}
+            coverArtUrl={campaign.coverArtUrl}
+            coverArtSource={campaign.coverArtSource ?? "none"}
+            arcPosition={(campaign.arcPosition as "gathering" | "arriving" | "open") ?? "arriving"}
+            coverArtRegenerationsUsed={campaign.coverArtRegenerationsUsed ?? 0}
+            genre={campaign.genre}
+            onCoverArtChanged={() => refetch()}
+            onArcPositionChanged={(_pos) => {
+              // Arc position is saved on the campaign record via the generate call
+              // No separate save needed — it's passed at generation time
+            }}
+          />
+        </div>
+
+        {/* Campaign brief / notes */}
+        <div className="flex-1 min-w-0 space-y-3">
+          {campaign.brief && (
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-4">
+              <div className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Campaign Brief</div>
+              <p className="text-zinc-300 text-sm leading-relaxed">{campaign.brief}</p>
+            </div>
+          )}
+          {campaign.characterNotes && (
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-4">
+              <div className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Character Notes</div>
+              <p className="text-zinc-300 text-sm leading-relaxed">{campaign.characterNotes}</p>
+            </div>
+          )}
+          {!campaign.brief && !campaign.characterNotes && (
+            <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-lg p-4">
+              <p className="text-zinc-600 text-sm italic">No brief or character notes added.</p>
+            </div>
           )}
         </div>
       </div>
