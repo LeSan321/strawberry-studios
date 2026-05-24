@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `campaigns` ADD `coverArtUrl` text;\nALTER TABLE `campaigns` ADD `coverArtSource` enum('generated','uploaded','none') DEFAULT 'none' NOT NULL;\nALTER TABLE `campaigns` ADD `coverArtGeneratedAt` bigint;\nALTER TABLE `campaigns` ADD `coverArtRegenerationsUsed` int DEFAULT 0 NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute ALTER TABLE `campaigns` ADD `coverArtUrl` text;\nALTER TABLE `campaigns` ADD `coverArtSource` enum('generated','uploaded','none') DEFAULT 'none' NOT NULL;\nALTER TABLE `campaigns` ADD `coverArtGeneratedAt` bigint;\nALTER TABLE `campaigns` ADD `coverArtRegenerationsUsed` int DEFAULT 0 NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1022
+}

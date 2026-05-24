@@ -1,4 +1,4 @@
-import { boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { bigint, boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -255,6 +255,26 @@ export const campaigns = mysqlTable("campaigns", {
   arcPosition: mysqlEnum("arcPosition", ["gathering", "arriving", "open"]).default("arriving").notNull(),
   /** Optional link to the creator's active frequency used for this campaign */
   frequencyId: int("frequencyId"),
+  /**
+   * Cover art URL — S3/CDN URL of the generated or uploaded cover art image.
+   * Null means no cover art has been set yet.
+   */
+  coverArtUrl: text("coverArtUrl"),
+  /**
+   * Cover art source — how the cover art was set.
+   * 'generated' = AI-generated via the prompt builder pipeline
+   * 'uploaded' = manually uploaded by the creator
+   * 'none' = no cover art set
+   */
+  coverArtSource: mysqlEnum("coverArtSource", ["generated", "uploaded", "none"]).default("none").notNull(),
+  /** UTC ms timestamp of the last successful cover art generation */
+  coverArtGeneratedAt: bigint("coverArtGeneratedAt", { mode: "number" }),
+  /**
+   * Number of times cover art has been regenerated for this campaign.
+   * Capped at 3. Never resets — not even if the creator uploads their own image.
+   * This prevents the upload-to-reset loop.
+   */
+  coverArtRegenerationsUsed: int("coverArtRegenerationsUsed").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

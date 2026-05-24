@@ -247,3 +247,12 @@
 - [x] Implement resolveVocabulary() — fallback hierarchy (personal → platform default)
 - [x] Write 34 vitest tests covering arc framing, weighting, lyric phrases, production context, char limit, vocabulary integrity, and full pipeline smoke tests
 - [x] All 122 tests passing (34 new Phase L tests)
+
+### Phase M: Cover Art Generation Procedure
+- [x] Add coverArtUrl, coverArtSource, coverArtGeneratedAt, coverArtRegenerationsUsed columns to campaigns schema
+- [x] Generate migration SQL and apply via webdev_execute_sql
+- [x] Add DB helpers: getCampaignCoverArt, setCampaignCoverArtFromUpload, setCampaignCoverArtFromGeneration, COVER_ART_REGEN_LIMIT
+- [x] Build server/coverArt/router.ts with coverArt.getState, coverArt.generate, coverArt.setFromUpload procedures
+- [x] Implement 3-regeneration cap (no reset) in generate procedure — atomic SQL LEAST() increment
+- [x] Wire coverArt router into main routers.ts
+- [x] Write vitest coverage for generation procedure and regeneration cap (16 tests, upload-to-reset loop prevention verified)

@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { drizzle as drizzleMysql2 } from "drizzle-orm/mysql2";
 import {
   InsertAudioTrack,
@@ -429,5 +429,96 @@ export async function upsertPlatformDefaultVocabulary(
       .where(eq(platformDefaultVocabulary.id, existing.id));
   } else {
     await db.insert(platformDefaultVocabulary).values({ vocabularyJson, version: 1 });
+  }
+}
+
+// ─── Cover Art ────────────────────────────────────────────────────────────────
+
+export type CoverArtState = {
+  coverArtUrl: string | null;
+  coverArtSource: "generated" | "uploaded" | "none";
+  coverArtGeneratedAt: number | null;
+  coverArtRegenerationsUsed: number;
+};
+
+/** Maximum number of cover art regenerations allowed per campaign. Never resets. */
+export const COVER_ART_REGEN_LIMIT = 3;
+
+/**
+ * Get the current cover art state for a campaign.
+ * Returns null if the campaign does not exist.
+ */
+export async function getCampaignCoverArt(
+  campaignId: number
+): Promise<CoverArtState | null> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await db
+    .select({
+      coverArtUrl: campaigns.coverArtUrl,
+      coverArtSource: campaigns.coverArtSource,
+      coverArtGeneratedAt: campaigns.coverArtGeneratedAt,
+      coverArtRegenerationsUsed: campaigns.coverArtRegenerationsUsed,
+    })
+    .from(campaigns)
+    .where(eq(campaigns.id, campaignId))
+    .limit(1);
+  if (!rows[0]) return null;
+  return rows[0] as CoverArtState;
+}
+
+/**
+ * Set cover art from an upload. Does NOT increment the regeneration count.
+ * The upload-to-reset loop is explicitly prevented by design — the regen
+ * count is per campaign and never resets under any circumstance.
+ */
+export async function setCampaignCoverArtFromUpload(
+  campaignId: number,
+  coverArtUrl: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(campaigns).set({
+    coverArtUrl,
+    coverArtSource: "uploaded",
+    coverArtGeneratedAt: null,
+    // coverArtRegenerationsUsed is intentionally NOT reset
+  }).where(eq(campaigns.id, campaignId));
+}
+
+/**
+ * Set cover art from a generation.
+ *
+ * - First generation (coverArtSource was 'none'): sets URL and source, does NOT
+ *   increment the regen count (the first generation is not a "regeneration").
+ * - Subsequent generations: increments regen count atomically, capped at COVER_ART_REGEN_LIMIT.
+ *
+ * Throws a REGENERATION_LIMIT_REACHED error if the limit has already been reached.
+ */
+export async function setCampaignCoverArtFromGeneration(
+  campaignId: number,
+  coverArtUrl: string,
+  isFirstGeneration: boolean
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  if (isFirstGeneration) {
+    await db.update(campaigns).set({
+      coverArtUrl,
+      coverArtSource: "generated",
+      coverArtGeneratedAt: Date.now(),
+    }).where(eq(campaigns.id, campaignId));
+  } else {
+    // Atomic increment with cap — uses drizzle sql template for type safety
+    const now = Date.now();
+    await db.execute(
+      sql`UPDATE campaigns
+          SET coverArtUrl = ${coverArtUrl},
+              coverArtSource = 'generated',
+              coverArtGeneratedAt = ${now},
+              coverArtRegenerationsUsed = LEAST(coverArtRegenerationsUsed + 1, ${COVER_ART_REGEN_LIMIT})
+          WHERE id = ${campaignId}`
+    );
   }
 }

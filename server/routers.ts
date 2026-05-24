@@ -9,6 +9,7 @@ import { z } from "zod";
 import { generateVideo, pollVideoStatus, getActiveProvider } from "./videoGeneration";
 import { buildCinématiqueVideoPrompt } from "./cinematiquePromptBuilder";
 import { campaignsRouter } from "./routers/campaigns";
+import { coverArtRouter } from "./routers/coverArt";
 import {
   createConcert,
   getConcertsByUser,
@@ -695,6 +696,7 @@ export const appRouter = router({
   // ─── Campaigns ────────────────────────────────────────────────────────────────────────────────
 
   campaigns: campaignsRouter,
+  coverArt: coverArtRouter,
 });
 
 export type AppRouter = typeof appRouter;
