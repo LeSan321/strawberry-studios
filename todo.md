@@ -279,3 +279,15 @@
 - [x] Add entry point to UI — "My Frequency" nav link in Home.tsx navigation
 - [x] Wire completed frequency into coverArt.generate procedure (resolveVocabulary already uses user's default — confirmed)
 - [x] Write vitest coverage for synthesize procedure and vocabulary structure validation (13 tests)
+
+### Phase P: Free Tier Auto-Generate at Publish
+- [x] Add countCampaignsByUser DB helper to db.ts
+- [x] Add campaigns.publish tRPC procedure with ownership check, 8-published-song limit, and isPublic toggle
+- [x] Tier detection: free = role 'user', premium = role 'admin'
+- [x] Wire silent auto-generate trigger into publish procedure (fire and forget, free-tier only, one-time)
+- [x] Auto-generate uses: platform default vocabulary, lyrics from campaign, arriving arc position
+- [x] One-time only — fires only when coverArtUrl is null AND coverArtRegenerationsUsed === 0
+- [x] Premium users bypass song limit and auto-generate
+- [x] Soft landing message: "You've built something real here — N songs and counting. Upgrade to keep going and unlock your full Visual Universe."
+- [x] Add Publish Campaign button to CampaignDetail UI (calls campaigns.publish, shows Published badge when live)
+- [x] Write vitest coverage for publish procedure and song limit logic (11 tests, 162 total passing)

@@ -532,6 +532,14 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
     }
   };
 
+  const publishMutation = trpc.campaigns.publish.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success("Campaign published — it's now visible to the world.");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const generatePackageMutation = trpc.campaigns.generatePackage.useMutation({
     onSuccess: () => {
       refetch();
@@ -646,6 +654,21 @@ function CampaignDetail({ campaignId, onBack }: { campaignId: number; onBack: ()
               <Clapperboard className="w-4 h-4" />
               {generatePackageMutation.isPending ? "Generating Package..." : "Generate Director's Package"}
             </Button>
+          )}
+          {!campaign.isPublic && campaign.status !== "draft" && (
+            <Button
+              onClick={() => publishMutation.mutate({ campaignId })}
+              disabled={publishMutation.isPending}
+              className="bg-emerald-700 hover:bg-emerald-600 gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              {publishMutation.isPending ? "Publishing..." : "Publish Campaign"}
+            </Button>
+          )}
+          {campaign.isPublic && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md bg-emerald-900/40 border border-emerald-700/50 text-emerald-400">
+              <Eye className="w-3 h-3" /> Published
+            </span>
           )}
         </div>
       </div>

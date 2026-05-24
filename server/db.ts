@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, sql } from "drizzle-orm";
 import { drizzle as drizzleMysql2 } from "drizzle-orm/mysql2";
 import {
   InsertAudioTrack,
@@ -195,6 +195,13 @@ export async function getCampaignsByUser(userId: number): Promise<Campaign[]> {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(campaigns).where(eq(campaigns.userId, userId)).orderBy(desc(campaigns.createdAt));
+}
+
+export async function countCampaignsByUser(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ value: count() }).from(campaigns).where(eq(campaigns.userId, userId));
+  return result[0]?.value ?? 0;
 }
 
 export async function getCampaignById(id: number): Promise<Campaign | null> {

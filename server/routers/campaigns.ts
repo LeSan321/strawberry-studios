@@ -24,15 +24,18 @@ import {
 import {
   addMoodBoardImage,
   clearPrimaryMoodBoardImage,
+  countCampaignsByUser,
   createCampaign,
   createCampaignShot,
   deleteCampaign,
   getCampaignById,
   getCampaignBySlug,
+  getCampaignCoverArt,
   getCampaignShots,
   getCampaignsByUser,
   getMoodBoardImages,
   removeMoodBoardImage,
+  setCampaignCoverArtFromGeneration,
   setPrimaryMoodBoardImage,
   updateCampaign,
   updateCampaignShot,
@@ -765,5 +768,94 @@ Generate the complete Director's Package as a JSON object. Every field is requir
       if (campaign.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
       await clearPrimaryMoodBoardImage(input.campaignId);
       return { cleared: true };
+    }),
+
+  /**
+   * Publish a campaign (set isPublic: true).
+   *
+   * Free-tier users (role === 'user'):
+   * - Enforces the 8-published-song limit with a soft-landing message.
+   * - Silently auto-generates cover art if none exists yet (one-time, platform
+   *   default vocabulary + lyrics, 'arriving' arc position). Fire-and-forget —
+   *   never blocks the publish response.
+   *
+   * Premium users (role === 'admin'):
+   * - No song limit.
+   * - No auto-generate (they control art via CoverArtCard).
+   */
+  publish: protectedProcedure
+    .input(
+      z.object({
+        campaignId: z.number(),
+        /** Optional lyrics passed to the auto-generate pipeline for free-tier users. */
+        lyrics: z.string().max(10000).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { campaignId, lyrics } = input;
+      const userId = ctx.user.id;
+      const isPremium = ctx.user.role === "admin";
+
+      // 1. Verify ownership ────────────────────────────────────────────────────
+      const campaign = await getCampaignById(campaignId);
+      if (!campaign) throw new TRPCError({ code: "NOT_FOUND" });
+      if (campaign.userId !== userId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      // 2. Free-tier: enforce 8-published-song limit ───────────────────────────
+      const FREE_TIER_SONG_LIMIT = 8;
+      if (!isPremium) {
+        const allCampaigns = await getCampaignsByUser(userId);
+        const publishedCount = allCampaigns.filter((c) => c.isPublic && c.id !== campaignId).length;
+        if (publishedCount >= FREE_TIER_SONG_LIMIT) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              `You've built something real here \u2014 ${publishedCount} songs and counting. ` +
+              `Upgrade to keep going and unlock your full Visual Universe.`,
+          });
+        }
+      }
+
+      // 3. Mark as public ──────────────────────────────────────────────────────
+      await updateCampaign(campaignId, { isPublic: true });
+
+      // 4. Free-tier: silent one-time auto-generate (fire and forget) ──────────
+      if (!isPremium) {
+        const coverArtState = await getCampaignCoverArt(campaignId);
+        const hasNoCoverArt = !coverArtState?.coverArtUrl;
+        const hasNotGeneratedBefore = (coverArtState?.coverArtRegenerationsUsed ?? 0) === 0;
+
+        if (hasNoCoverArt && hasNotGeneratedBefore) {
+          void (async () => {
+            try {
+              const { resolveVocabulary, extractLyricPhrases, buildCoverArtPrompt } =
+                await import("../coverArt/promptBuilder");
+              const { generateImage } = await import("../_core/imageGeneration");
+
+              const { vocabulary } = await resolveVocabulary(userId);
+              let lyricPhrases: string[] = [];
+              if (lyrics && lyrics.trim().length > 0) {
+                lyricPhrases = await extractLyricPhrases(lyrics);
+              }
+              const { prompt } = buildCoverArtPrompt({
+                vocabulary,
+                arcPosition: "arriving",
+                lyricPhrases,
+                genre: campaign.genre ?? undefined,
+              });
+              const result = await generateImage({ prompt });
+              if (result.url) {
+                await setCampaignCoverArtFromGeneration(campaignId, result.url, false);
+                console.log(`[publish] Auto-generated cover art for campaign ${campaignId} (free tier)`);
+              }
+            } catch (err) {
+              // Silent failure — never block the publish response
+              console.warn(`[publish] Auto-generate cover art failed for campaign ${campaignId}:`, err);
+            }
+          })();
+        }
+      }
+
+      return { published: true, campaignId };
     }),
 });
