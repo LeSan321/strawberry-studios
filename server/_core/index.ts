@@ -10,6 +10,7 @@ import { serveStatic, setupVite } from "./vite";
 import { registerAudioUploadRoute } from "../audioUploadRoute";
 import { registerCampaignPdfRoute } from "../campaignPdfRoute";
 import { registerMoodBoardUploadRoute } from "../moodBoardUploadRoute";
+import { registerBridgeRoutes } from "../bridgeRoutes";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -44,6 +45,8 @@ async function startServer() {
   registerCampaignPdfRoute(app);
   // Mood board image upload
   registerMoodBoardUploadRoute(app);
+  // Riff Bridge API — authenticated REST endpoints for cross-app communication
+  registerBridgeRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",

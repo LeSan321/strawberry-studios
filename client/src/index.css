@@ -4,53 +4,124 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================
-   STRAWBERRY STUDIOS — DARK NOIR DESIGN SYSTEM
+   STRAWBERRY STUDIOS — RIFF DESIGN SYSTEM
+   Same building. Another room.
    ============================================ */
 
 @theme inline {
-  /* Noir Color Palette */
-  --color-background: oklch(0.08 0.01 270);
-  --color-foreground: oklch(0.92 0.02 60);
-  --color-card: oklch(0.11 0.01 270);
-  --color-card-foreground: oklch(0.92 0.02 60);
-  --color-popover: oklch(0.10 0.01 270);
-  --color-popover-foreground: oklch(0.92 0.02 60);
-  /* Strawberry Riff Brand — Deep Crimson & Amber */
-  --color-primary: oklch(0.52 0.22 18);
-  --color-primary-foreground: oklch(0.97 0.01 60);
-  --color-secondary: oklch(0.15 0.02 270);
-  --color-secondary-foreground: oklch(0.85 0.04 60);
-  --color-muted: oklch(0.14 0.01 270);
-  --color-muted-foreground: oklch(0.70 0.03 60);
-  --color-accent: oklch(0.62 0.14 55);
-  --color-accent-foreground: oklch(0.08 0.01 270);
-  --color-destructive: oklch(0.52 0.22 18);
-  --color-destructive-foreground: oklch(0.97 0.01 60);
-  --color-border: oklch(0.20 0.02 270);
-  --color-input: oklch(0.14 0.01 270);
-  --color-ring: oklch(0.52 0.22 18);
-  /* Noir Gold & Smoke */
-  --color-gold: oklch(0.75 0.12 75);
-  --color-gold-dim: oklch(0.55 0.09 75);
-  --color-smoke: oklch(0.35 0.02 270);
-  /* Radius */
-  --radius: 0.25rem;
-  --radius-sm: 0.125rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  /* Sidebar (dark noir) */
-  --color-sidebar: oklch(0.10 0.01 270);
-  --color-sidebar-foreground: oklch(0.85 0.02 60);
-  --color-sidebar-primary: oklch(0.52 0.22 18);
-  --color-sidebar-primary-foreground: oklch(0.97 0.01 60);
-  --color-sidebar-accent: oklch(0.15 0.02 270);
-  --color-sidebar-accent-foreground: oklch(0.85 0.04 60);
-  --color-sidebar-border: oklch(0.20 0.02 270);
-  --color-sidebar-ring: oklch(0.52 0.22 18);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* No :root overrides needed — all tokens defined in @theme inline above */
+:root {
+  /* Strawberry Studios — Riff Design System (Deep Berry-Plum) */
+  --primary: oklch(0.62 0.22 340);        /* raspberry pink — matches Riff CTA */
+  --primary-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.62 0.22 340);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --chart-1: oklch(0.70 0.22 340);
+  --chart-2: oklch(0.65 0.22 310);
+  --chart-3: oklch(0.60 0.20 280);
+  --chart-4: oklch(0.55 0.18 260);
+  --chart-5: oklch(0.50 0.16 240);
+  --radius: 0.75rem;
+  /* Deep berry-plum backgrounds — identical to Riff */
+  --background: oklch(0.115 0.055 320);   /* #0f0614 — deepest plum */
+  --foreground: oklch(0.93 0.018 320);    /* #f0e8f5 — warm near-white */
+  --card: oklch(0.145 0.055 320);         /* #160b1e — card surface */
+  --card-foreground: oklch(0.93 0.018 320);
+  --popover: oklch(0.155 0.055 320);      /* #1e1028 — elevated surface */
+  --popover-foreground: oklch(0.93 0.018 320);
+  --secondary: oklch(0.185 0.055 320);
+  --secondary-foreground: oklch(0.80 0.025 320);
+  --muted: oklch(0.175 0.048 320);
+  --muted-foreground: oklch(0.62 0.04 320); /* #b89ec8 — muted lavender */
+  --accent: oklch(0.22 0.08 300);         /* purple-tinted elevated */
+  --accent-foreground: oklch(0.90 0.02 320);
+  --destructive: oklch(0.60 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.22 0.065 310);        /* #2e1a3a — subtle plum border */
+  --input: oklch(0.22 0.065 310);
+  --ring: oklch(0.62 0.22 340);
+  --sidebar: oklch(0.145 0.055 320);
+  --sidebar-foreground: oklch(0.93 0.018 320);
+  --sidebar-accent: oklch(0.22 0.08 300);
+  --sidebar-accent-foreground: oklch(0.90 0.02 320);
+  --sidebar-border: oklch(0.22 0.065 310);
+  --sidebar-ring: oklch(0.62 0.22 340);
+}
+
+.dark {
+  /* Dark variant — warm radial berry-plum palette (matches Riff .dark) */
+  --primary: oklch(0.68 0.22 340);
+  --primary-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.68 0.22 340);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --background: #0f0614;
+  --foreground: #f0e8f5;
+  --card: #160b1e;
+  --card-foreground: #f0e8f5;
+  --popover: #1e1028;
+  --popover-foreground: #f0e8f5;
+  --secondary: #1e1028;
+  --secondary-foreground: #c9b8d8;
+  --muted: #1a0f24;
+  --muted-foreground: #8a7098;
+  --accent: #2a1840;
+  --accent-foreground: #e8dff0;
+  --destructive: oklch(0.65 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: #2e1a3a;
+  --input: #2e1a3a;
+  --ring: oklch(0.68 0.22 340);
+  --chart-1: oklch(0.75 0.22 340);
+  --chart-2: oklch(0.70 0.22 310);
+  --chart-3: oklch(0.65 0.20 280);
+  --chart-4: oklch(0.60 0.18 260);
+  --chart-5: oklch(0.55 0.16 240);
+  --sidebar: #160b1e;
+  --sidebar-foreground: #f0e8f5;
+  --sidebar-accent: #2a1840;
+  --sidebar-accent-foreground: #e8dff0;
+  --sidebar-border: #2e1a3a;
+  --sidebar-ring: oklch(0.68 0.22 340);
+}
 
 @layer base {
   * {
@@ -58,14 +129,19 @@
   }
   html { @apply scroll-smooth; }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply text-foreground font-sans antialiased;
+    /* Riff-matched radial gradient — warm plum from left, echo at bottom-right */
+    background-color: #0f0614;
     background-image:
-      radial-gradient(ellipse at 20% 50%, oklch(0.18 0.04 18 / 0.12) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, oklch(0.18 0.03 55 / 0.08) 0%, transparent 50%);
+      radial-gradient(ellipse 55% 45% at 92% 95%, #2a0838 0%, transparent 70%),
+      radial-gradient(ellipse 120% 90% at 15% 45%, #4a1468 0%, #2a0a3a 35%, #160824 65%, #0a0010 100%);
+    background-attachment: fixed;
     min-height: 100vh;
   }
-  h1, h2, h3 { font-family: "Cinzel Decorative", "Cinzel", serif; letter-spacing: 0.06em; }
-  h4, h5, h6 { font-family: "Cormorant Garamond", "Georgia", serif; letter-spacing: 0.04em; }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),
@@ -80,79 +156,67 @@
 }
 
 /* ============================================
-   NOIR UTILITY CLASSES
+   STUDIOS UTILITY CLASSES
    ============================================ */
 
 @layer utilities {
-  .glow-crimson { box-shadow: 0 0 20px oklch(0.52 0.22 18 / 0.4), 0 0 60px oklch(0.52 0.22 18 / 0.15); }
-  .glow-gold { box-shadow: 0 0 20px oklch(0.75 0.12 75 / 0.3), 0 0 60px oklch(0.75 0.12 75 / 0.10); }
-  .glow-text-gold { text-shadow: 0 0 20px oklch(0.75 0.12 75 / 0.6), 0 0 40px oklch(0.75 0.12 75 / 0.3); }
-  .glow-text-crimson { text-shadow: 0 0 20px oklch(0.52 0.22 18 / 0.8), 0 0 40px oklch(0.52 0.22 18 / 0.4); }
-  .font-display { font-family: "Cinzel Decorative", "Cinzel", serif; }
-  .font-serif { font-family: "Cormorant Garamond", "Georgia", serif; }
-  .noir-card {
-    background: linear-gradient(135deg, oklch(0.12 0.01 270) 0%, oklch(0.09 0.01 270) 100%);
-    border: 1px solid oklch(0.22 0.03 18 / 0.4);
-    box-shadow: 0 4px 24px oklch(0.08 0.01 270 / 0.8), inset 0 1px 0 oklch(0.30 0.04 60 / 0.1);
+  /* Glow effects — plum/raspberry palette */
+  .glow-primary { box-shadow: 0 0 20px oklch(0.62 0.22 340 / 0.4), 0 0 60px oklch(0.62 0.22 340 / 0.15); }
+  .glow-accent { box-shadow: 0 0 20px oklch(0.22 0.08 300 / 0.5), 0 0 60px oklch(0.22 0.08 300 / 0.2); }
+  .glow-text-primary { text-shadow: 0 0 20px oklch(0.62 0.22 340 / 0.6), 0 0 40px oklch(0.62 0.22 340 / 0.3); }
+
+  /* Studios-specific card style — plum tinted */
+  .studios-card {
+    background: linear-gradient(135deg, #160b1e 0%, #0f0614 100%);
+    border: 1px solid #2e1a3a;
+    box-shadow: 0 4px 24px rgba(15, 6, 20, 0.8), inset 0 1px 0 rgba(232, 64, 106, 0.06);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
-  .noir-card:hover {
-    border-color: oklch(0.52 0.22 18 / 0.5);
-    box-shadow: 0 8px 32px oklch(0.08 0.01 270 / 0.9), 0 0 20px oklch(0.52 0.22 18 / 0.15);
+  .studios-card:hover {
+    border-color: oklch(0.62 0.22 340 / 0.4);
+    box-shadow: 0 8px 32px rgba(15, 6, 20, 0.9), 0 0 20px oklch(0.62 0.22 340 / 0.12);
   }
-  .rim-light { box-shadow: inset 0 0 0 1px oklch(0.62 0.14 55 / 0.3), 0 0 40px oklch(0.62 0.14 55 / 0.2); }
-  .venetian-shadow {
-    background: repeating-linear-gradient(
-      0deg, transparent, transparent 8px,
-      oklch(0.08 0.01 270 / 0.6) 8px, oklch(0.08 0.01 270 / 0.6) 12px
-    );
+
+  /* Step indicators */
+  .step-active { background: oklch(0.62 0.22 340); box-shadow: 0 0 12px oklch(0.62 0.22 340 / 0.6); }
+  .step-complete { background: oklch(0.65 0.20 280); box-shadow: 0 0 8px oklch(0.65 0.20 280 / 0.4); }
+
+  /* Gradient text — raspberry to violet */
+  .gradient-text {
+    background: linear-gradient(135deg, oklch(0.68 0.22 340) 0%, oklch(0.65 0.22 310) 50%, oklch(0.60 0.20 280) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  .step-active { background: oklch(0.52 0.22 18); box-shadow: 0 0 12px oklch(0.52 0.22 18 / 0.6); }
-  .step-complete { background: oklch(0.62 0.14 55); box-shadow: 0 0 8px oklch(0.62 0.14 55 / 0.4); }
+
+  /* Animation utilities */
+  .animate-fade-up { animation: fade-up 0.6s ease-out forwards; }
+  .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
+  .delay-100 { animation-delay: 0.1s; opacity: 0; }
+  .delay-200 { animation-delay: 0.2s; opacity: 0; }
+  .delay-300 { animation-delay: 0.3s; opacity: 0; }
+  .delay-400 { animation-delay: 0.4s; opacity: 0; }
+  .delay-500 { animation-delay: 0.5s; opacity: 0; }
 }
 
-/* Scrollbar */
+/* Scrollbar — plum tinted */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: oklch(0.10 0.01 270); }
-::-webkit-scrollbar-thumb { background: oklch(0.25 0.03 18 / 0.6); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: oklch(0.52 0.22 18 / 0.8); }
+::-webkit-scrollbar-track { background: #0f0614; }
+::-webkit-scrollbar-thumb { background: oklch(0.30 0.08 310 / 0.6); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.62 0.22 340 / 0.8); }
 
 /* Animations */
-@keyframes smoke-drift { 0%, 100% { opacity: 0.3; transform: translateY(0) scaleX(1); } 50% { opacity: 0.6; transform: translateY(-8px) scaleX(1.05); } }
-@keyframes flicker { 0%, 100% { opacity: 1; } 92% { opacity: 1; } 93% { opacity: 0.8; } 94% { opacity: 1; } 96% { opacity: 0.7; } 97% { opacity: 1; } }
-@keyframes amber-pulse { 0%, 100% { box-shadow: 0 0 20px oklch(0.62 0.14 55 / 0.3); } 50% { box-shadow: 0 0 35px oklch(0.62 0.14 55 / 0.5); } }
 @keyframes fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-.animate-smoke { animation: smoke-drift 6s ease-in-out infinite; }
-.animate-flicker { animation: flicker 8s ease-in-out infinite; }
-.animate-amber-pulse { animation: amber-pulse 3s ease-in-out infinite; }
-.animate-fade-up { animation: fade-up 0.6s ease-out forwards; }
-.animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
-.delay-100 { animation-delay: 0.1s; opacity: 0; }
-.delay-200 { animation-delay: 0.2s; opacity: 0; }
-.delay-300 { animation-delay: 0.3s; opacity: 0; }
-.delay-400 { animation-delay: 0.4s; opacity: 0; }
-.delay-500 { animation-delay: 0.5s; opacity: 0; }
+@keyframes pulse-ring { 0%, 100% { box-shadow: 0 0 0 0 oklch(0.62 0.22 340 / 0.0); } 50% { box-shadow: 0 0 0 6px oklch(0.62 0.22 340 / 0.2); } }
+.animate-pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
+    padding-left: 1rem;
     padding-right: 1rem;
   }
 
@@ -163,16 +227,16 @@
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
+      padding-left: 1.5rem;
       padding-right: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem; /* 32px - desktop padding */
+      padding-left: 2rem;
       padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
+      max-width: 1280px;
     }
   }
 }

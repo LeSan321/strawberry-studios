@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `users` ADD `riffUserId` int;\nALTER TABLE `users` ADD CONSTRAINT `users_riffUserId_unique` UNIQUE(`riffUserId`);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute ALTER TABLE `users` ADD `riffUserId` int;\nALTER TABLE `users` ADD CONSTRAINT `users_riffUserId_unique` UNIQUE(`riffUserId`);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 765
+}

@@ -327,8 +327,8 @@ export default function CreateConcert() {
                   onClick={() => updateState({ moodPreset: preset.id, lightingKelvin: preset.kelvin, cameraStyle: preset.camera })}
                   className={`text-left p-6 transition-all duration-300 ${
                     state.moodPreset === preset.id
-                      ? "border-primary bg-primary/10 glow-crimson"
-                      : "noir-card hover:border-primary/40"
+                      ? "border-primary bg-primary/10 glow-primary"
+                      : "studios-card hover:border-primary/40"
                   }`}
                   style={{ border: state.moodPreset === preset.id ? "1px solid oklch(0.52 0.22 18)" : undefined }}>
                   <div className="flex items-start justify-between mb-3">
@@ -383,7 +383,7 @@ export default function CreateConcert() {
                     className={`text-left p-6 transition-all duration-300 ${
                       state.visualPreset === preset.id
                         ? "border-accent bg-accent/10"
-                        : "noir-card hover:border-accent/40"
+                        : "studios-card hover:border-accent/40"
                     }`}
                     style={{ border: state.visualPreset === preset.id ? "1px solid oklch(0.62 0.14 55)" : undefined }}>
                     <div className="flex items-start justify-between mb-2">
@@ -440,7 +440,7 @@ export default function CreateConcert() {
                     key={char.id}
                     onClick={() => toggleCharacter(char.id)}
                     className={`text-left p-6 transition-all duration-300 ${
-                      isSelected ? "border-accent bg-accent/10" : "noir-card hover:border-accent/40"
+                      isSelected ? "border-accent bg-accent/10" : "studios-card hover:border-accent/40"
                     }`}
                     style={{ border: isSelected ? "1px solid oklch(0.62 0.14 55)" : undefined }}>
                     <div className="w-12 h-12 rounded-full mb-4 flex items-center justify-center"
@@ -533,7 +533,7 @@ export default function CreateConcert() {
             <button
               onClick={handleSubmit}
               disabled={createConcertMutation.isPending || submitted || !state.title}
-              className="px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase hover:bg-primary/90 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed glow-crimson">
+              className="px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase hover:bg-primary/90 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed glow-primary">
               {createConcertMutation.isPending ? "Consulting the Council..." : "Produce Concert →"}
             </button>
           )}

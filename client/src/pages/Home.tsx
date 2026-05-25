@@ -70,7 +70,7 @@ export default function Home() {
               backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 40px, oklch(0.08 0.01 270 / 0.8) 40px, oklch(0.08 0.01 270 / 0.8) 44px)"
             }} />
           {/* Smoke drift */}
-          <div className="absolute bottom-0 left-0 right-0 h-64 animate-smoke opacity-30"
+          <div className="absolute bottom-0 left-0 right-0 h-64  opacity-30"
             style={{
               background: "linear-gradient(to top, oklch(0.12 0.02 270 / 0.8), transparent)"
             }} />
@@ -93,7 +93,7 @@ export default function Home() {
           </p>
 
           {/* Main title */}
-          <h1 className="animate-fade-up delay-200 font-display text-5xl md:text-7xl lg:text-8xl text-foreground mb-2 leading-none glow-text-crimson">
+          <h1 className="animate-fade-up delay-200 font-display text-5xl md:text-7xl lg:text-8xl text-foreground mb-2 leading-none glow-text-primary">
             Strawberry
           </h1>
           <h1 className="animate-fade-up delay-300 font-display text-5xl md:text-7xl lg:text-8xl text-foreground mb-8 leading-none">
@@ -118,12 +118,12 @@ export default function Home() {
           <div className="animate-fade-up delay-500 flex flex-col sm:flex-row gap-4 justify-center items-center">
             {user ? (
               <Link href="/create"
-                className="group relative px-10 py-4 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-crimson">
+                className="group relative px-10 py-4 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-primary">
                 <span className="relative z-10">Enter the Studio</span>
               </Link>
             ) : (
               <a href={getLoginUrl()}
-                className="group relative px-10 py-4 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-crimson">
+                className="group relative px-10 py-4 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-primary">
                 <span className="relative z-10">Enter the Studio</span>
               </a>
             )}
@@ -155,7 +155,7 @@ export default function Home() {
                 {/* Atmospheric interior */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-8xl mb-4 opacity-20 animate-flicker">🎷</div>
+                    <div className="text-8xl mb-4 opacity-20 ">🎷</div>
                     <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent mx-auto" />
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export default function Home() {
                 icon: "🪨"
               }
             ].map(venue => (
-              <div key={venue.name} className="relative p-8 noir-card opacity-60">
+              <div key={venue.name} className="relative p-8 studios-card opacity-60">
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <span className="text-6xl opacity-5">{venue.icon}</span>
                 </div>
@@ -322,8 +322,8 @@ export default function Home() {
                 role: "Mysterious Figure"
               }
             ].map(char => (
-              <div key={char.name} className="noir-card p-8">
-                <div className="w-16 h-16 rounded-full mb-6 flex items-center justify-center animate-amber-pulse"
+              <div key={char.name} className="studios-card p-8">
+                <div className="w-16 h-16 rounded-full mb-6 flex items-center justify-center animate-pulse-ring"
                   style={{
                     background: "linear-gradient(135deg, oklch(0.18 0.04 18), oklch(0.12 0.02 55))",
                     border: "1px solid oklch(0.62 0.14 55 / 0.4)"
@@ -357,12 +357,12 @@ export default function Home() {
           </p>
           {user ? (
             <Link href="/create"
-              className="inline-flex items-center gap-3 px-12 py-5 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-crimson">
+              className="inline-flex items-center gap-3 px-12 py-5 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-primary">
               Begin Production
             </Link>
           ) : (
             <a href={getLoginUrl()}
-              className="inline-flex items-center gap-3 px-12 py-5 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-crimson">
+              className="inline-flex items-center gap-3 px-12 py-5 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-primary">
               Begin Production
             </a>
           )}

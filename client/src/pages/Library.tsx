@@ -171,7 +171,7 @@ function ConcertCard({ concert }: { concert: any }) {
     : "";
 
   return (
-    <div className="noir-card p-6">
+    <div className="studios-card p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           {/* Status row */}
@@ -515,7 +515,7 @@ export default function Library() {
             ) : (
               <div className="space-y-3">
                 {audioTracks.map(track => (
-                  <div key={track.id} className="noir-card p-5 flex items-center justify-between gap-4">
+                  <div key={track.id} className="studios-card p-5 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="w-10 h-10 flex items-center justify-center flex-shrink-0"
                         style={{ background: "oklch(0.15 0.02 270)", border: "1px solid oklch(0.62 0.14 55 / 0.3)" }}>

@@ -100,7 +100,7 @@ export default function ConcertTicket() {
           <p className="text-xs tracking-[0.4em] uppercase text-primary/70 mb-6 font-light">
             Strawberry Riff Presents
           </p>
-          <h1 className="font-display text-4xl md:text-6xl text-foreground mb-4 glow-text-crimson">
+          <h1 className="font-display text-4xl md:text-6xl text-foreground mb-4 glow-text-primary">
             {concert.title}
           </h1>
           {concert.artistName && (
@@ -134,7 +134,7 @@ export default function ConcertTicket() {
           {/* Share CTA */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button onClick={handleShare}
-              className="px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase hover:bg-primary/90 transition-all glow-crimson">
+              className="px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase hover:bg-primary/90 transition-all glow-primary">
               Share This Concert
             </button>
             <Link href="/"
@@ -164,7 +164,7 @@ export default function ConcertTicket() {
             <p className="text-xs tracking-[0.4em] uppercase text-primary/70 mb-8 font-light text-center">The Cast</p>
             <div className="flex flex-wrap gap-4 justify-center">
               {concert.characters.map((char: any) => (
-                <div key={char.id} className="noir-card px-6 py-4 text-center">
+                <div key={char.id} className="studios-card px-6 py-4 text-center">
                   <p className="text-xs tracking-wider uppercase text-muted-foreground/60 font-light mb-1">{char.role}</p>
                   <p className="font-display text-sm text-foreground">
                     {CHARACTER_LABELS[char.characterType] ?? char.characterType}
@@ -183,7 +183,7 @@ export default function ConcertTicket() {
             <p className="text-xs tracking-[0.4em] uppercase text-primary/70 mb-8 font-light text-center">Shot List</p>
             <div className="space-y-4">
               {dp.shotList.map((shot: any) => (
-                <div key={shot.shotNumber} className="noir-card p-6">
+                <div key={shot.shotNumber} className="studios-card p-6">
                   <div className="flex items-start gap-4">
                     <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 step-active rounded-full">
                       <span className="font-display text-xs text-primary-foreground">{shot.shotNumber}</span>
@@ -220,7 +220,7 @@ export default function ConcertTicket() {
                 { label: "Camera Psychology", value: dp.productionNotes.cameraPsychology },
                 { label: "Atmospheric Elements", value: dp.productionNotes.atmosphericElements },
               ].map(note => (
-                <div key={note.label} className="noir-card p-6">
+                <div key={note.label} className="studios-card p-6">
                   <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground/60 mb-3 font-light">{note.label}</p>
                   <p className="text-sm text-muted-foreground font-serif leading-relaxed">{note.value}</p>
                 </div>
@@ -302,7 +302,7 @@ export default function ConcertTicket() {
           Produce your own concert at the Velvet Strawberry Jazz Club. Part of the Strawberry Riff ecosystem.
         </p>
         <Link href="/"
-          className="inline-flex items-center gap-3 px-10 py-4 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all glow-crimson">
+          className="inline-flex items-center gap-3 px-10 py-4 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all glow-primary">
           Enter Strawberry Studios
         </Link>
       </section>

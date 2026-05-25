@@ -291,3 +291,15 @@
 - [x] Soft landing message: "You've built something real here — N songs and counting. Upgrade to keep going and unlock your full Visual Universe."
 - [x] Add Publish Campaign button to CampaignDetail UI (calls campaigns.publish, shows Published badge when live)
 - [x] Write vitest coverage for publish procedure and song limit logic (11 tests, 162 total passing)
+
+### Phase Q: Studios-Riff Bridge & Reskin
+- [x] Clone Riff repo and audit design tokens, component structure, and relevant pages
+- [x] Reskin Studios to match Riff design language (deep plum bg, raspberry pink accent, Space Grotesk + Inter fonts)
+- [x] Replace Velvet Strawberry noir utility classes (noir-card, glow-crimson, glow-gold) with Riff-matched equivalents
+- [x] Add riffUserId column to users table (migration applied)
+- [x] Build server/bridgeRoutes.ts — authenticated REST bridge endpoints: GET /frequency/:riffUserId, POST /frequency/synthesize, POST /frequency/save, POST /cover-art/generate
+- [x] Mount bridge routes in server/_core/index.ts
+- [x] Write riff_studios_bridge_handoff.md — precise Riff-side implementation document (9 sections, exact file paths and diffs)
+- [ ] Set BRIDGE_API_KEY secret in Studios (shared with Riff as STUDIOS_BRIDGE_KEY)
+- [ ] Set STUDIOS_BRIDGE_URL and STUDIOS_BRIDGE_KEY secrets in Riff project
+- [ ] Riff-side implementation (handled by Riff Manus instance — see handoff doc)

@@ -64,6 +64,13 @@
       "when": 1779659435883,
       "tag": "0008_rare_triathlon",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1779675622659,
+      "tag": "0009_tricky_iron_fist",
+      "breakpoints": true
     }
   ]
 }
