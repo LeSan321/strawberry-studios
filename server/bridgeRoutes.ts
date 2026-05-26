@@ -121,6 +121,13 @@ const GenerateCoverArtSchema = z.object({
 
 export function registerBridgeRoutes(app: Express): void {
   // ── GET /api/bridge/frequency/:riffUserId ──────────────────────────────────
+  // ─── Health Check ──────────────────────────────────────────────────────────
+  app.get("/api/bridge/ping", (req, res) => {
+    if (!requireBridgeKey(req, res)) return;
+    res.json({ ok: true, service: "strawberry-studios-bridge", ts: Date.now() });
+  });
+
+  // ─── Frequency Endpoints ─────────────────────────────────────────────────────
   app.get("/api/bridge/frequency/:riffUserId", async (req, res) => {
     if (!requireBridgeKey(req, res)) return;
     try {
