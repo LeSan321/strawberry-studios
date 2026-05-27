@@ -178,7 +178,7 @@ Return a JSON object with exactly this structure:
 {
   "reflection": "A 2-3 sentence paragraph in second person (\"you\") that mirrors the creator's answers back to them as a visual identity statement. Warm, specific, not generic.",
   "frequencyName": "A 2-4 word poetic name for this visual universe (e.g. 'Amber Drift', 'Midnight Bloom', 'Static Cathedral')",
-  "arcType": "One of: gathering | arriving | open",
+  "arcType": "One of: expansive_mythic | witnessing_lateral | intimate_relational | sustained_ambient | erosive_revelatory | cyclical_return — choose the one that best matches the creator's arc/time answer and overall vocabulary. expansive_mythic = grand, mythological, vast scale; witnessing_lateral = observational, documentary, present-tense; intimate_relational = close, personal, human-scale; sustained_ambient = slow, meditative, atmospheric; erosive_revelatory = tension, transformation, revelation; cyclical_return = repetition, memory, return.",
   "vocabulary": {
     "emotionalRegister": ["3-5 precise emotional tone words"],
     "colorAndLight": ["3-5 specific color/light descriptors"],
@@ -212,7 +212,7 @@ Synthesize their Visual Universe.`;
               properties: {
                 reflection: { type: "string" },
                 frequencyName: { type: "string" },
-                arcType: { type: "string", enum: ["gathering", "arriving", "open"] },
+                arcType: { type: "string", enum: ["expansive_mythic", "witnessing_lateral", "intimate_relational", "sustained_ambient", "erosive_revelatory", "cyclical_return"] },
                 vocabulary: {
                   type: "object",
                   properties: {
