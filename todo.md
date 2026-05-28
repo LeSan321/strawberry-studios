@@ -314,3 +314,16 @@
 - [x] FIX: Added detailed step-by-step logging to cover-art/generate handler
 - [x] FIX: Surface real error message in 500 response (detail field)
 - [x] VERIFIED: curl test returns 200 with valid coverArtUrl — 166 tests passing
+
+### Phase S: Cover Art Prompt Quality Fix
+- [x] DIAGNOSED: all images looked identical (radial burst motif) — three root causes identified
+- [x] ROOT CAUSE 1: arc framing sentences were dominant visual instructions ("the frontier present at the edge of frame", "scale expanding outward") — image model latched onto these as the primary subject
+- [x] ROOT CAUSE 2: abstract vocabulary terms ("present tense", "through not away from", "not yet resolved but not abandoned") are meaningless to image models — model fell back to training defaults (radial bursts)
+- [x] ROOT CAUSE 3: lyrics were buried at the end after all abstract vocabulary — model committed to the radial burst before reading song-specific content
+- [x] FIX 1: Rewrote arc framing to brief camera-direction modifiers ("mid-distance scale, threshold moment, world opening,") — no longer a dominant scene description
+- [x] FIX 2: Restructured assembly order — lyrics come FIRST as the primary visual anchor
+- [x] FIX 3: Added "no radial effects, no lens flares" to quality tail to explicitly block the recurring motif
+- [x] FIX 4: Changed forbidden terms from "avoid: X" to "no X" — direct negatives work better with image models
+- [x] FIX 5: Added pickTermsWithFallback() helper for future use when instruction fields are more concrete
+- [x] Updated 9 promptBuilder tests to match new format (arc framing strings, no 'avoid:' prefix, lyric-first order, no 'lyric anchors:' prefix)
+- [x] 166/166 tests passing

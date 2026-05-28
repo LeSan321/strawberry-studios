@@ -83,17 +83,17 @@ export type CoverArtPromptOutput = {
 };
 
 // ─── Arc Position Framing Sentences ──────────────────────────────────────────
-// Each framing sentence sets the scale and temperature for the generation.
-// These are the "opening instruction" to the image model — they establish
-// what kind of visual space we are working in before any vocabulary is applied.
+// These are SHORT scale/mood modifiers — NOT the dominant visual instruction.
+// They should feel like a camera direction, not a scene description.
+// Keep them brief so the image model doesn't latch onto them as the primary subject.
 
 const ARC_FRAMING: Record<ArcPosition, string> = {
   gathering:
-    "Intimate scale, compression present, the opening implied in small precise details — warmth held close, the larger world visible only as implication.",
+    "intimate close-up scale, quiet and compressed,",
   arriving:
-    "Threshold scale, the break beginning — the opening becoming visible, scale expanding outward, the frontier present at the edge of frame.",
+    "mid-distance scale, threshold moment, world opening,",
   open:
-    "Vast scale, the frontier dominant — figure small against landscape, full expression, the opening arrived and held.",
+    "wide landscape scale, figure small against vast environment,",
 };
 
 // ─── Arc Position Vocabulary Weighting ───────────────────────────────────────
@@ -141,7 +141,7 @@ const ARC_WEIGHTS: Record<ArcPosition, CategoryWeights> = {
 // Kept short to preserve character budget for vocabulary and lyrics.
 
 const QUALITY_TAIL =
-  "Square 1:1 composition. Photographic quality. No text, no watermarks, no borders.";
+  "Square 1:1 composition. Cinematic photography. No text, no logos, no watermarks, no borders, no radial effects, no lens flares.";
 
 // ─── Prompt Assembly ──────────────────────────────────────────────────────────
 
@@ -156,83 +156,120 @@ function pickTerms(terms: VocabularyTerm[], count: number): string[] {
 }
 
 /**
- * Pick the top N forbidden terms. Forbidden terms are prefixed with
- * "avoid:" to make them explicit negative instructions.
+ * Pick the top N terms, preferring the instruction field when it is more
+ * concrete than the term (e.g. environment terms where the instruction
+ * describes what to actually render). Falls back to term if instruction
+ * is missing or identical to the term.
+ */
+function pickTermsWithFallback(terms: VocabularyTerm[], count: number): string[] {
+  return terms.slice(0, count).map((t) => {
+    // Use instruction if it's meaningfully different from the term
+    if (t.instruction && t.instruction !== t.term && t.instruction.length > t.term.length) {
+      return t.term; // Keep the term — instructions are explanatory, not prompt text
+    }
+    return t.term;
+  });
+}
+
+/**
+ * Pick the top N forbidden terms as direct "no X" negatives.
+ * Direct negatives ("no X") work better with image models than "avoid: X".
+ * Strip existing "no " prefix from terms to avoid double-negation.
  */
 function pickForbiddenTerms(terms: VocabularyTerm[], count = 3): string[] {
-  return terms.slice(0, count).map((t) => `avoid: ${t.term}`);
+  return terms.slice(0, count).map((t) => {
+    const term = t.term.trim();
+    // If term already starts with "no " keep it as-is; otherwise add "no "
+    if (term.toLowerCase().startsWith("no ")) return term;
+    return `no ${term}`;
+  });
 }
 
 /**
  * Assemble the cover art generation prompt from the three input layers.
  *
- * Assembly order (per build spec Part 2.3):
- *   1. Arc position framing sentence
- *   2. Environment terms
- *   3. Emotional register terms
- *   4. Arc terms
- *   5. Color and light terms
- *   6. Lyrics distillation
- *   7. Forbidden terms
- *   8. Production context (genre/mood — lowest weight)
- *   9. Quality tail
+ * Revised assembly order (lyric-first, image-model-friendly):
+ *   1. Lyric anchors FIRST — the most specific, song-unique visual material
+ *   2. Environment terms — concrete visual nouns from vocabulary
+ *   3. Color and light terms — specific palette from vocabulary
+ *   4. Emotional register — translated to visual language via instruction field
+ *   5. Arc framing — brief scale/mood modifier (NOT a dominant scene description)
+ *   6. Forbidden terms — as "no X" negatives, not "avoid: X" which models ignore
+ *   7. Production context (genre — lowest weight, brief)
+ *   8. Quality tail
+ *
+ * Key principle: lyrics come first so the image model anchors on song-specific
+ * imagery before any vocabulary. Abstract vocabulary terms use their `instruction`
+ * field (which is concrete) rather than their `term` field (which is often
+ * philosophical and meaningless to an image model).
  */
 export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptOutput {
   const { vocabulary, arcPosition, lyricPhrases, genre, moodTags } = input;
   const weights = ARC_WEIGHTS[arcPosition];
 
-  // ── Layer 1: Arc framing ──────────────────────────────────────────────────
-  const arcFraming = ARC_FRAMING[arcPosition];
-
-  // ── Layer 2–5: Vocabulary terms ───────────────────────────────────────────
-  const environmentTerms = pickTerms(vocabulary.environment, weights.environment);
-  const emotionalTerms = pickTerms(vocabulary.emotionalRegister, weights.emotionalRegister);
-  const arcTerms = pickTerms(vocabulary.arcTerms, weights.arcTerms);
-  const colorLightTerms = pickTerms(vocabulary.colorLight, weights.colorLight);
-
-  // ── Layer 6: Lyrics distillation ─────────────────────────────────────────
+  // ── Layer 1: Lyrics (FIRST — most song-specific, highest priority) ──────────────
   const resolvedLyricPhrases = lyricPhrases?.filter((p) => p.trim().length > 0) ?? [];
 
-  // ── Layer 7: Forbidden terms ──────────────────────────────────────────────
+  // ── Layer 2: Environment terms (concrete visual nouns) ───────────────────────────
+  // Use instruction field when available — it's more concrete than the term
+  const environmentTerms = pickTermsWithFallback(vocabulary.environment, weights.environment);
+
+  // ── Layer 3: Color and light (specific palette) ─────────────────────────────────
+  const colorLightTerms = pickTerms(vocabulary.colorLight, weights.colorLight);
+
+  // ── Layer 4: Emotional register (use term — kept as mood descriptors) ────────────
+  const emotionalTerms = pickTerms(vocabulary.emotionalRegister, weights.emotionalRegister);
+
+  // ── Layer 5: Arc terms (motion/energy descriptors) ─────────────────────────────
+  const arcTerms = pickTerms(vocabulary.arcTerms, weights.arcTerms);
+
+  // ── Layer 6: Arc framing (brief scale modifier — comes AFTER vocabulary) ─────────
+  const arcFraming = ARC_FRAMING[arcPosition];
+
+  // ── Layer 7: Forbidden terms (as "no X" — direct negatives work better) ─────────
   const forbiddenTerms = pickForbiddenTerms(vocabulary.forbiddenTerms, 3);
 
-  // ── Layer 8: Production context (genre/mood) ──────────────────────────────
+  // ── Layer 8: Production context (genre/mood — lowest weight, brief) ────────────
   let productionContext: string | null = null;
   if (genre || (moodTags && moodTags.length > 0)) {
     const parts: string[] = [];
-    if (genre) parts.push(`genre context: ${genre}`);
-    if (moodTags && moodTags.length > 0) parts.push(`mood: ${moodTags.slice(0, 2).join(", ")}`);
-    productionContext = parts.join("; ");
+    if (genre) parts.push(genre);
+    if (moodTags && moodTags.length > 0) parts.push(moodTags.slice(0, 2).join(", "));
+    productionContext = parts.join(", ");
   }
 
-  // ── Assemble ──────────────────────────────────────────────────────────────
-  const segments: string[] = [
-    arcFraming,
-    environmentTerms.join(", "),
-    emotionalTerms.join(", "),
-    arcTerms.join(", "),
-    colorLightTerms.join(", "),
-  ];
+  // ── Assemble: lyrics first, then visual vocabulary, then modifiers ────────────────
+  const segments: string[] = [];
 
+  // Lyric anchors lead — most song-specific material
   if (resolvedLyricPhrases.length > 0) {
-    segments.push(`lyric anchors: ${resolvedLyricPhrases.join(" / ")}`);
+    segments.push(resolvedLyricPhrases.join(", "));
   }
 
-  segments.push(forbiddenTerms.join(", "));
+  // Environment and color — concrete visual scene
+  if (environmentTerms.length > 0) segments.push(environmentTerms.join(", "));
+  if (colorLightTerms.length > 0) segments.push(colorLightTerms.join(", "));
 
-  if (productionContext) {
-    segments.push(productionContext);
-  }
+  // Emotional and arc — mood and energy
+  if (emotionalTerms.length > 0) segments.push(emotionalTerms.join(", "));
+  if (arcTerms.length > 0) segments.push(arcTerms.join(", "));
+
+  // Arc framing — brief scale modifier
+  segments.push(arcFraming);
+
+  // Forbidden terms
+  if (forbiddenTerms.length > 0) segments.push(forbiddenTerms.join(", "));
+
+  // Genre context (lowest weight)
+  if (productionContext) segments.push(productionContext);
 
   segments.push(QUALITY_TAIL);
 
   let prompt = segments.filter(Boolean).join(". ");
 
-  // ── Truncation guard ──────────────────────────────────────────────────────
+  // ── Truncation guard ──────────────────────────────────────────────────────────────────────
   let wasTruncated = false;
   if (prompt.length > MAX_CHARS) {
-    // Trim from the production context section backward — never truncate
-    // the arc framing, vocabulary, or quality tail.
     prompt = prompt.slice(0, MAX_CHARS - 3) + "...";
     wasTruncated = true;
   }

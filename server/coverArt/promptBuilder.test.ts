@@ -143,12 +143,13 @@ describe("buildCoverArtPrompt — basic assembly", () => {
     }
   });
 
-  it("includes forbidden terms as 'avoid:' instructions", () => {
+  it("includes forbidden terms as 'no X' negatives", () => {
     const result = buildCoverArtPrompt({
       vocabulary: MINIMAL_VOCABULARY,
       arcPosition: "arriving",
     });
-    expect(result.prompt).toContain("avoid: no false comfort");
+    // Forbidden terms are now "no X" direct negatives (not "avoid: X")
+    expect(result.prompt).toContain("no false comfort");
   });
 
   it("returns a layers breakdown with all expected keys", () => {
@@ -170,31 +171,31 @@ describe("buildCoverArtPrompt — basic assembly", () => {
 // ─── Arc Position Tests ───────────────────────────────────────────────────────
 
 describe("buildCoverArtPrompt — arc position framing", () => {
-  it("gathering arc includes 'Intimate scale' framing", () => {
+  it("gathering arc includes 'intimate' framing", () => {
     const result = buildCoverArtPrompt({
       vocabulary: MINIMAL_VOCABULARY,
       arcPosition: "gathering",
     });
-    expect(result.prompt).toContain("Intimate scale");
-    expect(result.layers.arcFraming).toContain("Intimate scale");
+    expect(result.prompt).toContain("intimate");
+    expect(result.layers.arcFraming).toContain("intimate");
   });
 
-  it("arriving arc includes 'Threshold scale' framing", () => {
+  it("arriving arc includes 'threshold' framing", () => {
     const result = buildCoverArtPrompt({
       vocabulary: MINIMAL_VOCABULARY,
       arcPosition: "arriving",
     });
-    expect(result.prompt).toContain("Threshold scale");
-    expect(result.layers.arcFraming).toContain("Threshold scale");
+    expect(result.prompt).toContain("threshold");
+    expect(result.layers.arcFraming).toContain("threshold");
   });
 
-  it("open arc includes 'Vast scale' framing", () => {
+  it("open arc includes 'landscape' framing", () => {
     const result = buildCoverArtPrompt({
       vocabulary: MINIMAL_VOCABULARY,
       arcPosition: "open",
     });
-    expect(result.prompt).toContain("Vast scale");
-    expect(result.layers.arcFraming).toContain("Vast scale");
+    expect(result.prompt).toContain("landscape");
+    expect(result.layers.arcFraming).toContain("landscape");
   });
 
   it("three arc positions produce three distinct prompts", () => {
@@ -264,9 +265,12 @@ describe("buildCoverArtPrompt — lyric phrases", () => {
       arcPosition: "arriving",
       lyricPhrases: ["the window left open all night", "rain on the fire escape"],
     });
-    expect(result.prompt).toContain("lyric anchors:");
+    // Lyrics appear directly in the prompt (no 'lyric anchors:' prefix in new format)
     expect(result.prompt).toContain("the window left open all night");
     expect(result.prompt).toContain("rain on the fire escape");
+    // Lyrics should appear near the start of the prompt (lyric-first order)
+    const lyricIndex = result.prompt.indexOf("the window left open all night");
+    expect(lyricIndex).toBeLessThan(100);
   });
 
   it("lyric phrases appear in the layers breakdown", () => {
@@ -321,7 +325,8 @@ describe("buildCoverArtPrompt — production context (genre/mood)", () => {
       arcPosition: "arriving",
       genre: "indie folk",
     });
-    expect(result.prompt).toContain("genre context: indie folk");
+    // Genre appears directly (no 'genre context:' prefix in new format)
+    expect(result.prompt).toContain("indie folk");
     expect(result.layers.productionContext).toContain("indie folk");
   });
 
@@ -331,7 +336,9 @@ describe("buildCoverArtPrompt — production context (genre/mood)", () => {
       arcPosition: "arriving",
       moodTags: ["melancholic", "introspective"],
     });
-    expect(result.prompt).toContain("mood: melancholic, introspective");
+    // Mood tags appear directly (no 'mood:' prefix in new format)
+    expect(result.prompt).toContain("melancholic");
+    expect(result.prompt).toContain("introspective");
   });
 
   it("limits mood tags to 2 maximum", () => {
@@ -452,13 +459,14 @@ describe("buildCoverArtPrompt — vocabulary integrity", () => {
     }
   });
 
-  it("forbidden terms are always prefixed with 'avoid:'", () => {
+  it("forbidden terms are always 'no X' direct negatives", () => {
     const result = buildCoverArtPrompt({
       vocabulary: BLOOMING_FRONTIER_VOCABULARY,
       arcPosition: "arriving",
     });
     for (const term of result.layers.forbiddenTerms) {
-      expect(term.startsWith("avoid: ")).toBe(true);
+      // Terms should start with 'no ' (direct negative, not 'avoid: X')
+      expect(term.toLowerCase().startsWith("no ")).toBe(true);
     }
   });
 
@@ -498,10 +506,11 @@ describe("buildCoverArtPrompt — full pipeline smoke tests", () => {
     expect(result.prompt.length).toBeGreaterThan(150);
     expect(result.charCount).toBeLessThanOrEqual(900);
     expect(result.wasTruncated).toBe(false);
-    expect(result.prompt).toContain("Vast scale");
+    // Lyrics come first in the new format
+    expect(result.prompt).toContain("the window left open all night");
     expect(result.prompt).toContain("golden organic");
-    expect(result.prompt).toContain("lyric anchors:");
-    expect(result.prompt).toContain("genre context: indie folk");
+    // Genre appears directly without prefix
+    expect(result.prompt).toContain("indie folk");
   });
 
   it("all three arc positions with Blooming Frontier produce valid prompts", () => {
