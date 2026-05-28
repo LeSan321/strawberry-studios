@@ -139,6 +139,9 @@ export const coverArtRouter = router({
       });
 
       // ── 6. Generate image ────────────────────────────────────────────────────
+      console.log("[coverArt.generate] vocabSource:", vocabSource, "lyricPhrases:", lyricPhrases);
+      console.log("[coverArt.generate] prompt:", prompt);
+
       let imageUrl: string;
       try {
         const result = await generateImage({ prompt });
@@ -146,11 +149,13 @@ export const coverArtRouter = router({
           throw new Error("Image generation returned no URL");
         }
         imageUrl = result.url;
+        console.log("[coverArt.generate] success, url:", imageUrl);
       } catch (err) {
-        console.error("[coverArt.generate] Image generation failed:", err);
+        const errMsg = err instanceof Error ? err.message : String(err);
+        console.error("[coverArt.generate] Image generation failed:", errMsg);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Cover art generation failed. Please try again.",
+          message: `Cover art generation failed: ${errMsg}`,
         });
       }
 
