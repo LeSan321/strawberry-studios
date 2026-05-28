@@ -303,3 +303,14 @@
 - [ ] Set BRIDGE_API_KEY secret in Studios (shared with Riff as STUDIOS_BRIDGE_KEY)
 - [ ] Set STUDIOS_BRIDGE_URL and STUDIOS_BRIDGE_KEY secrets in Riff project
 - [ ] Riff-side implementation (handled by Riff Manus instance — see handoff doc)
+
+### Phase R: Bridge Bug Fix — Vocabulary Shape Mismatch
+- [x] BRIDGE_API_KEY secret set and validated in Studios
+- [x] STUDIOS_BRIDGE_URL and STUDIOS_BRIDGE_KEY secrets set in Riff (Railway)
+- [x] Riff-side implementation complete (handled by Riff Manus)
+- [x] BUG: /api/bridge/cover-art/generate returning 500 "Generation failed"
+- [x] ROOT CAUSE: bridge synthesize returns plain string[] with key `colorAndLight`; promptBuilder expects VocabularyTerm[] with key `colorLight` — pickTerms() was returning undefined for every term
+- [x] FIX: Added normalizeVocabulary() to bridgeRoutes.ts — converts string[] or VocabularyTerm[], maps colorAndLight→colorLight and texture→relationshipGeometry
+- [x] FIX: Added detailed step-by-step logging to cover-art/generate handler
+- [x] FIX: Surface real error message in 500 response (detail field)
+- [x] VERIFIED: curl test returns 200 with valid coverArtUrl — 166 tests passing

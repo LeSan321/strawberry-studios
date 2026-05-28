@@ -24,7 +24,7 @@ import {
   getPlatformDefaultVocabulary,
   getCampaignCoverArt,
 } from "./db";
-import { buildCoverArtPrompt, extractLyricPhrases, type VocabularyJson } from "./coverArt/promptBuilder";
+import { buildCoverArtPrompt, extractLyricPhrases, type VocabularyJson, type VocabularyTerm } from "./coverArt/promptBuilder";
 import { generateImage } from "./_core/imageGeneration";
 import { setCampaignCoverArtFromGeneration } from "./db";
 import { users } from "../drizzle/schema";
@@ -76,6 +76,43 @@ async function resolveStudiosUserId(riffUserId: number): Promise<number> {
     riffUserId,
   });
   return (result as any).insertId as number;
+}
+
+// ─── Vocabulary Normalizer ───────────────────────────────────────────────────
+
+/**
+ * The bridge synthesize endpoint returns vocabulary as plain string[] with keys
+ * like `colorAndLight` and `texture`. The promptBuilder expects VocabularyTerm[]
+ * (objects with `term` and `instruction`) with keys `colorLight` and
+ * `relationshipGeometry`. This function normalizes either shape into the
+ * canonical VocabularyJson format.
+ */
+function normalizeVocabulary(raw: Record<string, unknown>): VocabularyJson {
+  // Helper: convert a raw array value to VocabularyTerm[]
+  // Handles both string[] and VocabularyTerm[] (already normalized)
+  function toTerms(arr: unknown): VocabularyTerm[] {
+    if (!Array.isArray(arr)) return [];
+    return arr.map((item) => {
+      if (typeof item === "string") {
+        return { term: item, instruction: item };
+      }
+      if (item && typeof item === "object" && "term" in item) {
+        return item as VocabularyTerm;
+      }
+      return { term: String(item), instruction: String(item) };
+    });
+  }
+
+  return {
+    environment: toTerms(raw.environment),
+    emotionalRegister: toTerms(raw.emotionalRegister),
+    arcTerms: toTerms(raw.arcTerms),
+    forbiddenTerms: toTerms(raw.forbiddenTerms),
+    // Bridge uses `colorAndLight`; promptBuilder uses `colorLight`
+    colorLight: toTerms(raw.colorLight ?? raw.colorAndLight),
+    // Bridge uses `texture`; promptBuilder uses `relationshipGeometry`
+    relationshipGeometry: toTerms(raw.relationshipGeometry ?? raw.texture),
+  };
 }
 
 // ─── Zod Schemas ─────────────────────────────────────────────────────────────
@@ -285,21 +322,28 @@ Synthesize their Visual Universe.`;
       const studiosUserId = await resolveStudiosUserId(riffUserId);
 
       // Resolve vocabulary
+      console.log(`[Bridge] cover-art/generate: resolving vocabulary for studiosUserId=${studiosUserId}`);
       const frequency = await getDefaultCreatorFrequency(studiosUserId);
       const platformDefault = await getPlatformDefaultVocabulary();
-      const vocabulary = frequency
-        ? (frequency.vocabularyJson as unknown as VocabularyJson)
+      const rawVocabulary = frequency
+        ? (frequency.vocabularyJson as unknown as Record<string, unknown>)
         : platformDefault
-        ? (platformDefault.vocabularyJson as unknown as VocabularyJson)
+        ? (platformDefault.vocabularyJson as unknown as Record<string, unknown>)
         : null;
 
-      if (!vocabulary) {
+      if (!rawVocabulary) {
+        console.error("[Bridge] cover-art/generate: no vocabulary available — platform default not seeded");
         res.status(503).json({ error: "No vocabulary available" });
         return;
       }
 
+      // Normalize from bridge shape (plain string[]) to promptBuilder shape (VocabularyTerm[])
+      const vocabulary = normalizeVocabulary(rawVocabulary);
+      console.log(`[Bridge] cover-art/generate: vocabulary resolved, source=${frequency ? 'personal' : 'platform_default'}`);
+
       // Extract lyric phrases if lyrics provided
       const lyricPhrases = lyrics ? await extractLyricPhrases(lyrics) : [];
+      console.log(`[Bridge] cover-art/generate: lyricPhrases extracted, count=${lyricPhrases.length}`);
 
       // Build prompt
       const promptOutput = buildCoverArtPrompt({
@@ -308,9 +352,25 @@ Synthesize their Visual Universe.`;
         lyricPhrases,
         genre: genre ?? undefined,
       });
+      console.log(`[Bridge] cover-art/generate: prompt built, charCount=${promptOutput.charCount}, wasTruncated=${promptOutput.wasTruncated}`);
+      console.log(`[Bridge] cover-art/generate: prompt preview: ${promptOutput.prompt.slice(0, 120)}...`);
 
       // Generate image
-      const { url: imageUrl } = await generateImage({ prompt: promptOutput.prompt });
+      console.log("[Bridge] cover-art/generate: calling generateImage...");
+      let imageUrl: string | undefined;
+      try {
+        const result = await generateImage({ prompt: promptOutput.prompt });
+        imageUrl = result.url;
+        console.log(`[Bridge] cover-art/generate: image generated, url=${imageUrl ? imageUrl.slice(0, 60) + '...' : 'undefined'}`);
+      } catch (genErr) {
+        console.error("[Bridge] cover-art/generate: generateImage() threw:", genErr);
+        throw genErr;
+      }
+
+      if (!imageUrl) {
+        console.error("[Bridge] cover-art/generate: generateImage() returned no URL");
+        throw new Error("Image generation returned no URL");
+      }
 
       res.json({
         success: true,
@@ -320,8 +380,9 @@ Synthesize their Visual Universe.`;
         usedPersonalFrequency: !!frequency,
       });
     } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
       console.error("[Bridge] POST generate cover art error:", err);
-      res.status(500).json({ error: "Generation failed" });
+      res.status(500).json({ error: "Generation failed", detail: errMsg });
     }
   });
 
