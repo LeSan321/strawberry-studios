@@ -327,3 +327,12 @@
 - [x] FIX 5: Added pickTermsWithFallback() helper for future use when instruction fields are more concrete
 - [x] Updated 9 promptBuilder tests to match new format (arc framing strings, no 'avoid:' prefix, lyric-first order, no 'lyric anchors:' prefix)
 - [x] 166/166 tests passing
+
+### Phase T: Lyric Extraction — Metaphor-to-Scene Translation Fix
+- [x] DIAGNOSED: extractLyricPhrases() was extracting verbatim lyric phrases — metaphors like "fire in my veins" and "wild heart beats" were passed directly to the image model, which rendered them literally (fantasy figure with fire, etc.)
+- [x] ROOT CAUSE: system prompt said "extract verbatim" — correct for concrete lyrics, wrong for metaphorical/emotional lyrics (which most rock/pop songs use)
+- [x] FIX: Rewrote extractLyricPhrases() system prompt to be a music-to-visual TRANSLATOR, not an extractor — LLM now translates emotional metaphors into concrete photographable scenes
+- [x] New system prompt: explicit examples showing "fire in my veins" → "headlights on empty highway at 2am", "leather jacket, wind-blown hair"; "beyond the canyon wall" → "red rock canyon at golden hour", "lone figure on canyon rim"
+- [x] Added explicit avoidance list: "glowing orbs, radial bursts, fantasy landscapes, literal fire/lightning, sci-fi elements, circular motifs"
+- [x] Genre awareness added: "a rock song should feel like a photograph from that world (bar, stage, highway, desert), not a fantasy painting"
+- [x] 166/166 tests passing

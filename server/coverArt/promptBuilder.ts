@@ -294,13 +294,15 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
 // ─── Lyrics Pre-Processing ────────────────────────────────────────────────────
 
 /**
- * Extract 2–3 load-bearing phrases from raw lyrics using the LLM.
+ * Extract 2–3 concrete photographic scene descriptors from raw lyrics using the LLM.
  *
- * The extraction follows the Listening Bible Chapter 1 principle:
- * read for vocabulary, not content. The goal is to find the specific
- * words and images the creator actually used — not a summary or paraphrase.
+ * The goal is NOT to extract verbatim lyric phrases — many lyrics are emotional
+ * metaphors ("fire in my veins", "wild heart beats") that image models take
+ * literally and render as fantasy imagery. Instead, this function translates
+ * the emotional/metaphorical content of the lyrics into concrete, photographable
+ * visual scenes that capture the same feeling without triggering fantasy clichés.
  *
- * Returns an array of 2–3 short phrases (typically 3–8 words each).
+ * Returns an array of 2–3 short descriptors (typically 4–8 words each).
  * Returns an empty array if lyrics are empty or the LLM call fails.
  *
  * This function is async and calls the LLM — it should be called once
@@ -316,19 +318,27 @@ export async function extractLyricPhrases(lyrics: string): Promise<string[]> {
       messages: [
         {
           role: "system",
-          content: `You are a visual vocabulary extractor. Your job is to read song lyrics and identify 2–3 load-bearing phrases — the specific words and images the creator actually used that carry the most visual weight.
+          content: `You are a music-to-visual translator for album cover photography. Your job is to read song lyrics and produce 2–3 short, concrete, photographable scene descriptors that capture the emotional world of the song.
 
-Rules:
-- Extract phrases verbatim from the lyrics — do not paraphrase, summarize, or interpret
-- Choose phrases that are concrete and visual (not abstract concepts)
-- Each phrase should be 3–8 words maximum
-- Return ONLY a JSON array of strings, nothing else
-- Example output: ["the window left open all night", "rain on the fire escape", "your coat still on the chair"]
-- If the lyrics contain no visually concrete phrases, return an empty array: []`,
+Critical rules:
+- DO NOT extract metaphors verbatim. "Fire in my veins" is NOT a visual descriptor — it will generate a fantasy figure with literal fire.
+- DO NOT use abstract emotional language. "Wild heart beats" is NOT photographable.
+- TRANSLATE the emotion and imagery into real-world, physical scenes a photographer could actually shoot.
+- Each descriptor should be 4–8 words: a subject + physical context (e.g. "dusty boots on a dirt road", "leather jacket on a bar stool", "hands gripping a steering wheel at night")
+- Think: what physical objects, places, textures, and light conditions embody this song?
+- Avoid: glowing orbs, radial bursts, fantasy landscapes, literal fire/lightning, sci-fi elements, circular motifs
+- Genre matters: a rock song should feel like a photograph from that world (bar, stage, highway, desert), not a fantasy painting
+
+Examples of GOOD translations:
+- Lyrics "fire in my veins / racing through the night" → ["headlights on empty highway at 2am", "hands on steering wheel, dashboard glow", "leather jacket, wind-blown hair"]
+- Lyrics "beyond the canyon wall / the river runs free" → ["red rock canyon at golden hour", "river stones and rushing water", "lone figure on canyon rim"]
+- Lyrics "a good old horse / steady on the trail" → ["horse and rider on dusty trail", "worn saddle leather in afternoon sun", "hoofprints in dry earth"]
+
+Return ONLY a JSON object with a "phrases" array. No explanation.`,
         },
         {
           role: "user",
-          content: `Extract 2–3 load-bearing visual phrases from these lyrics:\n\n${lyrics.slice(0, 2000)}`,
+          content: `Translate these lyrics into 2–3 concrete photographic scene descriptors for an album cover:\n\n${lyrics.slice(0, 2000)}`,
         },
       ],
       response_format: {
