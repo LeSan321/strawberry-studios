@@ -357,27 +357,28 @@ describe("buildCoverArtPrompt — production context (genre/mood)", () => {
     expect(result.layers.productionContext).toContain("indie folk");
   });
 
-  it("includes mood tags when provided", () => {
+  it("translates mood tags into energy directives in the prompt", () => {
     const result = buildCoverArtPrompt({
       vocabulary: MINIMAL_VOCABULARY,
       arcPosition: "arriving",
       moodTags: ["melancholic", "introspective"],
     });
-    // Mood tags appear directly (no 'mood:' prefix in new format)
-    expect(result.prompt).toContain("melancholic");
-    expect(result.prompt).toContain("introspective");
+    // Mood tags are now translated to energy directives — "melancholic" maps to
+    // "cool desaturated tones, diffused light, quiet emptiness" and
+    // "solitary figure, turned away or distant"
+    expect(result.prompt).toContain("cool desaturated tones");
+    expect(result.prompt).toContain("solitary figure");
   });
 
-  it("limits mood tags to 2 maximum", () => {
+  it("uses the first matching mood tag for energy directive", () => {
     const result = buildCoverArtPrompt({
       vocabulary: MINIMAL_VOCABULARY,
       arcPosition: "arriving",
-      moodTags: ["melancholic", "introspective", "hopeful", "raw"],
+      moodTags: ["energetic", "raw", "melancholic", "hopeful"],
     });
-    // Should only include first 2
-    expect(result.layers.productionContext).toContain("melancholic");
-    expect(result.layers.productionContext).toContain("introspective");
-    expect(result.layers.productionContext).not.toContain("hopeful");
+    // First matching tag (energetic) should win
+    expect(result.prompt).toContain("kinetic energy");
+    expect(result.prompt).toContain("multiple figures");
   });
 
   it("no production context when genre and moodTags are both absent", () => {

@@ -157,6 +157,61 @@ const CINEMATIQUE_RENDERING: Record<ArcPosition, string> = {
     "wide dynamic range, natural available light, vast negative space, figure small against environment, atmospheric depth, no artificial fill",
 };
 
+// ─── Mood Energy Mapping ─────────────────────────────────────────────────────
+// Translates mood tags into concrete visual energy directives.
+// These go near the TOP of the prompt (after lyrics) so they influence
+// the model's core scene interpretation, not just the tail.
+//
+// Two outputs per mood cluster:
+//   energyDirective — the visual energy level and scene population
+//   humanPresence   — explicit instruction about people in the frame
+
+type MoodEnergyMap = {
+  energyDirective: string;
+  humanPresence: string;
+};
+
+const MOOD_ENERGY_MAP: Record<string, MoodEnergyMap> = {
+  // High energy / upbeat
+  hypnotic: { energyDirective: "layered visual depth, dreamlike motion, vibrant color saturation", humanPresence: "multiple figures in motion, crowd energy implied" },
+  lush: { energyDirective: "rich saturated color, dense layered texture, abundant visual detail", humanPresence: "figures present, warm and connected" },
+  energetic: { energyDirective: "dynamic motion blur, high contrast, kinetic energy", humanPresence: "multiple figures, movement and energy" },
+  upbeat: { energyDirective: "bright warm light, open space, forward movement", humanPresence: "figures present, expressive and in motion" },
+  euphoric: { energyDirective: "overexposed highlights, warm golden light, expansive scale", humanPresence: "crowd or group energy, faces visible and expressive" },
+  playful: { energyDirective: "bright light, unexpected angles, vivid color", humanPresence: "figures present, candid and spontaneous" },
+  // Mid energy / emotional
+  romantic: { energyDirective: "soft warm light, intimate scale, bokeh background", humanPresence: "two figures or intimate single figure, close and present" },
+  tender: { energyDirective: "soft diffused light, gentle texture, quiet warmth", humanPresence: "figure present, gentle and close" },
+  raw: { energyDirective: "high grain, harsh available light, unpolished texture", humanPresence: "figure present, unguarded and authentic" },
+  passionate: { energyDirective: "deep warm tones, high contrast, intense focus", humanPresence: "figure present, intense and expressive" },
+  // Low energy / introspective
+  meditative: { energyDirective: "still air, long shadows, minimal movement", humanPresence: "solitary figure or no figure, stillness" },
+  melancholic: { energyDirective: "cool desaturated tones, diffused light, quiet emptiness", humanPresence: "solitary figure, turned away or distant" },
+  // Night / atmosphere
+  "late night": { energyDirective: "neon-lit interior, warm practical lights, night atmosphere", humanPresence: "figures present, bar or venue crowd energy" },
+  dark: { energyDirective: "deep shadow, minimal light sources, high contrast", humanPresence: "solitary figure or silhouette" },
+  // Country / folk / roots
+  nostalgic: { energyDirective: "golden hour light, worn textures, analog warmth", humanPresence: "figure present, weathered and authentic" },
+  soulful: { energyDirective: "warm tungsten light, rich shadow, emotional depth", humanPresence: "figure present, expressive and present" },
+};
+
+/**
+ * Translate mood tags into visual energy and human presence directives.
+ * Returns null if no mood tags match the map.
+ */
+function resolveMoodEnergy(moodTags: string[]): MoodEnergyMap | null {
+  const normalized = moodTags.map((t) => t.toLowerCase().trim());
+  // Find the first matching mood tag (priority: first match wins)
+  for (const tag of normalized) {
+    if (MOOD_ENERGY_MAP[tag]) return MOOD_ENERGY_MAP[tag];
+    // Partial match — check if any key is contained in the tag
+    for (const key of Object.keys(MOOD_ENERGY_MAP)) {
+      if (tag.includes(key) || key.includes(tag)) return MOOD_ENERGY_MAP[key];
+    }
+  }
+  return null;
+}
+
 // ─── Quality Tail ─────────────────────────────────────────────────────────────
 // Standard image quality and composition instructions appended to every prompt.
 // Kept short to preserve character budget for vocabulary and lyrics.
@@ -231,72 +286,77 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // ── Layer 1: Lyrics (FIRST — most song-specific, highest priority) ──────────────
   const resolvedLyricPhrases = lyricPhrases?.filter((p) => p.trim().length > 0) ?? [];
 
-  // ── Layer 2: Environment terms (concrete visual nouns) ───────────────────────────
-  // Use instruction field when available — it's more concrete than the term
+  // ── Layer 1b: Mood energy + human presence (SECOND — sets energy and population) ──
+  // Mood tags are translated into concrete visual energy and human presence directives.
+  // These go NEAR THE TOP so the model commits to the right energy level before
+  // reading vocabulary. Without this, the model defaults to solitary-somber.
+  const moodEnergy = moodTags && moodTags.length > 0 ? resolveMoodEnergy(moodTags) : null;
+
+  // ── Layer 2: Environment terms (concrete visual nouns) ───────────────────────
   const environmentTerms = pickTermsWithFallback(vocabulary.environment, weights.environment);
 
-  // ── Layer 3: Color and light (specific palette) ─────────────────────────────────
+  // ── Layer 3: Color and light (specific palette) ───────────────────────────
   const colorLightTerms = pickTerms(vocabulary.colorLight, weights.colorLight);
 
-  // ── Layer 4: Emotional register (use term — kept as mood descriptors) ────────────
+  // ── Layer 4: Emotional register (use term — kept as mood descriptors) ──────────
   const emotionalTerms = pickTerms(vocabulary.emotionalRegister, weights.emotionalRegister);
 
-  // ── Layer 5: Arc terms (motion/energy descriptors) ─────────────────────────────
+  // ── Layer 5: Arc terms (motion/energy descriptors) ───────────────────────
   const arcTerms = pickTerms(vocabulary.arcTerms, weights.arcTerms);
 
   // ── Layer 6: Arc framing (brief scale modifier — comes AFTER vocabulary) ─────────
   const arcFraming = ARC_FRAMING[arcPosition];
 
-  // ── Layer 6b: Cinématique rendering directive ────────────────────────────────
-  // HOW to render — lighting grammar, atmosphere, composition from the Bible.
-  // Sits after vocabulary so it modifies the scene rather than defining it.
+  // ── Layer 6b: Cinématique rendering directive ───────────────────────────────
   const cinematiqueRendering = CINEMATIQUE_RENDERING[arcPosition];
 
   // ── Layer 7: Forbidden terms (as "no X" — direct negatives work better) ─────────
   const forbiddenTerms = pickForbiddenTerms(vocabulary.forbiddenTerms, 3);
 
-  // ── Layer 8: Production context (genre/mood — lowest weight, brief) ────────────
-  let productionContext: string | null = null;
-  if (genre || (moodTags && moodTags.length > 0)) {
-    const parts: string[] = [];
-    if (genre) parts.push(genre);
-    if (moodTags && moodTags.length > 0) parts.push(moodTags.slice(0, 2).join(", "));
-    productionContext = parts.join(", ");
-  }
+  // ── Layer 8: Production context (genre only — mood is now handled by moodEnergy) ──
+  const productionContext: string | null = genre ?? null;
 
   // ── Assemble: lyrics first, then visual vocabulary, then modifiers ────────────────
   const segments: string[] = [];
 
-  // Lyric anchors lead — most song-specific material
+  // Layer 1: Lyric anchors — most song-specific material
   if (resolvedLyricPhrases.length > 0) {
     segments.push(resolvedLyricPhrases.join(", "));
   }
 
-  // Environment and color — concrete visual scene
+  // Layer 1b: Mood energy directive — sets energy level and scene population EARLY
+  // This is the fix for the solitary-somber default: the model must commit to
+  // the right energy and human presence before reading vocabulary.
+  if (moodEnergy) {
+    segments.push(moodEnergy.energyDirective);
+    segments.push(moodEnergy.humanPresence);
+  }
+
+  // Layer 2-3: Environment and color — concrete visual scene
   if (environmentTerms.length > 0) segments.push(environmentTerms.join(", "));
   if (colorLightTerms.length > 0) segments.push(colorLightTerms.join(", "));
 
-  // Emotional and arc — mood and energy
+  // Layer 4-5: Emotional and arc — mood and energy
   if (emotionalTerms.length > 0) segments.push(emotionalTerms.join(", "));
   if (arcTerms.length > 0) segments.push(arcTerms.join(", "));
 
-  // Arc framing — brief scale modifier
+  // Layer 6: Arc framing — brief scale modifier
   segments.push(arcFraming);
 
-  // Cinématique rendering — how to render (lighting, atmosphere, composition)
+  // Layer 6b: Cinématique rendering — how to render (lighting, atmosphere, composition)
   segments.push(cinematiqueRendering);
 
-  // Forbidden terms
+  // Layer 7: Forbidden terms
   if (forbiddenTerms.length > 0) segments.push(forbiddenTerms.join(", "));
 
-  // Genre context (lowest weight)
+  // Layer 8: Genre context (lowest weight)
   if (productionContext) segments.push(productionContext);
 
   segments.push(QUALITY_TAIL);
 
   let prompt = segments.filter(Boolean).join(". ");
 
-  // ── Truncation guard ──────────────────────────────────────────────────────────────────────
+  // Truncation guard
   let wasTruncated = false;
   if (prompt.length > MAX_CHARS) {
     prompt = prompt.slice(0, MAX_CHARS - 3) + "...";
