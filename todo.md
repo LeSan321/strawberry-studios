@@ -336,3 +336,6 @@
 - [x] Added explicit avoidance list: "glowing orbs, radial bursts, fantasy landscapes, literal fire/lightning, sci-fi elements, circular motifs"
 - [x] Genre awareness added: "a rock song should feel like a photograph from that world (bar, stage, highway, desert), not a fantasy painting"
 - [x] 166/166 tests passing
+
+## Bug Fix — Lyrics Not Reaching Prompt Builder
+- [ ] Fix lyrics data flow: stored song lyrics are never passed to the cover art prompt builder — title/description fields are being used as lyric source instead

@@ -401,14 +401,14 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
 export async function extractLyricPhrases(lyrics: string): Promise<string[]> {
   if (!lyrics || lyrics.trim().length < 10) return [];
 
-  try {
-    const { invokeLLM } = await import("../_core/llm");
+  // ── OpenAI path (primary) ─────────────────────────────────────────────────
+  // Uses GPT-4o-mini via OpenAI API directly, bypassing the Manus Forge quota.
+  // Falls back to raw lyrics snippet if the API call fails for any reason.
+  const { ENV } = await import("../_core/env");
 
-    const response = await invokeLLM({
-      messages: [
-        {
-          role: "system",
-          content: `You are a music-to-visual translator for album cover photography. Your job is to read song lyrics and produce 2–3 short, concrete, photographable scene descriptors that capture the emotional world of the song.
+  if (ENV.openAiApiKey) {
+    try {
+      const systemPrompt = `You are a music-to-visual translator for album cover photography. Your job is to read song lyrics and produce 2–3 short, concrete, photographable scene descriptors that capture the emotional world of the song.
 
 Critical rules:
 - DO NOT extract metaphors verbatim. "Fire in my veins" is NOT a visual descriptor — it will generate a fantasy figure with literal fire.
@@ -424,46 +424,54 @@ Examples of GOOD translations:
 - Lyrics "beyond the canyon wall / the river runs free" → ["red rock canyon at golden hour", "river stones and rushing water", "lone figure on canyon rim"]
 - Lyrics "a good old horse / steady on the trail" → ["horse and rider on dusty trail", "worn saddle leather in afternoon sun", "hoofprints in dry earth"]
 
-Return ONLY a JSON object with a "phrases" array. No explanation.`,
+Return ONLY a JSON object with a "phrases" array. No explanation.`;
+
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${ENV.openAiApiKey}`,
         },
-        {
-          role: "user",
-          content: `Translate these lyrics into 2–3 concrete photographic scene descriptors for an album cover:\n\n${lyrics.slice(0, 2000)}`,
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "lyric_phrases",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              phrases: {
-                type: "array",
-                items: { type: "string" },
-                description: "2–3 verbatim visual phrases from the lyrics",
-              },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: `Translate these lyrics into 2–3 concrete photographic scene descriptors for an album cover:\n\n${lyrics.slice(0, 2000)}`,
             },
-            required: ["phrases"],
-            additionalProperties: false,
-          },
-        },
-      },
-    });
+          ],
+          max_tokens: 200,
+          temperature: 0.4,
+        }),
+      });
 
-    const rawContent = response?.choices?.[0]?.message?.content;
-    if (!rawContent) return [];
-    // content can be string or array of content parts; we only need the text
-    const content = typeof rawContent === "string" ? rawContent : "";
-    if (!content) return [];
+      if (!res.ok) {
+        const errBody = await res.text();
+        throw new Error(`OpenAI API error ${res.status}: ${errBody}`);
+      }
 
-    const parsed = JSON.parse(content) as { phrases: string[] };
-    return (parsed.phrases ?? []).slice(0, 3).filter((p) => p.trim().length > 0);
-  } catch (err) {
-    console.warn("[coverArtPromptBuilder] Lyric extraction failed:", err);
-    return [];
+      const json = (await res.json()) as {
+        choices: Array<{ message: { content: string } }>;
+      };
+      const content = json.choices?.[0]?.message?.content ?? "";
+      const parsed = JSON.parse(content) as { phrases: string[] };
+      const phrases = (parsed.phrases ?? []).slice(0, 3).filter((p) => p.trim().length > 0);
+      console.log(`[coverArtPromptBuilder] OpenAI lyric extraction succeeded, count=${phrases.length}`);
+      return phrases;
+    } catch (err) {
+      console.warn("[coverArtPromptBuilder] OpenAI lyric extraction failed, falling back to raw lyrics:", err);
+    }
   }
+
+  // ── Raw lyrics fallback ───────────────────────────────────────────────────
+  // When the LLM is unavailable, pass the first 200 chars of raw lyrics
+  // directly as a single phrase. This ensures the lyrics always reach the
+  // prompt builder even without the translation step.
+  console.log("[coverArtPromptBuilder] Using raw lyrics fallback (no OpenAI key or LLM unavailable)");
+  const rawSnippet = lyrics.trim().slice(0, 200).replace(/\n+/g, ", ");
+  return [rawSnippet];
 }
 
 // ─── Vocabulary Resolver ──────────────────────────────────────────────────────
