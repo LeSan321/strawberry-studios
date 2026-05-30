@@ -79,6 +79,7 @@ export type CoverArtPromptOutput = {
     lyricPhrases: string[];
     forbiddenTerms: string[];
     productionContext: string | null;
+    cinematiqueRendering: string;
   };
 };
 
@@ -136,12 +137,32 @@ const ARC_WEIGHTS: Record<ArcPosition, CategoryWeights> = {
   },
 };
 
+// ─── Cinématique Rendering Layer ─────────────────────────────────────────────
+// Derived from the Cinématique Physics Bible and Psychology Bible.
+// These are HOW-TO-RENDER directives — not scene content.
+// They add lighting grammar, atmospheric texture, and compositional tension
+// that push outputs from "stock photography" toward "album cover art".
+//
+// Each arc position maps to a distinct cinematic rendering grammar:
+//   gathering  → intimate chiaroscuro, close shadow ratio, warm tungsten
+//   arriving   → threshold lighting, motivated source, atmospheric depth
+//   open       → wide dynamic range, natural light, vast negative space
+
+const CINEMATIQUE_RENDERING: Record<ArcPosition, string> = {
+  gathering:
+    "chiaroscuro lighting, deep shadow 70% frame, warm tungsten 2700K key, asymmetric composition, shallow depth of field, foreground texture for depth",
+  arriving:
+    "motivated single source, threshold light, stratified atmosphere, asymmetric framing, figure off-center, background partially obscured",
+  open:
+    "wide dynamic range, natural available light, vast negative space, figure small against environment, atmospheric depth, no artificial fill",
+};
+
 // ─── Quality Tail ─────────────────────────────────────────────────────────────
 // Standard image quality and composition instructions appended to every prompt.
 // Kept short to preserve character budget for vocabulary and lyrics.
 
 const QUALITY_TAIL =
-  "Square 1:1 composition. Cinematic photography. No text, no logos, no watermarks, no borders, no radial effects, no lens flares.";
+  "Square 1:1 composition. Cinematic photography. Album cover aesthetic. No text, no logos, no watermarks, no borders, no radial effects, no lens flares, no symmetrical centered composition.";
 
 // ─── Prompt Assembly ──────────────────────────────────────────────────────────
 
@@ -226,6 +247,11 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // ── Layer 6: Arc framing (brief scale modifier — comes AFTER vocabulary) ─────────
   const arcFraming = ARC_FRAMING[arcPosition];
 
+  // ── Layer 6b: Cinématique rendering directive ────────────────────────────────
+  // HOW to render — lighting grammar, atmosphere, composition from the Bible.
+  // Sits after vocabulary so it modifies the scene rather than defining it.
+  const cinematiqueRendering = CINEMATIQUE_RENDERING[arcPosition];
+
   // ── Layer 7: Forbidden terms (as "no X" — direct negatives work better) ─────────
   const forbiddenTerms = pickForbiddenTerms(vocabulary.forbiddenTerms, 3);
 
@@ -257,6 +283,9 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // Arc framing — brief scale modifier
   segments.push(arcFraming);
 
+  // Cinématique rendering — how to render (lighting, atmosphere, composition)
+  segments.push(cinematiqueRendering);
+
   // Forbidden terms
   if (forbiddenTerms.length > 0) segments.push(forbiddenTerms.join(", "));
 
@@ -287,6 +316,7 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
       lyricPhrases: resolvedLyricPhrases,
       forbiddenTerms,
       productionContext,
+      cinematiqueRendering,
     },
   };
 }

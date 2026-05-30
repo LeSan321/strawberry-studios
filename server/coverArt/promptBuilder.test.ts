@@ -165,6 +165,33 @@ describe("buildCoverArtPrompt — basic assembly", () => {
     expect(result.layers).toHaveProperty("lyricPhrases");
     expect(result.layers).toHaveProperty("forbiddenTerms");
     expect(result.layers).toHaveProperty("productionContext");
+    expect(result.layers).toHaveProperty("cinematiqueRendering");
+  });
+
+  it("includes Cin\u00e9matique rendering directives in every prompt", () => {
+    for (const arcPosition of ["gathering", "arriving", "open"] as ArcPosition[]) {
+      const result = buildCoverArtPrompt({ vocabulary: MINIMAL_VOCABULARY, arcPosition });
+      // Each arc position should have a non-empty cinematic rendering directive
+      expect(result.layers.cinematiqueRendering.length).toBeGreaterThan(20);
+      expect(result.prompt).toContain(result.layers.cinematiqueRendering);
+    }
+  });
+
+  it("gathering arc has chiaroscuro rendering directive", () => {
+    const result = buildCoverArtPrompt({ vocabulary: MINIMAL_VOCABULARY, arcPosition: "gathering" });
+    expect(result.layers.cinematiqueRendering).toContain("chiaroscuro");
+    expect(result.prompt).toContain("chiaroscuro");
+  });
+
+  it("open arc has wide dynamic range rendering directive", () => {
+    const result = buildCoverArtPrompt({ vocabulary: MINIMAL_VOCABULARY, arcPosition: "open" });
+    expect(result.layers.cinematiqueRendering).toContain("wide dynamic range");
+    expect(result.prompt).toContain("wide dynamic range");
+  });
+
+  it("quality tail includes album cover aesthetic", () => {
+    const result = buildCoverArtPrompt({ vocabulary: MINIMAL_VOCABULARY, arcPosition: "arriving" });
+    expect(result.prompt).toContain("Album cover aesthetic");
   });
 });
 
