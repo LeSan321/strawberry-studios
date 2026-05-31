@@ -89,6 +89,7 @@ export type CoverArtPromptOutput = {
     forbiddenTerms: string[];
     productionContext: string | null;
     cinematiqueRendering: string;
+    genreFallbackPresence: string | null;
   };
 };
 
@@ -161,7 +162,7 @@ const CINEMATIQUE_RENDERING: Record<ArcPosition, string> = {
   gathering:
     "chiaroscuro lighting, deep shadow 70% frame, warm tungsten 2700K key, asymmetric composition, shallow depth of field, foreground texture for depth",
   arriving:
-    "motivated single source, threshold light, stratified atmosphere, asymmetric framing, figure off-center, background partially obscured",
+    "motivated single source, threshold light, stratified atmosphere, asymmetric framing, figure facing forward or in profile, background partially obscured",
   open:
     "wide dynamic range, natural available light, vast negative space, figure small against environment, atmospheric depth, no artificial fill",
 };
@@ -195,7 +196,7 @@ const MOOD_ENERGY_MAP: Record<string, MoodEnergyMap> = {
   passionate: { energyDirective: "deep warm tones, high contrast, intense focus", humanPresence: "figure present, intense and expressive" },
   // Low energy / introspective
   meditative: { energyDirective: "still air, long shadows, minimal movement", humanPresence: "solitary figure or no figure, stillness" },
-  melancholic: { energyDirective: "cool desaturated tones, diffused light, quiet emptiness", humanPresence: "solitary figure, turned away or distant" },
+  melancholic: { energyDirective: "cool desaturated tones, diffused light, quiet emptiness", humanPresence: "solitary figure, facing camera or in profile, present and still" },
   // Night / atmosphere
   "late night": { energyDirective: "neon-lit interior, warm practical lights, night atmosphere", humanPresence: "figures present, bar or venue crowd energy" },
   dark: { energyDirective: "deep shadow, minimal light sources, high contrast", humanPresence: "solitary figure or silhouette" },
@@ -226,7 +227,7 @@ function resolveMoodEnergy(moodTags: string[]): MoodEnergyMap | null {
 // Kept short to preserve character budget for vocabulary and lyrics.
 
 const QUALITY_TAIL =
-  "Square 1:1 composition. Cinematic photography. Album cover aesthetic. No text, no logos, no watermarks, no borders, no radial effects, no lens flares, no symmetrical centered composition.";
+  "Square 1:1 composition. Cinematic photography. Album cover aesthetic. No text, no logos, no watermarks, no borders, no radial effects, no lens flares, no symmetrical centered composition. No backs-to-camera. Figures face forward or in profile.";
 
 // ─── Prompt Assembly ──────────────────────────────────────────────────────────
 
@@ -322,6 +323,21 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // ── Layer 7: Forbidden terms (as "no X" — direct negatives work better) ─────────
   const forbiddenTerms = pickForbiddenTerms(vocabulary.forbiddenTerms, 3);
 
+  // ── Layer 1c: Genre-aware human presence fallback ─────────────────────────────
+  // When no mood tags are present, derive a basic energy/presence hint from the genre string.
+  // This prevents the model from defaulting to solitary-somber when genre implies energy.
+  let genreFallbackPresence: string | null = null;
+  if (!moodEnergy && genre) {
+    const g = genre.toLowerCase();
+    if (/upbeat|reggae|psychedelic|vaporwave|rock|punk|hip.?hop|dance|pop|funk|soul|r.?b/.test(g)) {
+      genreFallbackPresence = "figures present and engaged, facing forward, energy and life in the scene";
+    } else if (/country|folk|bluegrass|americana|roots/.test(g)) {
+      genreFallbackPresence = "figure present, grounded and authentic, facing forward or in profile";
+    } else if (/jazz|blues|gospel/.test(g)) {
+      genreFallbackPresence = "figure present, expressive and present, warm and close";
+    }
+  }
+
   // ── Layer 8: Production context (genre only — mood is now handled by moodEnergy) ──
   const productionContext: string | null = genre ?? null;
 
@@ -347,6 +363,9 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   if (moodEnergy) {
     segments.push(moodEnergy.energyDirective);
     segments.push(moodEnergy.humanPresence);
+  } else if (genreFallbackPresence) {
+    // Genre-aware fallback: when no mood tags, use genre to set basic human presence
+    segments.push(genreFallbackPresence);
   }
 
   // Layer 2-3: Environment and color — concrete visual scene
@@ -395,6 +414,7 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
       forbiddenTerms,
       productionContext,
       cinematiqueRendering,
+      genreFallbackPresence,
     },
   };
 }

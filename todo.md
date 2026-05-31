@@ -344,3 +344,11 @@
 - [x] 4 new steeringNote vitest tests added (175/175 passing)
 - [ ] FIX (Riff side): Pre-populate form.lyrics from stored track record on page load — see riff_studios_bridge_handoff_v2.md
 - [ ] FIX (Riff side): Rename Description field to "Art Direction" and wire to steeringNote in generateCoverArt call — see riff_studios_bridge_handoff_v2.md
+
+## Bug Fix — Morose Default Cover Art (Mossy Rocks, Backs-Turned Figures)
+- [x] Fix platform default vocabulary: replace abstract philosophical terms with concrete photographable instructions that produce varied, energetic scenes
+- [x] Add genre-aware human presence fallback: when no mood tags are present, derive energy/presence from genre string (upbeat/country/reggae → active, facing camera; melancholic/dark → introspective)
+- [x] Fix melancholic mood energy map: "turned away or distant" → "facing camera or in profile, present and still"
+- [x] Fix arriving arc Cinemétique rendering: "figure off-center" → "figure facing forward or in profile"
+- [x] Add "No backs-to-camera. Figures face forward or in profile." to quality tail (all prompts)
+- [x] 175/175 tests passing
