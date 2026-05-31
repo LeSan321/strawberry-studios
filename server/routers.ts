@@ -619,7 +619,8 @@ export const appRouter = router({
           fileSizeBytes: input.fileSizeBytes,
           durationSeconds: input.durationSeconds,
         });
-        return { success: true, id: (result as any).insertId };
+        // Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] — insertId is at index 0
+        return { success: true, id: (result as any)[0]?.insertId };
       }),
 
     list: protectedProcedure.query(async ({ ctx }) => {

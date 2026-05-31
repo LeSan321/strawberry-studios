@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, openId, name, riffUserId FROM users WHERE riffUserId = 7777;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT id, openId, name, riffUserId FROM users WHERE riffUserId = 7777;",
+  "rows": [
+    {
+      "id": "7140001",
+      "openId": "riff:7777",
+      "name": "Riff User 7777",
+      "riffUserId": "7777"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\triffUserId\n7140001\triff:7777\tRiff User 7777\t7777\n",
+  "stderr": "",
+  "execution_time_ms": 260
+}

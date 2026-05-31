@@ -1,0 +1,20 @@
+{
+  "query": "SELECT u.id, u.openId, u.name, u.riffUserId, cf.id as freqId, cf.frequencyName, cf.arcType, cf.isDefault FROM users u LEFT JOIN creator_frequencies cf ON cf.userId = u.id AND cf.isDefault = true WHERE u.riffUserId = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT u.id, u.openId, u.name, u.riffUserId, cf.id as freqId, cf.frequencyName, cf.arcType, cf.isDefault FROM users u LEFT JOIN creator_frequencies cf ON cf.userId = u.id AND cf.isDefault = true WHERE u.riffUserId = 1;",
+  "rows": [
+    {
+      "id": "5940001",
+      "openId": "riff:1",
+      "name": "Riff User 1",
+      "riffUserId": "1",
+      "freqId": "60001",
+      "frequencyName": "Blooming Frontier",
+      "arcType": "erosive_revelatory",
+      "isDefault": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\triffUserId\tfreqId\tfrequencyName\tarcType\tisDefault\n5940001\triff:1\tRiff User 1\t1\t60001\tBlooming Frontier\terosive_revelatory\t1\n",
+  "stderr": "",
+  "execution_time_ms": 273
+}

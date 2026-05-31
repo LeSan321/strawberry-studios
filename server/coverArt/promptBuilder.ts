@@ -68,6 +68,14 @@ export type CoverArtPromptInput = {
   genre?: string | null;
   /** Optional mood tags for production context (lowest weight) */
   moodTags?: string[] | null;
+  /**
+   * Optional synthesis fingerprint from the creator's Frequency record.
+   * Used as the environment anchor when no lyrics and no steering note are
+   * present — it is the most complete single-sentence description of the
+   * creator's visual world and is written in photographable language.
+   * Only the first ~200 chars are used to stay within the character budget.
+   */
+  synthesisFingerprint?: string | null;
 };
 
 export type CoverArtPromptOutput = {
@@ -90,6 +98,7 @@ export type CoverArtPromptOutput = {
     productionContext: string | null;
     cinematiqueRendering: string;
     genreFallbackPresence: string | null;
+    synthesisAnchor: string | null;
   };
 };
 
@@ -290,11 +299,22 @@ function pickForbiddenTerms(terms: VocabularyTerm[], count = 3): string[] {
  * philosophical and meaningless to an image model).
  */
 export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptOutput {
-  const { vocabulary, arcPosition, lyricPhrases, steeringNote, genre, moodTags } = input;
+  const { vocabulary, arcPosition, lyricPhrases, steeringNote, genre, moodTags, synthesisFingerprint } = input;
   const weights = ARC_WEIGHTS[arcPosition];
 
   // ── Layer 1: Lyrics (FIRST — most song-specific, highest priority) ──────────────
   const resolvedLyricPhrases = lyricPhrases?.filter((p) => p.trim().length > 0) ?? [];
+
+  // ── Synthesis anchor (environment fallback when no lyrics and no steering note) ──
+  // When the creator has a Frequency, their synthesis fingerprint is the most
+  // complete photographable description of their visual world. Use the first
+  // ~200 chars as the environment anchor ONLY when there is nothing more specific
+  // (no lyrics, no steering note). This prevents the model from falling back to
+  // its training-distribution default (mossy rocks, solitary silhouettes).
+  const resolvedSynthesisAnchor: string | null =
+    !steeringNote?.trim() && resolvedLyricPhrases.length === 0 && synthesisFingerprint
+      ? synthesisFingerprint.slice(0, 200).trim()
+      : null;
 
   // ── Layer 1b: Mood energy + human presence (SECOND — sets energy and population) ──
   // Mood tags are translated into concrete visual energy and human presence directives.
@@ -357,6 +377,13 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
     segments.push(resolvedLyricPhrases.join(", "));
   }
 
+  // Layer 1c: Synthesis anchor — environment fallback when no lyrics/steering note
+  // This is the creator's visual world in their own words, used as the scene
+  // foundation when the song has no lyrics to anchor on.
+  if (resolvedSynthesisAnchor) {
+    segments.push(resolvedSynthesisAnchor);
+  }
+
   // Layer 1b: Mood energy directive — sets energy level and scene population EARLY
   // This is the fix for the solitary-somber default: the model must commit to
   // the right energy and human presence before reading vocabulary.
@@ -415,6 +442,7 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
       productionContext,
       cinematiqueRendering,
       genreFallbackPresence,
+      synthesisAnchor: resolvedSynthesisAnchor,
     },
   };
 }

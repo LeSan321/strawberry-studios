@@ -188,7 +188,8 @@ export async function createCampaign(data: InsertCampaign): Promise<number> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(campaigns).values(data);
-  return (result as unknown as { insertId: number }).insertId;
+  // Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] — insertId is at index 0
+  return (result as unknown as [{ insertId: number }])[0].insertId;
 }
 
 export async function getCampaignsByUser(userId: number): Promise<Campaign[]> {
@@ -237,7 +238,8 @@ export async function createCampaignShot(data: InsertCampaignShot): Promise<numb
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(campaignShots).values(data);
-  return (result as unknown as { insertId: number }).insertId;
+  // Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] — insertId is at index 0
+  return (result as unknown as [{ insertId: number }])[0].insertId;
 }
 
 export async function getCampaignShots(campaignId: number): Promise<CampaignShot[]> {
@@ -279,7 +281,8 @@ export async function addMoodBoardImage(data: InsertCampaignMoodBoardImage): Pro
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(campaignMoodBoardImages).values(data);
-  return (result as unknown as { insertId: number }).insertId;
+  // Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] — insertId is at index 0
+  return (result as unknown as [{ insertId: number }])[0].insertId;
 }
 
 export async function removeMoodBoardImage(id: number, campaignId: number): Promise<void> {

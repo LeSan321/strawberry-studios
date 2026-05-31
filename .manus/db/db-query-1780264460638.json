@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, frequencyName, arcType, LEFT(synthesisFingerprint, 400) as fingerprint_preview FROM creator_frequencies LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT id, frequencyName, arcType, LEFT(synthesisFingerprint, 400) as fingerprint_preview FROM creator_frequencies LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "frequencyName": "Blooming Frontier",
+      "arcType": "expansive_mythic",
+      "fingerprint_preview": "The meeting point of organic warmth and mathematical luminescence — two presences, one horizon, music as the reason they are standing there. The world is open and alive: golden hour light on living ground, the forest edge giving way to vast open landscape, the horizon always present beyond every frame edge. A human figure in organic wardrobe stands at the threshold, feet on living ground, oriented"
+    },
+    {
+      "id": "30001",
+      "frequencyName": "Stillness Held",
+      "arcType": "expansive_mythic",
+      "fingerprint_preview": "You inhabit a space of quiet contemplation"
+    },
+    {
+      "id": "60001",
+      "frequencyName": "Blooming Frontier",
+      "arcType": "erosive_revelatory",
+      "fingerprint_preview": "You articulate a visual identity rooted in profound personal transformation, moving from deep internal struggle to an explosive, grounded power. Your aesthetic centers on the unwinding of inner strength, a journey from compressed darkness towards a radiant, hopeful release, akin to drawing from a hidden, life-giving source."
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfrequencyName\tarcType\tfingerprint_preview\n1\tBlooming Frontier\texpansive_mythic\tThe meeting point of organic warmth and mathematical luminescence — two presences, one horizon, music as the reason they are standing there. The world is open and alive: golden hour light on living ground, the forest edge giving way to vast open landscape, the horizon always present beyond every frame edge. A human figure in organic wardrobe stands at the threshold, feet on living ground, oriented\n30001\tStillness Held\texpansive_mythic\tYou inhabit a space of quiet contemplation\n60001\tBlooming Frontier\terosive_revelatory\tYou articulate a visual identity rooted in profound personal transformation, moving from deep internal struggle to an explosive, grounded power. Your aesthetic centers on the unwinding of inner strength, a journey from compressed darkness towards a radiant, hopeful release, akin to drawing from a hidden, life-giving source.\n",
+  "stderr": "",
+  "execution_time_ms": 267
+}

@@ -1,0 +1,60 @@
+{
+  "query": "SELECT u.id as studiosUserId, u.riffUserId, u.name, cf.id as freqId, cf.frequencyName, cf.arcType, LEFT(cf.synthesisFingerprint, 150) as fp_preview, LEFT(CAST(cf.vocabularyJson AS CHAR), 200) as vocab_preview FROM users u LEFT JOIN creator_frequencies cf ON cf.userId = u.id AND cf.isDefault = 1 WHERE u.riffUserId IS NOT NULL ORDER BY u.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT u.id as studiosUserId, u.riffUserId, u.name, cf.id as freqId, cf.frequencyName, cf.arcType, LEFT(cf.synthesisFingerprint, 150) as fp_preview, LEFT(CAST(cf.vocabularyJson AS CHAR), 200) as vocab_preview FROM users u LEFT JOIN creator_frequencies cf ON cf.userId = u.id AND cf.isDefault = 1 WHERE u.riffUserId IS NOT NULL ORDER BY u.id;",
+  "rows": [
+    {
+      "studiosUserId": "5550005",
+      "riffUserId": "999",
+      "name": "Riff User 999",
+      "freqId": "30001",
+      "frequencyName": "Stillness Held",
+      "arcType": "expansive_mythic",
+      "fp_preview": "You inhabit a space of quiet contemplation",
+      "vocab_preview": "\"{\\\"emotionalRegister\\\":[\\\"melancholic\\\"]}\""
+    },
+    {
+      "studiosUserId": "5940001",
+      "riffUserId": "1",
+      "name": "Riff User 1",
+      "freqId": "60001",
+      "frequencyName": "Blooming Frontier",
+      "arcType": "erosive_revelatory",
+      "fp_preview": "You articulate a visual identity rooted in profound personal transformation, moving from deep internal struggle to an explosive, grounded power. Your ",
+      "vocab_preview": "\"{\\\"emotionalRegister\\\":[\\\"resilient\\\",\\\"unwinding\\\",\\\"empowered\\\",\\\"hopeful\\\",\\\"transformative\\\"],\\\"colorAndLight\\\":[\\\"pre-dawn glow\\\",\\\"deepening indigo\\\",\\\"radiant core\\\",\\\"first light\\\",\\\"breaking"
+    },
+    {
+      "studiosUserId": "6000002",
+      "riffUserId": "99999",
+      "name": "Riff User 99999",
+      "freqId": "NULL",
+      "frequencyName": "NULL",
+      "arcType": "NULL",
+      "fp_preview": "NULL",
+      "vocab_preview": "NULL"
+    },
+    {
+      "studiosUserId": "6420001",
+      "riffUserId": "123",
+      "name": "Riff User 123",
+      "freqId": "NULL",
+      "frequencyName": "NULL",
+      "arcType": "NULL",
+      "fp_preview": "NULL",
+      "vocab_preview": "NULL"
+    },
+    {
+      "studiosUserId": "7050002",
+      "riffUserId": "9999",
+      "name": "Riff User 9999",
+      "freqId": "NULL",
+      "frequencyName": "NULL",
+      "arcType": "NULL",
+      "fp_preview": "NULL",
+      "vocab_preview": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "studiosUserId\triffUserId\tname\tfreqId\tfrequencyName\tarcType\tfp_preview\tvocab_preview\n5550005\t999\tRiff User 999\t30001\tStillness Held\texpansive_mythic\tYou inhabit a space of quiet contemplation\t\"{\\\"emotionalRegister\\\":[\\\"melancholic\\\"]}\"\n5940001\t1\tRiff User 1\t60001\tBlooming Frontier\terosive_revelatory\tYou articulate a visual identity rooted in profound personal transformation, moving from deep internal struggle to an explosive, grounded power. Your \t\"{\\\"emotionalRegister\\\":[\\\"resilient\\\",\\\"unwinding\\\",\\\"empowered\\\",\\\"hopeful\\\",\\\"transformative\\\"],\\\"colorAndLight\\\":[\\\"pre-dawn glow\\\",\\\"deepening indigo\\\",\\\"radiant core\\\",\\\"first light\\\",\\\"breaking\n6000002\t99999\tRiff User 99999\tNULL\tNULL\tNULL\tNULL\tNULL\n6420001\t123\tRiff User 123\tNULL\tNULL\tNULL\tNULL\tNULL\n7050002\t9999\tRiff User 9999\tNULL\tNULL\tNULL\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 278
+}

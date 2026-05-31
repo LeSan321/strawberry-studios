@@ -75,7 +75,8 @@ async function resolveStudiosUserId(riffUserId: number): Promise<number> {
     role: "user",
     riffUserId,
   });
-  return (result as any).insertId as number;
+  // Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] — insertId is at index 0
+  return (result as any)[0].insertId as number;
 }
 
 // ─── Vocabulary Normalizer ───────────────────────────────────────────────────
@@ -293,8 +294,9 @@ Synthesize their Visual Universe.`;
       }
       const { riffUserId, ...frequencyData } = parsed.data;
       const studiosUserId = await resolveStudiosUserId(riffUserId);
+      console.log(`[Bridge] POST save frequency: riffUserId=${riffUserId}, studiosUserId=${studiosUserId}, type=${typeof studiosUserId}`);
 
-       const insertedId = await saveCreatorFrequency({
+      const insertedId = await saveCreatorFrequency({
         userId: studiosUserId,
         frequencyName: frequencyData.frequencyName,
         arcType: frequencyData.arcType,
@@ -348,12 +350,14 @@ Synthesize their Visual Universe.`;
       console.log(`[Bridge] cover-art/generate: lyricPhrases extracted, count=${lyricPhrases.length}`);
 
       // Build prompt
+      const synthesisFingerprint = frequency?.synthesisFingerprint ?? null;
       const promptOutput = buildCoverArtPrompt({
         vocabulary,
         arcPosition: arcPosition ?? "arriving",
         lyricPhrases,
         steeringNote: steeringNote ?? undefined,
         genre: genre ?? undefined,
+        synthesisFingerprint: synthesisFingerprint ?? undefined,
       });
       console.log(`[Bridge] cover-art/generate: prompt built, charCount=${promptOutput.charCount}, wasTruncated=${promptOutput.wasTruncated}`);
       console.log(`[Bridge] cover-art/generate: lyricPhrases used: ${JSON.stringify(lyricPhrases)}`);
@@ -387,6 +391,7 @@ Synthesize their Visual Universe.`;
           lyricsReceived: lyrics ?? null,
           steeringNoteReceived: steeringNote ?? null,
           lyricPhrasesExtracted: lyricPhrases,
+          synthesisAnchorUsed: promptOutput.layers.synthesisAnchor,
           promptUsed: promptOutput.prompt,
           promptCharCount: promptOutput.charCount,
         },

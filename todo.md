@@ -345,6 +345,13 @@
 - [ ] FIX (Riff side): Pre-populate form.lyrics from stored track record on page load — see riff_studios_bridge_handoff_v2.md
 - [ ] FIX (Riff side): Rename Description field to "Art Direction" and wire to steeringNote in generateCoverArt call — see riff_studios_bridge_handoff_v2.md
 
+## Bug Fix — Bridge Save insertId (userId = default error)
+- [x] ROOT CAUSE: Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] array; `(result as any).insertId` was undefined; new shadow users got `userId = undefined` → DB error "Field 'userId' doesn't have a default value"
+- [x] FIX: Changed `resolveStudiosUserId` in bridgeRoutes.ts to use `(result as any)[0].insertId`
+- [x] FIX: Fixed same pattern in db.ts for `createCampaign`, `createCampaignShot`, `addMoodBoardImage` (all now use `[0].insertId`)
+- [x] FIX: Fixed same pattern in routers.ts for audio track upload
+- [x] VERIFIED: Bridge save test returns `{success:true, frequencyId:90002}` with correct vocabulary stored as JSON object; 175/175 tests passing
+
 ## Bug Fix — Morose Default Cover Art (Mossy Rocks, Backs-Turned Figures)
 - [x] Fix platform default vocabulary: replace abstract philosophical terms with concrete photographable instructions that produce varied, energetic scenes
 - [x] Add genre-aware human presence fallback: when no mood tags are present, derive energy/presence from genre string (upbeat/country/reggae → active, facing camera; melancholic/dark → introspective)

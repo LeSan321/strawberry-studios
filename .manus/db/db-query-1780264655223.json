@@ -1,0 +1,15 @@
+{
+  "query": "SELECT id, frequencyName, LEFT(CAST(vocabularyJson AS CHAR), 600) as vocab_preview FROM creator_frequencies WHERE id = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT id, frequencyName, LEFT(CAST(vocabularyJson AS CHAR), 600) as vocab_preview FROM creator_frequencies WHERE id = 1;",
+  "rows": [
+    {
+      "id": "1",
+      "frequencyName": "Blooming Frontier",
+      "vocab_preview": "{\"arcTerms\": [{\"instruction\": \"The arc moves from contained pressure outward — the opening is earned, not given\", \"term\": \"compression builds to rupture\"}, {\"instruction\": \"The direction of movement is always outward and forward — toward the frontier, toward the opening\", \"term\": \"outward and forward\"}, {\"instruction\": \"Standing at a boundary — moving forward or still at the edge of something larger\", \"term\": \"threshold stance\"}, {\"instruction\": \"Shadow is present in the image but it is not the conclusion — the light is winning\", \"term\": \"darkness still present but not final\"}], \"colorLight\": "
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfrequencyName\tvocab_preview\n1\tBlooming Frontier\t{\"arcTerms\": [{\"instruction\": \"The arc moves from contained pressure outward — the opening is earned, not given\", \"term\": \"compression builds to rupture\"}, {\"instruction\": \"The direction of movement is always outward and forward — toward the frontier, toward the opening\", \"term\": \"outward and forward\"}, {\"instruction\": \"Standing at a boundary — moving forward or still at the edge of something larger\", \"term\": \"threshold stance\"}, {\"instruction\": \"Shadow is present in the image but it is not the conclusion — the light is winning\", \"term\": \"darkness still present but not final\"}], \"colorLight\": \n",
+  "stderr": "",
+  "execution_time_ms": 888
+}
