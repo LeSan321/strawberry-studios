@@ -352,6 +352,12 @@
 - [x] FIX: Fixed same pattern in routers.ts for audio track upload
 - [x] VERIFIED: Bridge save test returns `{success:true, frequencyId:90002}` with correct vocabulary stored as JSON object; 175/175 tests passing
 
+## Bug Fix — vocabularyJson Double-Encoding (Frequency Terms Not Reaching Prompt)
+- [x] ROOT CAUSE: Riff sends vocabularyJson as a JSON.stringify'd string; MySQL JSON column stores it as a JSON string value (not object); Drizzle reads it back as a JS string; `normalizeVocabulary()` received a string instead of object → all `toTerms()` calls got `undefined` → every vocabulary category was empty
+- [x] FIX: Added `parseVocabJson()` helper in bridgeRoutes.ts that detects string vs object and JSON.parses if needed; called before `normalizeVocabulary()` in cover-art/generate route
+- [x] VERIFIED: New prompt now contains personal vocabulary terms: "constricted spaces, breaking walls, open vistas", "fractured light, glowing fissures", "resilient, transformative", "propelling, erupting, unraveling", "no depressing, no hopeless, no poisonous"
+- [x] 175/175 tests passing
+
 ## Bug Fix — Morose Default Cover Art (Mossy Rocks, Backs-Turned Figures)
 - [x] Fix platform default vocabulary: replace abstract philosophical terms with concrete photographable instructions that produce varied, energetic scenes
 - [x] Add genre-aware human presence fallback: when no mood tags are present, derive energy/presence from genre string (upbeat/country/reggae → active, facing camera; melancholic/dark → introspective)

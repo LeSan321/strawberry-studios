@@ -1,0 +1,30 @@
+{
+  "query": "SELECT id, userId, frequencyName, arcType, isDefault, createdAt, JSON_TYPE(vocabularyJson) as vocabType, JSON_KEYS(vocabularyJson) as vocabKeys FROM creator_frequencies WHERE userId = 5940001 ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT id, userId, frequencyName, arcType, isDefault, createdAt, JSON_TYPE(vocabularyJson) as vocabType, JSON_KEYS(vocabularyJson) as vocabKeys FROM creator_frequencies WHERE userId = 5940001 ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "120001",
+      "userId": "5940001",
+      "frequencyName": "Blooming Frontier",
+      "arcType": "erosive_revelatory",
+      "isDefault": "1",
+      "createdAt": "2026-05-31 22:38:04",
+      "vocabType": "STRING",
+      "vocabKeys": "NULL"
+    },
+    {
+      "id": "60001",
+      "userId": "5940001",
+      "frequencyName": "Blooming Frontier",
+      "arcType": "erosive_revelatory",
+      "isDefault": "0",
+      "createdAt": "2026-05-28 02:59:31",
+      "vocabType": "STRING",
+      "vocabKeys": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tfrequencyName\tarcType\tisDefault\tcreatedAt\tvocabType\tvocabKeys\n120001\t5940001\tBlooming Frontier\terosive_revelatory\t1\t2026-05-31 22:38:04\tSTRING\tNULL\n60001\t5940001\tBlooming Frontier\terosive_revelatory\t0\t2026-05-28 02:59:31\tSTRING\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 263
+}

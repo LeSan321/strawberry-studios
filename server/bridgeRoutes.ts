@@ -88,6 +88,16 @@ async function resolveStudiosUserId(riffUserId: number): Promise<number> {
  * `relationshipGeometry`. This function normalizes either shape into the
  * canonical VocabularyJson format.
  */
+/** Parse a vocabulary value that may be double-encoded (string inside a JSON column). */
+function parseVocabJson(raw: unknown): Record<string, unknown> | null {
+  if (!raw) return null;
+  if (typeof raw === "string") {
+    try { return JSON.parse(raw) as Record<string, unknown>; } catch { return null; }
+  }
+  if (typeof raw === "object") return raw as Record<string, unknown>;
+  return null;
+}
+
 function normalizeVocabulary(raw: Record<string, unknown>): VocabularyJson {
   // Helper: convert a raw array value to VocabularyTerm[]
   // Handles both string[] and VocabularyTerm[] (already normalized)
@@ -329,10 +339,11 @@ Synthesize their Visual Universe.`;
       console.log(`[Bridge] cover-art/generate: resolving vocabulary for studiosUserId=${studiosUserId}`);
       const frequency = await getDefaultCreatorFrequency(studiosUserId);
       const platformDefault = await getPlatformDefaultVocabulary();
+
       const rawVocabulary = frequency
-        ? (frequency.vocabularyJson as unknown as Record<string, unknown>)
+        ? parseVocabJson(frequency.vocabularyJson)
         : platformDefault
-        ? (platformDefault.vocabularyJson as unknown as Record<string, unknown>)
+        ? parseVocabJson(platformDefault.vocabularyJson)
         : null;
 
       if (!rawVocabulary) {

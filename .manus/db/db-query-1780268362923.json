@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, frequencyName, arcType, LEFT(CAST(vocabularyJson AS CHAR), 300) as vocabRaw FROM creator_frequencies WHERE userId = 5940001 ORDER BY createdAt DESC LIMIT 2;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute SELECT id, frequencyName, arcType, LEFT(CAST(vocabularyJson AS CHAR), 300) as vocabRaw FROM creator_frequencies WHERE userId = 5940001 ORDER BY createdAt DESC LIMIT 2;",
+  "rows": [
+    {
+      "id": "120001",
+      "frequencyName": "Blooming Frontier",
+      "arcType": "erosive_revelatory",
+      "vocabRaw": "\"{\\\"emotionalRegister\\\":[\\\"resilient\\\",\\\"transformative\\\",\\\"hopeful\\\",\\\"liberating\\\",\\\"courageous\\\"],\\\"colorAndLight\\\":[\\\"fractured light\\\",\\\"glowing fissures\\\",\\\"blinding white\\\",\\\"deep indigo\\\",\\\"radiant dawn\\\"],\\\"environment\\\":[\\\"constricted spaces\\\",\\\"breaking walls\\\",\\\"open vistas\\\",\\\"threshold"
+    },
+    {
+      "id": "60001",
+      "frequencyName": "Blooming Frontier",
+      "arcType": "erosive_revelatory",
+      "vocabRaw": "\"{\\\"emotionalRegister\\\":[\\\"resilient\\\",\\\"unwinding\\\",\\\"empowered\\\",\\\"hopeful\\\",\\\"transformative\\\"],\\\"colorAndLight\\\":[\\\"pre-dawn glow\\\",\\\"deepening indigo\\\",\\\"radiant core\\\",\\\"first light\\\",\\\"breaking dawn\\\"],\\\"environment\\\":[\\\"hidden spring\\\",\\\"frontier's edge\\\",\\\"subterranean well\\\",\\\"unfurling vo"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfrequencyName\tarcType\tvocabRaw\n120001\tBlooming Frontier\terosive_revelatory\t\"{\\\"emotionalRegister\\\":[\\\"resilient\\\",\\\"transformative\\\",\\\"hopeful\\\",\\\"liberating\\\",\\\"courageous\\\"],\\\"colorAndLight\\\":[\\\"fractured light\\\",\\\"glowing fissures\\\",\\\"blinding white\\\",\\\"deep indigo\\\",\\\"radiant dawn\\\"],\\\"environment\\\":[\\\"constricted spaces\\\",\\\"breaking walls\\\",\\\"open vistas\\\",\\\"threshold\n60001\tBlooming Frontier\terosive_revelatory\t\"{\\\"emotionalRegister\\\":[\\\"resilient\\\",\\\"unwinding\\\",\\\"empowered\\\",\\\"hopeful\\\",\\\"transformative\\\"],\\\"colorAndLight\\\":[\\\"pre-dawn glow\\\",\\\"deepening indigo\\\",\\\"radiant core\\\",\\\"first light\\\",\\\"breaking dawn\\\"],\\\"environment\\\":[\\\"hidden spring\\\",\\\"frontier's edge\\\",\\\"subterranean well\\\",\\\"unfurling vo\n",
+  "stderr": "",
+  "execution_time_ms": 263
+}
