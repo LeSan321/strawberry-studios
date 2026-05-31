@@ -56,6 +56,14 @@ export type CoverArtPromptInput = {
    * if no lyrics are available.
    */
   lyricPhrases?: string[] | null;
+  /**
+   * Optional creator-supplied art direction note (repurposed from the
+   * Description field in the Riff upload form). When present, this is
+   * prepended as the HIGHEST-PRIORITY directive — before lyrics and
+   * vocabulary. A few words from the creator override everything else.
+   * Example: "golden hour, empty road" or "rainy city, neon reflections"
+   */
+  steeringNote?: string | null;
   /** Optional genre tag for production context (lowest weight) */
   genre?: string | null;
   /** Optional mood tags for production context (lowest weight) */
@@ -71,6 +79,7 @@ export type CoverArtPromptOutput = {
   wasTruncated: boolean;
   /** Debug breakdown of which layers contributed */
   layers: {
+    steeringNote: string | null;
     arcFraming: string;
     environmentTerms: string[];
     emotionalTerms: string[];
@@ -280,7 +289,7 @@ function pickForbiddenTerms(terms: VocabularyTerm[], count = 3): string[] {
  * philosophical and meaningless to an image model).
  */
 export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptOutput {
-  const { vocabulary, arcPosition, lyricPhrases, genre, moodTags } = input;
+  const { vocabulary, arcPosition, lyricPhrases, steeringNote, genre, moodTags } = input;
   const weights = ARC_WEIGHTS[arcPosition];
 
   // ── Layer 1: Lyrics (FIRST — most song-specific, highest priority) ──────────────
@@ -316,8 +325,16 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // ── Layer 8: Production context (genre only — mood is now handled by moodEnergy) ──
   const productionContext: string | null = genre ?? null;
 
-  // ── Assemble: lyrics first, then visual vocabulary, then modifiers ────────────────
+  // ── Assemble: steering note first, then lyrics, then visual vocabulary ─────────────
   const segments: string[] = [];
+
+  // Layer 0: Creator art direction — HIGHEST PRIORITY, overrides everything
+  // A few words from the creator (e.g. "golden hour, empty road") go first so
+  // the image model anchors on their intent before reading any generated content.
+  const resolvedSteeringNote = steeringNote?.trim() || null;
+  if (resolvedSteeringNote) {
+    segments.push(resolvedSteeringNote);
+  }
 
   // Layer 1: Lyric anchors — most song-specific material
   if (resolvedLyricPhrases.length > 0) {
@@ -368,6 +385,7 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
     charCount: prompt.length,
     wasTruncated,
     layers: {
+      steeringNote: resolvedSteeringNote,
       arcFraming,
       environmentTerms,
       emotionalTerms,

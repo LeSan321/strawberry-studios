@@ -149,6 +149,7 @@ const GenerateCoverArtSchema = z.object({
   riffUserId: z.number().int().positive(),
   riffTrackId: z.number().int().positive(),
   lyrics: z.string().optional(),
+  steeringNote: z.string().max(300).optional(),
   genre: z.string().optional(),
   arcPosition: z.enum(["gathering", "arriving", "open"]).optional(),
   isRegeneration: z.boolean().optional(),
@@ -318,7 +319,8 @@ Synthesize their Visual Universe.`;
         res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });
         return;
       }
-      const { riffUserId, riffTrackId, lyrics, genre, arcPosition, isRegeneration } = parsed.data;
+      const { riffUserId, riffTrackId, lyrics, steeringNote, genre, arcPosition, isRegeneration } = parsed.data;
+      console.log(`[Bridge] cover-art/generate: incoming payload — riffUserId=${riffUserId}, riffTrackId=${riffTrackId}, genre=${genre}, arcPosition=${arcPosition}, lyricsPresent=${!!lyrics}, lyricsLength=${lyrics?.length ?? 0}, lyricsPreview=${lyrics ? JSON.stringify(lyrics.slice(0, 120)) : 'null'}, steeringNote=${steeringNote ? JSON.stringify(steeringNote.slice(0, 80)) : 'null'}`);
       const studiosUserId = await resolveStudiosUserId(riffUserId);
 
       // Resolve vocabulary
@@ -350,10 +352,12 @@ Synthesize their Visual Universe.`;
         vocabulary,
         arcPosition: arcPosition ?? "arriving",
         lyricPhrases,
+        steeringNote: steeringNote ?? undefined,
         genre: genre ?? undefined,
       });
       console.log(`[Bridge] cover-art/generate: prompt built, charCount=${promptOutput.charCount}, wasTruncated=${promptOutput.wasTruncated}`);
-      console.log(`[Bridge] cover-art/generate: prompt preview: ${promptOutput.prompt.slice(0, 120)}...`);
+      console.log(`[Bridge] cover-art/generate: lyricPhrases used: ${JSON.stringify(lyricPhrases)}`);
+      console.log(`[Bridge] cover-art/generate: FULL PROMPT: ${promptOutput.prompt}`);
 
       // Generate image
       console.log("[Bridge] cover-art/generate: calling generateImage...");
@@ -378,6 +382,14 @@ Synthesize their Visual Universe.`;
         riffTrackId,
         arcPosition: arcPosition ?? "arriving",
         usedPersonalFrequency: !!frequency,
+        // Debug fields — remove once lyrics data flow is confirmed working
+        _debug: {
+          lyricsReceived: lyrics ?? null,
+          steeringNoteReceived: steeringNote ?? null,
+          lyricPhrasesExtracted: lyricPhrases,
+          promptUsed: promptOutput.prompt,
+          promptCharCount: promptOutput.charCount,
+        },
       });
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);

@@ -157,6 +157,7 @@ describe("buildCoverArtPrompt — basic assembly", () => {
       vocabulary: MINIMAL_VOCABULARY,
       arcPosition: "arriving",
     });
+    expect(result.layers).toHaveProperty("steeringNote");
     expect(result.layers).toHaveProperty("arcFraming");
     expect(result.layers).toHaveProperty("environmentTerms");
     expect(result.layers).toHaveProperty("emotionalTerms");
@@ -340,6 +341,56 @@ describe("buildCoverArtPrompt — lyric phrases", () => {
     });
     expect(result.layers.lyricPhrases).toHaveLength(1);
     expect(result.layers.lyricPhrases[0]).toBe("valid phrase");
+  });
+});
+
+// ─── Steering Note Tests ────────────────────────────────────────────────────
+
+describe("buildCoverArtPrompt — steeringNote (Art Direction)", () => {
+  it("places steeringNote at the very start of the prompt", () => {
+    const result = buildCoverArtPrompt({
+      vocabulary: MINIMAL_VOCABULARY,
+      arcPosition: "arriving",
+      steeringNote: "golden hour, empty road",
+    });
+    expect(result.prompt.startsWith("golden hour, empty road")).toBe(true);
+    expect(result.layers.steeringNote).toBe("golden hour, empty road");
+  });
+
+  it("steeringNote appears before lyric phrases", () => {
+    const result = buildCoverArtPrompt({
+      vocabulary: MINIMAL_VOCABULARY,
+      arcPosition: "arriving",
+      steeringNote: "rainy city, neon reflections",
+      lyricPhrases: ["hands on steering wheel at night"],
+    });
+    const steeringIdx = result.prompt.indexOf("rainy city");
+    const lyricIdx = result.prompt.indexOf("hands on steering wheel");
+    expect(steeringIdx).toBeLessThan(lyricIdx);
+    expect(steeringIdx).toBe(0);
+  });
+
+  it("omitting steeringNote leaves layers.steeringNote as null", () => {
+    const result = buildCoverArtPrompt({
+      vocabulary: MINIMAL_VOCABULARY,
+      arcPosition: "arriving",
+    });
+    expect(result.layers.steeringNote).toBeNull();
+  });
+
+  it("empty or whitespace-only steeringNote is treated as absent", () => {
+    const withEmpty = buildCoverArtPrompt({
+      vocabulary: MINIMAL_VOCABULARY,
+      arcPosition: "arriving",
+      steeringNote: "   ",
+    });
+    const withNull = buildCoverArtPrompt({
+      vocabulary: MINIMAL_VOCABULARY,
+      arcPosition: "arriving",
+      steeringNote: null,
+    });
+    expect(withEmpty.prompt).toBe(withNull.prompt);
+    expect(withEmpty.layers.steeringNote).toBeNull();
   });
 });
 

@@ -338,4 +338,9 @@
 - [x] 166/166 tests passing
 
 ## Bug Fix — Lyrics Not Reaching Prompt Builder
-- [ ] Fix lyrics data flow: stored song lyrics are never passed to the cover art prompt builder — title/description fields are being used as lyric source instead
+- [x] DIAGNOSED: lyrics data flow issue — Riff sends form.lyrics (empty on page load) not stored track lyrics; title/description fields used as accidental lyric source
+- [x] FIX (Studios side): Add steeringNote field to bridge schema and promptBuilder — creator art direction note placed at highest priority (Layer 0) before lyrics and vocabulary
+- [x] FIX (Studios side): steeringNote wired through bridgeRoutes.ts → buildCoverArtPrompt() → _debug response
+- [x] 4 new steeringNote vitest tests added (175/175 passing)
+- [ ] FIX (Riff side): Pre-populate form.lyrics from stored track record on page load — see riff_studios_bridge_handoff_v2.md
+- [ ] FIX (Riff side): Rename Description field to "Art Direction" and wire to steeringNote in generateCoverArt call — see riff_studios_bridge_handoff_v2.md
