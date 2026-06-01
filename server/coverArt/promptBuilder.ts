@@ -50,6 +50,8 @@ export type VocabularyJson = {
 
 // ─── Imports ─────────────────────────────────────────────────────────────────
 import { selectLifeSignals } from "./lifeSignalRandomizer";
+import { buildArcModulationDirectives } from "./arcModulationMatrix";
+import type { ArcModulationDirectives } from "./arcModulationMatrix";
 
 export type CoverArtPromptInput = {
   /** Creator's personal vocabulary, or the platform default vocabulary */
@@ -109,6 +111,10 @@ export type CoverArtPromptOutput = {
     forbiddenTerms: string[];
     productionContext: string | null;
     cinematiqueRendering: string;
+    /** Arc Modulation Matrix — 8-dimension physics directive (Emotional Physics v1.0) */
+    arcModulation: string;
+    /** Structured breakdown of each modulation dimension for debugging */
+    arcModulationDimensions: ArcModulationDirectives["dimensions"];
     genreFallbackPresence: string | null;
     synthesisAnchor: string | null;
     lifeSignalBlock: string | null;
@@ -254,7 +260,10 @@ const QUALITY_TAIL =
 
 // ─── Prompt Assembly ──────────────────────────────────────────────────────────
 
-const MAX_CHARS = 900;
+// Raised from 900 → 1400 to accommodate the Arc Modulation Matrix directive (~450 chars).
+// Runway accepts prompts up to 1500 chars; 1400 gives a safe ceiling with room for the full
+// Emotional Physics pipeline (Cinématique + Arc Modulation + Life Signal).
+const MAX_CHARS = 1400;
 
 /**
  * Pick the top N terms from a vocabulary category, ordered by position
@@ -354,7 +363,14 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // ── Layer 6b: Cinématique rendering directive ───────────────────────────────
   const cinematiqueRendering = CINEMATIQUE_RENDERING[arcPosition];
 
-  // ── Layer 6c: Life Signal Randomizer ─────────────────────────────────────────
+  // ── Layer 6c: Arc Modulation Matrix ──────────────────────────────────────────
+  // Translates the arc position into concrete physics directives across all 8
+  // dimensions: light structure, shadow ratio, scale, depth, motion, irregularity,
+  // withholding, and biological anchors. This ensures a Gathering image can never
+  // accidentally look Open, and an Open image can never feel compressed.
+  const arcModulation = buildArcModulationDirectives(arcPosition);
+
+  // ── Layer 6d: Life Signal Randomizer ─────────────────────────────────────────
   // Injects 1–2 controlled micro-irregularities to prevent sterile AI polish.
   // Based on the Emotional Physics Framework Life Signal Registry v1.0.
   const lifeSignalResult = selectLifeSignals(
@@ -431,7 +447,12 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // Layer 6b: Cinématique rendering — how to render (lighting, atmosphere, composition)
   segments.push(cinematiqueRendering);
 
-  // Layer 6c: Life Signal — micro-irregularity injection (Emotional Physics)
+  // Layer 6c: Arc Modulation Matrix — 8-dimension physics enforcement
+  // Injected AFTER Cinématique rendering and BEFORE Life Signals.
+  // This is the physics layer that locks the arc into its physical state.
+  segments.push(arcModulation.promptDirective);
+
+  // Layer 6d: Life Signal — micro-irregularity injection (Emotional Physics)
   if (lifeSignalResult.promptFragment) {
     segments.push(lifeSignalResult.promptFragment);
   }
@@ -468,6 +489,8 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
       forbiddenTerms,
       productionContext,
       cinematiqueRendering,
+      arcModulation: arcModulation.promptDirective,
+      arcModulationDimensions: arcModulation.dimensions,
       genreFallbackPresence,
       synthesisAnchor: resolvedSynthesisAnchor,
       lifeSignalBlock: lifeSignalResult.promptFragment || null,

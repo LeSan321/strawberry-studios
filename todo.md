@@ -425,3 +425,16 @@
 - [x] Write coverArtEvaluator.test.ts (38 tests: 5 dimensions, ARC_PHYSICS profiles, resolveLifeSignals, adjustment engine)
 - [x] Write coverArtAdaptiveController tests inside coverArtEvaluator.test.ts (buildDefaultAdaptiveWeights, computeStabilityMetrics, shouldAdapt, runAdaptationCycle, getEffectiveSignalWeight, TARGET_RANGES)
 - [x] 242/242 tests passing
+
+## Emotional Physics Framework — Arc Modulation Matrix — COMPLETE ✅
+- [x] Build arcModulationMatrix.ts — 8-dimension physics translation layer
+- [x] ArcModulationProfile typed data for gathering / arriving / open (shadowRatio, depthStructure, scale, motionTime, irregularity, withholdingLevel, lightDiffusion, biologicalAnchors)
+- [x] ARC_MODULATION_PROFILES: gathering = high shadow / shallow / high withholding / minimal motion; arriving = mid shadow / layered / medium withholding / noticeable motion; open = low shadow / deep / low withholding / ambient motion
+- [x] 8 translation tables: LIGHT_STRUCTURE, SHADOW_RATIO, SCALE, DEPTH_STRUCTURE, MOTION_TIME, IRREGULARITY, WITHHOLDING, BIOLOGICAL_ANCHORS — each maps profile value to photographable prompt language
+- [x] buildArcModulationDirectives() — assembles 8 strings into comma-joined promptDirective + structured dimensions object
+- [x] getArcModulationProfile() — returns raw typed profile for evaluator/other consumers
+- [x] Integrated into promptBuilder as Layer 3 (between Cinématique rendering and Life Signal block)
+- [x] CoverArtPromptOutput.layers extended with arcModulation and arcModulationDimensions fields
+- [x] MAX_CHARS raised from 900 → 1400 (Runway accepts up to 1500; matrix adds ~450 chars)
+- [x] Write arcModulationMatrix.test.ts (26 tests: profile integrity, per-arc physics, translation correctness, arc isolation, promptBuilder integration)
+- [x] 268/268 tests passing

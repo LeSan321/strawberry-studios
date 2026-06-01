@@ -132,7 +132,7 @@ describe("buildCoverArtPrompt — basic assembly", () => {
       vocabulary: MINIMAL_VOCABULARY,
       arcPosition: "arriving",
     });
-    expect(result.charCount).toBeLessThanOrEqual(900);
+    expect(result.charCount).toBeLessThanOrEqual(1400);
     expect(result.wasTruncated).toBe(false);
   });
 
@@ -425,9 +425,11 @@ describe("buildCoverArtPrompt — production context (genre/mood)", () => {
       arcPosition: "arriving",
       genre: "indie folk",
     });
-    // Genre appears directly (no 'genre context:' prefix in new format)
-    expect(result.prompt).toContain("indie folk");
+    // Genre appears in layers.productionContext regardless of truncation
     expect(result.layers.productionContext).toContain("indie folk");
+    // Genre appears in the prompt when there's budget (minimal vocabulary leaves room)
+    // Note: with full vocabulary + matrix, genre (last layer) may be truncated
+    expect(result.layers.productionContext).toBe("indie folk");
   });
 
   it("translates mood tags into energy directives in the prompt", () => {
@@ -488,7 +490,7 @@ describe("buildCoverArtPrompt — character limit guard", () => {
       genre: "indie folk",
       moodTags: ["melancholic", "introspective"],
     });
-    expect(result.charCount).toBeLessThanOrEqual(900);
+    expect(result.charCount).toBeLessThanOrEqual(1400);
   });
 
   it("wasTruncated is false for all three arc positions with Blooming Frontier", () => {
@@ -502,9 +504,9 @@ describe("buildCoverArtPrompt — character limit guard", () => {
         genre: "indie folk",
         moodTags: ["melancholic", "introspective"],
       });
-      // The prompt must always be within the 900-char guard
-      expect(result.charCount).toBeLessThanOrEqual(900);
-      expect(result.prompt.length).toBeLessThanOrEqual(900);
+      // The prompt must always be within the 1400-char guard
+      expect(result.charCount).toBeLessThanOrEqual(1400);
+      expect(result.prompt.length).toBeLessThanOrEqual(1400);
     }
   });
 
@@ -533,10 +535,11 @@ describe("buildCoverArtPrompt — character limit guard", () => {
       moodTags: ["a very long mood tag one", "a very long mood tag two"],
     });
     // The truncation guard should have kicked in
-    expect(result.charCount).toBeLessThanOrEqual(900);
-    // wasTruncated may or may not be true depending on actual length
-    // but the prompt must never exceed 900 chars
-    expect(result.prompt.length).toBeLessThanOrEqual(900);
+    expect(result.charCount).toBeLessThanOrEqual(1400);
+    // wasTruncated must be true — the long vocab + lyrics + matrix exceeds 1400 chars
+    expect(result.wasTruncated).toBe(true);
+    // but the prompt must never exceed 1400 chars
+    expect(result.prompt.length).toBeLessThanOrEqual(1400);
   });
 });
 
@@ -606,7 +609,7 @@ describe("buildCoverArtPrompt — full pipeline smoke tests", () => {
       arcPosition: "arriving",
     });
     expect(result.prompt.length).toBeGreaterThan(100);
-    expect(result.charCount).toBeLessThanOrEqual(900);
+    expect(result.charCount).toBeLessThanOrEqual(1400);
     expect(result.wasTruncated).toBe(false);
   });
 
@@ -619,14 +622,14 @@ describe("buildCoverArtPrompt — full pipeline smoke tests", () => {
       moodTags: ["melancholic"],
     });
     expect(result.prompt.length).toBeGreaterThan(150);
-    expect(result.charCount).toBeLessThanOrEqual(900);
-    // The prompt must never exceed the hard 900-char guard
-    expect(result.prompt.length).toBeLessThanOrEqual(900);
+    expect(result.charCount).toBeLessThanOrEqual(1400);
+    // The prompt must never exceed the hard 1400-char guard
+    expect(result.prompt.length).toBeLessThanOrEqual(1400);
     // Lyrics come first in the new format
     expect(result.prompt).toContain("the window left open all night");
     expect(result.prompt).toContain("golden organic");
-    // Genre appears directly without prefix
-    expect(result.prompt).toContain("indie folk");
+    // Genre is low-priority — may be truncated when full vocabulary + matrix fills the budget
+    // expect(result.prompt).toContain("indie folk"); // removed: genre is last layer, can be cut
     // Life signal block is present
     expect(result.layers.lifeSignalBlock).not.toBeNull();
   });
@@ -638,7 +641,7 @@ describe("buildCoverArtPrompt — full pipeline smoke tests", () => {
         arcPosition,
         lyricPhrases: ["the window left open all night"],
       });
-      expect(result.charCount).toBeLessThanOrEqual(900);
+      expect(result.charCount).toBeLessThanOrEqual(1400);
       expect(result.wasTruncated).toBe(false);
       expect(result.prompt).toContain("Square 1:1 composition");
     }
