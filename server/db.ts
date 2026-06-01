@@ -14,6 +14,8 @@ import {
   concerts,
   creatorFrequencies,
   platformDefaultVocabulary,
+  coverArtGenerationLogs,
+  coverArtAdaptiveWeights,
   users,
   type Campaign,
   type CampaignMoodBoardImage,
@@ -25,6 +27,9 @@ import {
   type InsertCreatorFrequency,
   type InsertUser,
   type PlatformDefaultVocabulary,
+  type InsertCoverArtGenerationLog,
+  type CoverArtGenerationLog,
+  type CoverArtAdaptiveWeight,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -542,4 +547,113 @@ export async function setCampaignCoverArtFromGeneration(
           WHERE id = ${campaignId}`
     );
   }
+}
+
+// ─── Cover Art Generation Logs ────────────────────────────────────────────────
+
+/**
+ * Appends a generation log entry for a user.
+ * Used by the Adaptive Weight Tuning System as its rolling window data source.
+ */
+export async function appendCoverArtGenerationLog(
+  entry: Omit<InsertCoverArtGenerationLog, "id">
+): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot append generation log: database not available"); return; }
+
+  await db.insert(coverArtGenerationLogs).values(entry);
+}
+
+/**
+ * Returns the most recent `limit` generation logs for a user, ordered newest first.
+ * Used to compute stability metrics and detect repetition patterns.
+ */
+export async function getRecentCoverArtGenerationLogs(
+  userId: number,
+  limit: number
+): Promise<CoverArtGenerationLog[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const rows = await db
+    .select()
+    .from(coverArtGenerationLogs)
+    .where(eq(coverArtGenerationLogs.userId, userId))
+    .orderBy(desc(coverArtGenerationLogs.timestamp))
+    .limit(limit);
+
+  return rows;
+}
+
+/**
+ * Returns the total count of generation logs for a user.
+ * Used to determine whether the rolling window is large enough for adaptation.
+ */
+export async function getCoverArtGenerationLogCount(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+
+  const rows = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(coverArtGenerationLogs)
+    .where(eq(coverArtGenerationLogs.userId, userId));
+
+  return rows[0]?.count ?? 0;
+}
+
+// ─── Cover Art Adaptive Weights ───────────────────────────────────────────────
+
+/**
+ * Returns the adaptive weights record for a user, or null if not yet initialized.
+ */
+export async function getCoverArtAdaptiveWeights(
+  userId: number
+): Promise<CoverArtAdaptiveWeight | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const rows = await db
+    .select()
+    .from(coverArtAdaptiveWeights)
+    .where(eq(coverArtAdaptiveWeights.userId, userId))
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
+/**
+ * Upserts the adaptive weights record for a user.
+ * Creates a new record on first call; updates on subsequent calls.
+ */
+export async function upsertCoverArtAdaptiveWeights(
+  userId: number,
+  weights: {
+    signalWeights: Record<string, number>;
+    domainWeights: Record<string, number>;
+    generationsSinceLastAdaptation: number;
+    totalGenerations: number;
+    lastAdaptedAt: number | null;
+  }
+): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot upsert adaptive weights: database not available"); return; }
+
+  await db.execute(
+    sql`INSERT INTO cover_art_adaptive_weights
+        (userId, signalWeights, domainWeights, generationsSinceLastAdaptation, totalGenerations, lastAdaptedAt)
+        VALUES (
+          ${userId},
+          ${JSON.stringify(weights.signalWeights)},
+          ${JSON.stringify(weights.domainWeights)},
+          ${weights.generationsSinceLastAdaptation},
+          ${weights.totalGenerations},
+          ${weights.lastAdaptedAt ?? null}
+        )
+        ON DUPLICATE KEY UPDATE
+          signalWeights = VALUES(signalWeights),
+          domainWeights = VALUES(domainWeights),
+          generationsSinceLastAdaptation = VALUES(generationsSinceLastAdaptation),
+          totalGenerations = VALUES(totalGenerations),
+          lastAdaptedAt = VALUES(lastAdaptedAt)`
+  );
 }

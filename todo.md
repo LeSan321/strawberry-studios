@@ -381,3 +381,47 @@
 - [x] Write lifeSignalRandomizer.test.ts (registry integrity, arc eligibility, incompatibility, rotation memory, promptBuilder integration)
 - [x] Update promptBuilder.test.ts for non-deterministic life signal layer
 - [x] 204/204 tests passing
+
+## Emotional Physics Framework — Auto-Evaluation Heuristic + Adaptive Weight Tuning — COMPLETE ✅
+
+### Phase U: Auto-Evaluation Heuristic (Structural Self-Checker)
+- [x] Build coverArtEvaluator.ts — 5-dimension structural QA module
+- [x] Dimension 1: Coherence Score (0–4) — checks for physics grammar tokens: scale, lighting, composition, atmosphere, texture
+- [x] Dimension 2: Depth Score (0–4) — checks for depth tokens per arc (chiaroscuro/shadow for gathering, transition/motion for arriving, vast/horizon for open)
+- [x] Dimension 3: Tension Score (0–4) — counts tension tokens, applies arc-specific max cap (gathering=4, arriving=3, open=3), warns on overcompression
+- [x] Dimension 4: Life Signal Score (0–4) — validates signal presence, arc eligibility, intensity total (chaos penalty >4), reuse warning, incompatibility warning
+- [x] Dimension 5: Arc Alignment Score (0–4) — checks for arc-specific alignment tokens and penalises mismatched tokens from other arcs
+- [x] ARC_PHYSICS profiles for gathering/arriving/open (shadowRatioRange, withholdingLevel, scaleRange, motionLevel, maxTensionScore)
+- [x] SELF_HEALING_THRESHOLD = 14 — prompts below this score receive adjustment suggestions
+- [x] Adjustment engine: inject_physics_block, inject_life_signal, inject_tension_token, rerun_arc_modulation, reduce_moderate_signals, reselect_life_signals
+- [x] resolveLifeSignals() helper — maps signal IDs to LifeSignal objects (silently drops unknowns)
+- [x] Wire evaluateCoverArtPrompt() into coverArt.generate procedure (post-prompt-build, pre-image-generation)
+- [x] QA scores surfaced in generate response (evaluation.totalScore, isHealthy, warnings, scores object)
+- [x] QA scores logged to console on every generation
+
+### Phase V: Adaptive Weight Tuning System (Controlled Evolution Engine)
+- [x] Build coverArtAdaptiveController.ts — adaptive weight tuning module
+- [x] WINDOW_SIZE = 50, ADAPTATION_INTERVAL = 20, LDI_THRESHOLD = 0.6
+- [x] WEIGHT_MIN = 0.2, WEIGHT_MAX = 2.0 (hard bounds — entropy protection)
+- [x] TARGET_RANGES: total 15–18, lifeSignal 2.5–3.2, coherence 3.0–3.8, tension 2.5–3.5
+- [x] buildDefaultAdaptiveWeights() — initialises all 20 signal weights and 5 domain weights to 1.0
+- [x] computeStabilityMetrics(window) — avgTotal, per-dimension averages, signalFrequency map, domainDistribution, LDI
+- [x] shouldAdapt(weights, windowSize) — fires when generationsSinceLastAdaptation ≥ 20 AND windowSize ≥ 50
+- [x] Rule A1: Underpowered boost — boosts domain weights when avgLifeSignal < 2.5
+- [x] Rule A2: Overscoring dampener — reduces domain weights when avgTotal > 18
+- [x] Rule B: Repetition suppression — reduces signal weight when frequency > 30%
+- [x] Rule C: Chaos dampening — reduces moderate-intensity signal weights when avgIntensity > 3.5
+- [x] Rule D: Arc flattening detector — boosts domain weights when one arc dominates > 60% of window
+- [x] Soft exploration injection — randomly boosts 2 low-weight signals by 0.1 to prevent stagnation
+- [x] Long-Term Diversity Index (LDI) — unique signals used / total available; warns when < 0.6
+- [x] getEffectiveSignalWeight() — registry base weight × signal multiplier × domain multiplier
+- [x] DB schema: cover_art_generation_logs table (userId, arc, lifeSignalIds, intensityTotal, qaScores, timestamp)
+- [x] DB schema: cover_art_adaptive_weights table (userId unique, signalWeights, domainWeights, generation counters, lastAdaptedAt)
+- [x] DB migration 0011 applied (cover_art_adaptive_weights + cover_art_generation_logs)
+- [x] DB helpers: appendCoverArtGenerationLog, getRecentCoverArtGenerationLogs, getCoverArtGenerationLogCount, getCoverArtAdaptiveWeights, upsertCoverArtAdaptiveWeights
+- [x] Wire adaptive cycle into coverArt.generate procedure (fire-and-forget after image generation)
+- [x] Generation log persisted on every generation (fire-and-forget, non-blocking)
+- [x] Adaptive cycle fires every 20 generations when rolling window ≥ 50 entries
+- [x] Write coverArtEvaluator.test.ts (38 tests: 5 dimensions, ARC_PHYSICS profiles, resolveLifeSignals, adjustment engine)
+- [x] Write coverArtAdaptiveController tests inside coverArtEvaluator.test.ts (buildDefaultAdaptiveWeights, computeStabilityMetrics, shouldAdapt, runAdaptationCycle, getEffectiveSignalWeight, TARGET_RANGES)
+- [x] 242/242 tests passing

@@ -1,5 +1,5 @@
 /**
- * Cover Art Router — Phase M
+ * Cover Art Router — Phase M (with Evaluator + Adaptive Controller)
  *
  * tRPC procedures for cover art generation and management.
  *
@@ -12,6 +12,12 @@
  * not counted as a "regeneration" — it is the initial generation.
  * Regenerations 1, 2, and 3 increment the counter. After 3, generation
  * is permanently disabled for that campaign.
+ *
+ * Evaluation pipeline (runs after every generation):
+ *   1. evaluateCoverArtPrompt() — 5-dimension structural QA check
+ *   2. appendCoverArtGenerationLog() — persist log entry for adaptive system
+ *   3. shouldAdapt() + runAdaptationCycle() — update weights every 20 gens
+ *      (only when rolling window ≥ 50 entries)
  */
 
 import { TRPCError } from "@trpc/server";
@@ -24,6 +30,11 @@ import {
   setCampaignCoverArtFromGeneration,
   setCampaignCoverArtFromUpload,
   COVER_ART_REGEN_LIMIT,
+  appendCoverArtGenerationLog,
+  getRecentCoverArtGenerationLogs,
+  getCoverArtGenerationLogCount,
+  getCoverArtAdaptiveWeights,
+  upsertCoverArtAdaptiveWeights,
 } from "../db";
 import {
   buildCoverArtPrompt,
@@ -31,6 +42,17 @@ import {
   resolveVocabulary,
   type ArcPosition,
 } from "../coverArt/promptBuilder";
+import {
+  evaluateCoverArtPrompt,
+  resolveLifeSignals,
+} from "../coverArt/coverArtEvaluator";
+import {
+  buildDefaultAdaptiveWeights,
+  computeStabilityMetrics,
+  shouldAdapt,
+  runAdaptationCycle,
+  WINDOW_SIZE,
+} from "../coverArt/coverArtAdaptiveController";
 
 export const coverArtRouter = router({
   /**
@@ -64,9 +86,9 @@ export const coverArtRouter = router({
    * Generate cover art for a campaign.
    *
    * Input:
-   *   campaignId  — The campaign to generate cover art for
-   *   arcPosition — The arc position (gathering / arriving / open)
-   *   lyrics      — Optional song lyrics for the lyric extraction step
+   *   campaignId     — The campaign to generate cover art for
+   *   arcPosition    — The arc position (gathering / arriving / open)
+   *   lyrics         — Optional song lyrics for the lyric extraction step
    *   isRegeneration — True if this is a regeneration (not the first generation)
    *
    * The procedure:
@@ -75,8 +97,11 @@ export const coverArtRouter = router({
    *   3. Resolves the vocabulary (personal frequency or platform default)
    *   4. Extracts lyric phrases via LLM (if lyrics provided)
    *   5. Assembles the prompt via buildCoverArtPrompt()
-   *   6. Calls generateImage() to produce the image
-   *   7. Stores the result and updates the regeneration count
+   *   6. Runs the Auto-Evaluation Heuristic (structural QA)
+   *   7. Calls generateImage() to produce the image
+   *   8. Stores the result and updates the regeneration count
+   *   9. Persists the generation log entry
+   *  10. Runs the adaptive weight cycle if conditions are met
    */
   generate: protectedProcedure
     .input(
@@ -130,8 +155,6 @@ export const coverArtRouter = router({
       }
 
       // ── 5. Assemble prompt ───────────────────────────────────────────────────
-      // Pass the campaign's last-used life signal IDs so the randomizer can
-      // rotate away from signals used in the immediately preceding generation.
       const { prompt, charCount, wasTruncated, layers } = buildCoverArtPrompt({
         vocabulary,
         arcPosition: arcPosition as ArcPosition,
@@ -141,7 +164,23 @@ export const coverArtRouter = router({
         lastUsedLifeSignalIds: currentState.lastUsedLifeSignalIds ?? [],
       });
 
-      // ── 6. Generate image ────────────────────────────────────────────────────
+      // ── 6. Auto-Evaluation Heuristic ─────────────────────────────────────────
+      const injectedSignals = resolveLifeSignals(layers.lifeSignalIds);
+      const evaluation = evaluateCoverArtPrompt({
+        prompt,
+        arc: arcPosition as ArcPosition,
+        injectedSignals,
+        lastUsedSignalIds: currentState.lastUsedLifeSignalIds ?? [],
+      });
+
+      console.log(
+        "[coverArt.generate] QA evaluation:",
+        `total=${evaluation.totalScore}/20`,
+        `healthy=${evaluation.isHealthy}`,
+        evaluation.warnings.length > 0 ? `warnings=${evaluation.warnings.join("; ")}` : ""
+      );
+
+      // ── 7. Generate image ────────────────────────────────────────────────────
       console.log("[coverArt.generate] vocabSource:", vocabSource, "lyricPhrases:", lyricPhrases);
       console.log("[coverArt.generate] prompt:", prompt);
 
@@ -162,7 +201,7 @@ export const coverArtRouter = router({
         });
       }
 
-      // ── 7. Store result ──────────────────────────────────────────────────────
+      // ── 8. Store result ──────────────────────────────────────────────────────
       const isFirstGeneration = !isRegeneration && currentState.coverArtSource === "none";
       await setCampaignCoverArtFromGeneration(
         campaignId,
@@ -170,6 +209,35 @@ export const coverArtRouter = router({
         isFirstGeneration,
         layers.lifeSignalIds
       );
+
+      // ── 9. Persist generation log (fire-and-forget) ──────────────────────────
+      const intensityTotal = injectedSignals.reduce(
+        (sum, s) => sum + (s.intensity === "moderate" ? 2 : 1),
+        0
+      );
+
+      appendCoverArtGenerationLog({
+        userId,
+        arc: arcPosition as ArcPosition,
+        lifeSignalIds: layers.lifeSignalIds,
+        lifeSignalIntensityTotal: intensityTotal,
+        qaScores: {
+          coherence: evaluation.coherenceScore,
+          depth: evaluation.depthScore,
+          tension: evaluation.tensionScore,
+          lifeSignal: evaluation.lifeSignalScore,
+          arcAlignment: evaluation.arcAlignmentScore,
+          total: evaluation.totalScore,
+        },
+        timestamp: Date.now(),
+      }).catch((err) => {
+        console.warn("[coverArt.generate] Failed to persist generation log:", err);
+      });
+
+      // ── 10. Adaptive weight cycle (fire-and-forget) ──────────────────────────
+      runAdaptiveWeightCycleIfNeeded(userId).catch((err) => {
+        console.warn("[coverArt.generate] Adaptive weight cycle error:", err);
+      });
 
       // Return the result with debug info for development
       return {
@@ -188,6 +256,18 @@ export const coverArtRouter = router({
         },
         lyricPhrasesExtracted: lyricPhrases,
         arcPosition,
+        evaluation: {
+          totalScore: evaluation.totalScore,
+          isHealthy: evaluation.isHealthy,
+          warnings: evaluation.warnings,
+          scores: {
+            coherence: evaluation.coherenceScore,
+            depth: evaluation.depthScore,
+            tension: evaluation.tensionScore,
+            lifeSignal: evaluation.lifeSignalScore,
+            arcAlignment: evaluation.arcAlignmentScore,
+          },
+        },
       };
     }),
 
@@ -226,3 +306,56 @@ export const coverArtRouter = router({
 });
 
 export type CoverArtRouter = typeof coverArtRouter;
+
+// ─── Adaptive Weight Cycle Helper ────────────────────────────────────────────
+
+/**
+ * Runs the adaptive weight cycle for a user if the conditions are met.
+ * Fires asynchronously after each generation — never blocks the response.
+ *
+ * Conditions:
+ *   - generationsSinceLastAdaptation >= ADAPTATION_INTERVAL (20)
+ *   - rolling window size >= WINDOW_SIZE (50)
+ */
+async function runAdaptiveWeightCycleIfNeeded(userId: number): Promise<void> {
+  // Load or initialize adaptive weights
+  const existing = await getCoverArtAdaptiveWeights(userId);
+  const weights = existing
+    ? {
+        signalWeights: existing.signalWeights as Record<string, number>,
+        domainWeights: existing.domainWeights as Record<string, number>,
+        generationsSinceLastAdaptation: existing.generationsSinceLastAdaptation,
+        totalGenerations: existing.totalGenerations,
+        lastAdaptedAt: existing.lastAdaptedAt ?? null,
+      }
+    : buildDefaultAdaptiveWeights();
+
+  // Increment counters
+  weights.generationsSinceLastAdaptation++;
+  weights.totalGenerations++;
+
+  // Check if adaptation should fire
+  const windowSize = await getCoverArtGenerationLogCount(userId);
+
+  if (!shouldAdapt(weights, windowSize)) {
+    // Just update the counters
+    await upsertCoverArtAdaptiveWeights(userId, weights);
+    return;
+  }
+
+  // Load the rolling window for metrics computation
+  const recentLogs = await getRecentCoverArtGenerationLogs(userId, WINDOW_SIZE);
+  const metrics = computeStabilityMetrics(recentLogs);
+
+  // Run the adaptation cycle
+  const { updatedWeights, report } = runAdaptationCycle(weights, metrics);
+
+  console.log(
+    "[coverArt.adaptive] Adaptation cycle fired:",
+    `rules=${report.rulesApplied.length}`,
+    `ldi=${(metrics.ldi * 100).toFixed(0)}%`,
+    `avgTotal=${metrics.avgTotal.toFixed(1)}`
+  );
+
+  await upsertCoverArtAdaptiveWeights(userId, updatedWeights);
+}

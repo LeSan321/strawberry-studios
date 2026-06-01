@@ -406,3 +406,66 @@ export const platformDefaultVocabulary = mysqlTable("platform_default_vocabulary
 
 export type PlatformDefaultVocabulary = typeof platformDefaultVocabulary.$inferSelect;
 export type InsertPlatformDefaultVocabulary = typeof platformDefaultVocabulary.$inferInsert;
+
+/**
+ * Cover art generation logs — one row per generation.
+ * Rolling window data source for the Adaptive Weight Tuning System.
+ * Scoped to userId (not campaignId) so it works for both the tRPC path
+ * and the bridge path (Riff-originated generations).
+ */
+export const coverArtGenerationLogs = mysqlTable("cover_art_generation_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** Arc position used for this generation */
+  arc: mysqlEnum("arc", ["gathering", "arriving", "open"]).notNull(),
+  /** IDs of life signals injected (JSON array of strings) */
+  lifeSignalIds: json("lifeSignalIds").notNull().$type<string[]>(),
+  /** Sum of intensity values (subtle=1, moderate=2) */
+  lifeSignalIntensityTotal: int("lifeSignalIntensityTotal").notNull().default(0),
+  /** QA scores from the Auto-Evaluation Heuristic */
+  qaScores: json("qaScores").notNull().$type<{
+    coherence: number;
+    depth: number;
+    tension: number;
+    lifeSignal: number;
+    arcAlignment: number;
+    total: number;
+  }>(),
+  /** UTC ms timestamp of the generation */
+  timestamp: bigint("timestamp", { mode: "number" }).notNull(),
+});
+
+export type CoverArtGenerationLog = typeof coverArtGenerationLogs.$inferSelect;
+export type InsertCoverArtGenerationLog = typeof coverArtGenerationLogs.$inferInsert;
+
+/**
+ * Cover art adaptive weights — one row per user.
+ * Stores the current weight multipliers for all 20 life signals,
+ * domain multipliers, and adaptation cycle metadata.
+ * Written by the Adaptive Weight Tuning System after each adaptation cycle.
+ */
+export const coverArtAdaptiveWeights = mysqlTable("cover_art_adaptive_weights", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  /**
+   * Per-signal weight multipliers keyed by signal ID.
+   * JSON object: { [signalId]: number }
+   * Neutral starting value: 1.0 for all signals.
+   */
+  signalWeights: json("signalWeights").notNull().$type<Record<string, number>>(),
+  /**
+   * Per-domain probability multipliers.
+   * JSON object: { light, material, atmosphere, composition, temporal }
+   */
+  domainWeights: json("domainWeights").notNull().$type<Record<string, number>>(),
+  /** Generations since last adaptation cycle fired */
+  generationsSinceLastAdaptation: int("generationsSinceLastAdaptation").notNull().default(0),
+  /** Total lifetime generations for this user */
+  totalGenerations: int("totalGenerations").notNull().default(0),
+  /** UTC ms timestamp of last weight update (null = never adapted) */
+  lastAdaptedAt: bigint("lastAdaptedAt", { mode: "number" }),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CoverArtAdaptiveWeight = typeof coverArtAdaptiveWeights.$inferSelect;
+export type InsertCoverArtAdaptiveWeight = typeof coverArtAdaptiveWeights.$inferInsert;
