@@ -365,3 +365,8 @@
 - [x] Fix arriving arc Cinemétique rendering: "figure off-center" → "figure facing forward or in profile"
 - [x] Add "No backs-to-camera. Figures face forward or in profile." to quality tail (all prompts)
 - [x] 175/175 tests passing
+
+## Bug Fix — Lyrics Not Sent with Cover Art Generation
+- [ ] Diagnose: trace where lyrics are stored in Riff DB and where they drop out of the bridge call payload (lyricsPresent=false in all recent logs)
+- [ ] Fix: ensure lyrics are always fetched and included in the cover-art/generate bridge payload
+- [ ] Verify: lyricsPresent=true in server log for a song that has lyrics; lyric phrases appear in prompt
