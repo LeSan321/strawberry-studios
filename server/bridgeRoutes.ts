@@ -405,6 +405,8 @@ Synthesize their Visual Universe.`;
           synthesisAnchorUsed: promptOutput.layers.synthesisAnchor,
           promptUsed: promptOutput.prompt,
           promptCharCount: promptOutput.charCount,
+          lifeSignalIds: promptOutput.layers.lifeSignalIds,
+          lifeSignalBlock: promptOutput.layers.lifeSignalBlock,
         },
       });
     } catch (err) {

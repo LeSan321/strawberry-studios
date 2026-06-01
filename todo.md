@@ -370,3 +370,14 @@
 - [ ] Diagnose: trace where lyrics are stored in Riff DB and where they drop out of the bridge call payload (lyricsPresent=false in all recent logs)
 - [ ] Fix: ensure lyrics are always fetched and included in the cover-art/generate bridge payload
 - [ ] Verify: lyricsPresent=true in server log for a song that has lyrics; lyric phrases appear in prompt
+
+## Emotional Physics Framework — Life Signal Randomizer Integration — COMPLETE ✅
+- [x] Build Life Signal Registry v1.0 (20 signals, 5 domains, weights, incompatibility rules, arc eligibility)
+- [x] Implement selectLifeSignals() with weighted selection, arc filtering, incompatibility enforcement, and rotation memory
+- [x] Add lastUsedLifeSignalIds to CoverArtPromptInput and CoverArtPromptOutput.layers
+- [x] Add lastUsedLifeSignalIds column to campaigns table (schema + migration 0010)
+- [x] Thread rotation memory through getCampaignCoverArt → buildCoverArtPrompt → setCampaignCoverArtFromGeneration
+- [x] Expose lifeSignalIds and lifeSignalBlock in bridge route _debug response
+- [x] Write lifeSignalRandomizer.test.ts (registry integrity, arc eligibility, incompatibility, rotation memory, promptBuilder integration)
+- [x] Update promptBuilder.test.ts for non-deterministic life signal layer
+- [x] 204/204 tests passing

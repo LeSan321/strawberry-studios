@@ -449,6 +449,8 @@ export type CoverArtState = {
   coverArtSource: "generated" | "uploaded" | "none";
   coverArtGeneratedAt: number | null;
   coverArtRegenerationsUsed: number;
+  /** Life Signal rotation memory — IDs used in the last generation */
+  lastUsedLifeSignalIds: string[] | null;
 };
 
 /** Maximum number of cover art regenerations allowed per campaign. Never resets. */
@@ -469,6 +471,7 @@ export async function getCampaignCoverArt(
       coverArtSource: campaigns.coverArtSource,
       coverArtGeneratedAt: campaigns.coverArtGeneratedAt,
       coverArtRegenerationsUsed: campaigns.coverArtRegenerationsUsed,
+      lastUsedLifeSignalIds: campaigns.lastUsedLifeSignalIds,
     })
     .from(campaigns)
     .where(eq(campaigns.id, campaignId))
@@ -508,26 +511,34 @@ export async function setCampaignCoverArtFromUpload(
 export async function setCampaignCoverArtFromGeneration(
   campaignId: number,
   coverArtUrl: string,
-  isFirstGeneration: boolean
+  isFirstGeneration: boolean,
+  lastUsedLifeSignalIds?: string[]
 ): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+
+  const lifeSignalJson = lastUsedLifeSignalIds && lastUsedLifeSignalIds.length > 0
+    ? lastUsedLifeSignalIds
+    : null;
 
   if (isFirstGeneration) {
     await db.update(campaigns).set({
       coverArtUrl,
       coverArtSource: "generated",
       coverArtGeneratedAt: Date.now(),
+      lastUsedLifeSignalIds: lifeSignalJson,
     }).where(eq(campaigns.id, campaignId));
   } else {
     // Atomic increment with cap — uses drizzle sql template for type safety
     const now = Date.now();
+    const lifeSignalStr = lifeSignalJson ? JSON.stringify(lifeSignalJson) : null;
     await db.execute(
       sql`UPDATE campaigns
           SET coverArtUrl = ${coverArtUrl},
               coverArtSource = 'generated',
               coverArtGeneratedAt = ${now},
-              coverArtRegenerationsUsed = LEAST(coverArtRegenerationsUsed + 1, ${COVER_ART_REGEN_LIMIT})
+              coverArtRegenerationsUsed = LEAST(coverArtRegenerationsUsed + 1, ${COVER_ART_REGEN_LIMIT}),
+              lastUsedLifeSignalIds = ${lifeSignalStr}
           WHERE id = ${campaignId}`
     );
   }

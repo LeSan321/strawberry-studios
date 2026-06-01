@@ -276,6 +276,12 @@ export const campaigns = mysqlTable("campaigns", {
    * This prevents the upload-to-reset loop.
    */
   coverArtRegenerationsUsed: int("coverArtRegenerationsUsed").default(0).notNull(),
+  /**
+   * Life Signal rotation memory — IDs of signals used in the last cover art generation.
+   * Stored as a JSON array of strings. Used by the Life Signal Randomizer to prevent
+   * consecutive repetition of the same micro-irregularity signals.
+   */
+  lastUsedLifeSignalIds: json("lastUsedLifeSignalIds").$type<string[]>(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

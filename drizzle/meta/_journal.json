@@ -71,6 +71,13 @@
       "when": 1779675622659,
       "tag": "0009_tricky_iron_fist",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1780344482796,
+      "tag": "0010_glamorous_namorita",
+      "breakpoints": true
     }
   ]
 }

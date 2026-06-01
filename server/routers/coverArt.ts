@@ -130,12 +130,15 @@ export const coverArtRouter = router({
       }
 
       // ── 5. Assemble prompt ───────────────────────────────────────────────────
+      // Pass the campaign's last-used life signal IDs so the randomizer can
+      // rotate away from signals used in the immediately preceding generation.
       const { prompt, charCount, wasTruncated, layers } = buildCoverArtPrompt({
         vocabulary,
         arcPosition: arcPosition as ArcPosition,
         lyricPhrases,
         genre,
         moodTags,
+        lastUsedLifeSignalIds: currentState.lastUsedLifeSignalIds ?? [],
       });
 
       // ── 6. Generate image ────────────────────────────────────────────────────
@@ -161,7 +164,12 @@ export const coverArtRouter = router({
 
       // ── 7. Store result ──────────────────────────────────────────────────────
       const isFirstGeneration = !isRegeneration && currentState.coverArtSource === "none";
-      await setCampaignCoverArtFromGeneration(campaignId, imageUrl, isFirstGeneration);
+      await setCampaignCoverArtFromGeneration(
+        campaignId,
+        imageUrl,
+        isFirstGeneration,
+        layers.lifeSignalIds
+      );
 
       // Return the result with debug info for development
       return {

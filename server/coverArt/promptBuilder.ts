@@ -1,6 +1,9 @@
 /**
  * Cover Art Prompt Builder
  *
+ * Includes the Life Signal Randomizer (Emotional Physics Framework)
+ * for controlled micro-irregularity injection.
+ *
  * Assembles image generation prompts from three input layers:
  *   1. Creator vocabulary (personal frequency or platform default)
  *   2. Arc position (gathering / arriving / open)
@@ -45,6 +48,9 @@ export type VocabularyJson = {
   relationshipGeometry: VocabularyTerm[];
 };
 
+// ─── Imports ─────────────────────────────────────────────────────────────────
+import { selectLifeSignals } from "./lifeSignalRandomizer";
+
 export type CoverArtPromptInput = {
   /** Creator's personal vocabulary, or the platform default vocabulary */
   vocabulary: VocabularyJson;
@@ -76,6 +82,12 @@ export type CoverArtPromptInput = {
    * Only the first ~200 chars are used to stay within the character budget.
    */
   synthesisFingerprint?: string | null;
+  /**
+   * IDs of life signals used in the immediately preceding generation.
+   * Passed to the Life Signal Randomizer to prevent consecutive repetition.
+   * Omit or pass empty array for the first generation.
+   */
+  lastUsedLifeSignalIds?: string[] | null;
 };
 
 export type CoverArtPromptOutput = {
@@ -99,6 +111,8 @@ export type CoverArtPromptOutput = {
     cinematiqueRendering: string;
     genreFallbackPresence: string | null;
     synthesisAnchor: string | null;
+    lifeSignalBlock: string | null;
+    lifeSignalIds: string[];
   };
 };
 
@@ -340,6 +354,14 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // ── Layer 6b: Cinématique rendering directive ───────────────────────────────
   const cinematiqueRendering = CINEMATIQUE_RENDERING[arcPosition];
 
+  // ── Layer 6c: Life Signal Randomizer ─────────────────────────────────────────
+  // Injects 1–2 controlled micro-irregularities to prevent sterile AI polish.
+  // Based on the Emotional Physics Framework Life Signal Registry v1.0.
+  const lifeSignalResult = selectLifeSignals(
+    arcPosition,
+    input.lastUsedLifeSignalIds ?? []
+  );
+
   // ── Layer 7: Forbidden terms (as "no X" — direct negatives work better) ─────────
   const forbiddenTerms = pickForbiddenTerms(vocabulary.forbiddenTerms, 3);
 
@@ -409,6 +431,11 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // Layer 6b: Cinématique rendering — how to render (lighting, atmosphere, composition)
   segments.push(cinematiqueRendering);
 
+  // Layer 6c: Life Signal — micro-irregularity injection (Emotional Physics)
+  if (lifeSignalResult.promptFragment) {
+    segments.push(lifeSignalResult.promptFragment);
+  }
+
   // Layer 7: Forbidden terms
   if (forbiddenTerms.length > 0) segments.push(forbiddenTerms.join(", "));
 
@@ -443,6 +470,8 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
       cinematiqueRendering,
       genreFallbackPresence,
       synthesisAnchor: resolvedSynthesisAnchor,
+      lifeSignalBlock: lifeSignalResult.promptFragment || null,
+      lifeSignalIds: lifeSignalResult.selectedIds,
     },
   };
 }
