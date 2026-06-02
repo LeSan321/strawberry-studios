@@ -260,10 +260,13 @@ const QUALITY_TAIL =
 
 // ─── Prompt Assembly ──────────────────────────────────────────────────────────
 
-// Raised from 900 → 1400 to accommodate the Arc Modulation Matrix directive (~450 chars).
-// Runway accepts prompts up to 1500 chars; 1400 gives a safe ceiling with room for the full
-// Emotional Physics pipeline (Cinématique + Arc Modulation + Life Signal).
-const MAX_CHARS = 1400;
+// Hard ceiling: Runway's promptText limit is 1000 characters.
+// We set MAX_CHARS to 980 to give a 20-char safety margin.
+// The Arc Modulation Matrix was compressed from ~470 chars to ~120 chars
+// (see arcModulationMatrix.ts COMPACT_DIRECTIVES) to fit all layers within budget.
+// In worst-case scenarios (long lyrics + mood energy + full vocabulary), the
+// truncation guard below will cut the lowest-priority tail (genre, quality tail).
+const MAX_CHARS = 980;
 
 /**
  * Pick the top N terms from a vocabulary category, ordered by position

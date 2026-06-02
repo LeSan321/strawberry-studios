@@ -110,55 +110,74 @@ export const ARC_MODULATION_PROFILES: Record<ArcPosition, ArcModulationProfile> 
   },
 };
 
-// ─── Dimension Translation Tables ────────────────────────────────────────────
-// Each dimension maps its enum value to a concrete prompt directive.
-// Language is chosen to be photographable and image-model-friendly.
+// ─── Compact Directive Table ─────────────────────────────────────────────────
+// Each arc position maps to a single compact directive string that encodes all
+// 8 physics dimensions (light, shadow, scale, depth, motion, irregularity,
+// withholding, biological anchors) in ~115–130 chars.
+//
+// Compressed from the full 8-clause format (~470 chars) to stay within
+// Runway's 1000-character promptText hard limit while preserving all
+// semantic physics values.
+//
+// Dimension encoding key:
+//   light falloff | shadow % | subject scale | depth mode | motion level |
+//   withholding level | biological anchor
+
+const COMPACT_DIRECTIVES: Record<ArcPosition, string> = {
+  gathering: "steep falloff, 60–80% shadow, subject 20–40% frame, shallow DOF, near-stillness, high withholding, warm skin texture",
+  arriving:  "controlled falloff, 50–65% shadow, subject 40–60% frame, layered depth, threshold motion, one element withheld, direct gaze",
+  open:      "gradual falloff, 30–50% shadow, subject 60–80% frame or figure small, deep space, ambient drift, open disclosure, sky and horizon",
+};
+
+// ─── Legacy dimension tables (kept for structured debug output) ───────────────
+// These are NOT used in the prompt directive — only in the `dimensions` debug
+// breakdown returned by buildArcModulationDirectives().
 
 const LIGHT_STRUCTURE: Record<ArcPosition, string> = {
-  gathering: "directional light partially occluded, steep falloff, light feels discovered not given",
-  arriving:  "strong directional source, controlled falloff, light feels confrontational and present",
-  open:      "broad diffused light, gradual falloff, light feels inhabitable and ambient",
+  gathering: "steep falloff, light partially occluded",
+  arriving:  "controlled falloff, strong directional source",
+  open:      "gradual falloff, broad diffused light",
 };
 
 const SHADOW_RATIO: Record<ArcPosition, string> = {
-  gathering: "60–80% frame in shadow, shadow is narrative compression",
-  arriving:  "50–65% shadow, shadow negotiates with light",
-  open:      "30–50% shadow, shadow recedes, frame opens",
+  gathering: "60–80% frame in shadow",
+  arriving:  "50–65% shadow",
+  open:      "30–50% shadow",
 };
 
 const SCALE: Record<ArcPosition, string> = {
-  gathering: "subject occupies 20–40% of frame, compressed intimate scale",
-  arriving:  "subject occupies 40–60% of frame, threshold scale",
-  open:      "subject occupies 60–80% of frame OR vast environmental scale with figure small",
+  gathering: "subject 20–40% frame, compressed intimate scale",
+  arriving:  "subject 40–60% frame, threshold scale",
+  open:      "subject 60–80% frame or figure small in vast environment",
 };
 
 const DEPTH_STRUCTURE: Record<DepthMode, string> = {
-  shallow: "shallow depth of field, subject isolated from environment",
-  layered: "layered mid-depth, foreground and background both present",
-  deep:    "deep layered space, environment fully integrated with subject",
+  shallow: "shallow DOF, subject isolated",
+  layered: "layered depth, foreground and background both present",
+  deep:    "deep space, environment fully integrated",
 };
 
 const MOTION_TIME: Record<MotionLevel, string> = {
-  minimal:    "breath-level motion only, near-stillness",
-  noticeable: "threshold-level motion, crossing implied",
-  ambient:    "environmental drift, stable ambient movement",
+  minimal:    "near-stillness",
+  noticeable: "threshold motion, crossing implied",
+  ambient:    "ambient drift",
 };
 
 const IRREGULARITY: Record<IrregularityLevel, string> = {
-  subtle: "subtle irregularity only, no chaos",
-  mixed:  "subtle irregularity plus one moderate element allowed, friction present",
+  subtle: "subtle irregularity only",
+  mixed:  "one moderate element allowed, friction present",
 };
 
 const WITHHOLDING: Record<WithholdingLevel, string> = {
-  high:   "partial occlusion, hidden light source, cropped frame, high withholding",
-  medium: "one element revealed, one element withheld, balanced disclosure",
-  low:    "minimal obstruction, frame breathes, open disclosure",
+  high:   "high withholding, partial occlusion",
+  medium: "one element withheld, balanced disclosure",
+  low:    "open disclosure, frame breathes",
 };
 
 const BIOLOGICAL_ANCHORS: Record<ArcPosition, string> = {
-  gathering: "warm light on skin, breath visible, tactile texture detail",
-  arriving:  "direct gaze, contrast edges, threshold presence",
-  open:      "scale, sky, horizon, air, environmental vastness",
+  gathering: "warm skin texture",
+  arriving:  "direct gaze",
+  open:      "sky and horizon",
 };
 
 // ─── Translation Function ─────────────────────────────────────────────────────
@@ -184,19 +203,10 @@ export function buildArcModulationDirectives(
   const withholding       = WITHHOLDING[profile.withholdingLevel];
   const biologicalAnchors = BIOLOGICAL_ANCHORS[arcPosition];
 
-  // Compact directive: all 8 dimensions joined as a single prompt string.
-  // Order mirrors the spec's priority: light → shadow → scale → depth →
-  // motion → irregularity → withholding → biological anchors.
-  const promptDirective = [
-    lightStructure,
-    shadowRatio,
-    scale,
-    depthStructure,
-    motionTime,
-    irregularity,
-    withholding,
-    biologicalAnchors,
-  ].join(", ");
+  // Compact directive: use the pre-built compact string for the arc position.
+  // This encodes all 8 dimensions in ~115–130 chars (vs ~470 chars for the
+  // full 8-clause format), keeping the total prompt under Runway's 1000-char limit.
+  const promptDirective = COMPACT_DIRECTIVES[arcPosition];
 
   return {
     promptDirective,

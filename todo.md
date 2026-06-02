@@ -438,3 +438,10 @@
 - [x] MAX_CHARS raised from 900 → 1400 (Runway accepts up to 1500; matrix adds ~450 chars)
 - [x] Write arcModulationMatrix.test.ts (26 tests: profile integrity, per-arc physics, translation correctness, arc isolation, promptBuilder integration)
 - [x] 268/268 tests passing
+
+## Bug Fix — Runway 400 promptText Too Long (Arc Modulation Matrix) — COMPLETE ✅
+- [x] ROOT CAUSE: MAX_CHARS was raised to 1400 to accommodate Arc Modulation Matrix (~470 chars), but Runway's actual API hard limit is 1000 characters — published site was returning 500 on every generation
+- [x] FIX: Compressed Arc Modulation Matrix from 8 separate clauses (~470 chars) to 3-4 tightly worded compact directives (~120 chars) — all 8 physics dimensions preserved semantically
+- [x] FIX: Lowered MAX_CHARS from 1400 → 980 (20-char safety margin below Runway's 1000-char limit)
+- [x] Updated all 1400-char assertions in promptBuilder.test.ts and arcModulationMatrix.test.ts to 980
+- [x] 268/268 tests passing

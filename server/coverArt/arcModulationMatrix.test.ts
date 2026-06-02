@@ -153,9 +153,9 @@ describe("buildArcModulationDirectives — translation correctness", () => {
     const { promptDirective } = buildArcModulationDirectives("gathering");
     expect(promptDirective).toMatch(/60.80%/);
     expect(promptDirective).toMatch(/steep falloff/i);
-    expect(promptDirective).toMatch(/shallow depth of field/i);
+    expect(promptDirective).toMatch(/shallow DOF/i);
     expect(promptDirective).toMatch(/high withholding/i);
-    expect(promptDirective).toMatch(/breath/i);
+    expect(promptDirective).toMatch(/warm skin/i);
   });
 
   it("arriving directive contains threshold and layered depth language", () => {
@@ -171,8 +171,8 @@ describe("buildArcModulationDirectives — translation correctness", () => {
     const { promptDirective } = buildArcModulationDirectives("open");
     expect(promptDirective).toMatch(/30.50%/);
     expect(promptDirective).toMatch(/gradual falloff/i);
-    expect(promptDirective).toMatch(/deep layered space/i);
-    expect(promptDirective).toMatch(/frame breathes/i);
+    expect(promptDirective).toMatch(/deep space/i);
+    expect(promptDirective).toMatch(/open disclosure/i);
     expect(promptDirective).toMatch(/horizon/i);
   });
 });
@@ -201,18 +201,18 @@ describe("Arc isolation — a Gathering image cannot look Open", () => {
   it("gathering and open have distinct depth language", () => {
     const g = buildArcModulationDirectives("gathering");
     const o = buildArcModulationDirectives("open");
-    expect(g.dimensions.depthStructure).toContain("shallow depth of field");
-    expect(o.dimensions.depthStructure).toContain("deep layered space");
+    expect(g.dimensions.depthStructure).toContain("shallow DOF");
+    expect(o.dimensions.depthStructure).toContain("deep space");
   });
 
   it("gathering and open have distinct biological anchors", () => {
     const g = buildArcModulationDirectives("gathering");
     const o = buildArcModulationDirectives("open");
-    // Gathering activates warmth/breath; Open activates scale/horizon
-    expect(g.dimensions.biologicalAnchors).toMatch(/breath/i);
+    // Gathering activates warmth/skin; Open activates sky/horizon
+    expect(g.dimensions.biologicalAnchors).toMatch(/warm skin/i);
     expect(o.dimensions.biologicalAnchors).toMatch(/horizon/i);
     expect(g.dimensions.biologicalAnchors).not.toMatch(/horizon/i);
-    expect(o.dimensions.biologicalAnchors).not.toMatch(/breath/i);
+    expect(o.dimensions.biologicalAnchors).not.toMatch(/warm skin/i);
   });
 
   it("arriving is distinct from both gathering and open", () => {
@@ -268,8 +268,9 @@ describe("promptBuilder integration — arcModulation layer", () => {
       vocabulary: minimalVocabulary,
       arcPosition: "open",
     });
-    // The open directive contains 'frame breathes' — verify it's in the prompt
-    expect(result.prompt).toContain("frame breathes");
+    // The open directive contains 'open disclosure' and 'horizon' — verify it's in the prompt
+    expect(result.prompt).toContain("open disclosure");
+    expect(result.prompt).toContain("horizon");
   });
 
   it("gathering prompt contains shadow compression language from the matrix", () => {
@@ -299,7 +300,7 @@ describe("promptBuilder integration — arcModulation layer", () => {
     expect(g.layers.arcModulation).not.toBe(o.layers.arcModulation);
   });
 
-    it("prompt stays under 1400 characters with the matrix layer added", () => {
+  it("prompt stays under 980 characters with the compressed matrix layer", () => {
     for (const arc of ["gathering", "arriving", "open"] as ArcPosition[]) {
       const result = buildCoverArtPrompt({
         vocabulary: minimalVocabulary,
@@ -307,7 +308,7 @@ describe("promptBuilder integration — arcModulation layer", () => {
         lyricPhrases: ["empty highway at 2am", "headlights on wet asphalt"],
         genre: "indie rock",
       });
-      expect(result.charCount).toBeLessThanOrEqual(1400);
+      expect(result.charCount).toBeLessThanOrEqual(980);
     }
   });
 });
