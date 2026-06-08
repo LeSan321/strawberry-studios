@@ -56,6 +56,7 @@ function requireBridgeKey(req: Request, res: Response): boolean {
  * Returns the Studios userId.
  */
 async function resolveStudiosUserId(riffUserId: number): Promise<number> {
+  console.log(`[Bridge] resolveStudiosUserId: looking up riffUserId=${riffUserId}`);
   const db = await getDb();
   if (!db) throw new Error("Database connection failed");
 
@@ -66,17 +67,28 @@ async function resolveStudiosUserId(riffUserId: number): Promise<number> {
     .where(eq(users.riffUserId, riffUserId))
     .limit(1);
 
-  if (existing.length > 0) return existing[0].id;
+  if (existing.length > 0) {
+    console.log(`[Bridge] resolveStudiosUserId: found existing mapping, studiosUserId=${existing[0].id}`);
+    return existing[0].id;
+  }
 
   // Create shadow user
-  const result = await db.insert(users).values({
-    openId: `riff:${riffUserId}`,
-    name: `Riff User ${riffUserId}`,
-    role: "user",
-    riffUserId,
-  });
-  // Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] — insertId is at index 0
-  return (result as any)[0].insertId as number;
+  console.log(`[Bridge] resolveStudiosUserId: creating shadow user for riffUserId=${riffUserId}`);
+  try {
+    const result = await db.insert(users).values({
+      openId: `riff:${riffUserId}`,
+      name: `Riff User ${riffUserId}`,
+      role: "user",
+      riffUserId,
+    });
+    // Drizzle mysql2 returns [ResultSetHeader, FieldPacket[]] — insertId is at index 0
+    const insertedId = (result as any)[0].insertId as number;
+    console.log(`[Bridge] resolveStudiosUserId: shadow user created, studiosUserId=${insertedId}`);
+    return insertedId;
+  } catch (err) {
+    console.error(`[Bridge] resolveStudiosUserId: failed to create shadow user:`, err);
+    throw err;
+  }
 }
 
 // ─── Vocabulary Normalizer ───────────────────────────────────────────────────
