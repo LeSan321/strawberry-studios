@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+import { SignInButton } from "@/components/SignInButton";
 
 const TAGLINE = "Where Artists Become Legends";
 const SUB_TAGLINE = "A virtual performance venue system powered by AI. Upload your track, choose your world, and step into the Velvet Strawberry Jazz Club.";
@@ -47,10 +47,7 @@ export default function Home() {
               Produce
             </Link>
           ) : (
-            <a href={getLoginUrl()}
-              className="px-5 py-2 text-sm tracking-widest uppercase font-medium border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-              Enter
-            </a>
+            <SignInButton />
           )}
         </div>
       </nav>
@@ -122,10 +119,7 @@ export default function Home() {
                 <span className="relative z-10">Enter the Studio</span>
               </Link>
             ) : (
-              <a href={getLoginUrl()}
-                className="group relative px-10 py-4 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-primary">
-                <span className="relative z-10">Enter the Studio</span>
-              </a>
+              <SignInButton className="group relative px-10 py-4 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-primary" />
             )}
             <Link href="/venues"
               className="px-10 py-4 border border-foreground/20 text-foreground/70 font-display text-sm tracking-[0.2em] uppercase hover:border-foreground/50 hover:text-foreground transition-all duration-300">
@@ -216,11 +210,12 @@ export default function Home() {
                   <span>→</span>
                 </Link>
               ) : (
-                <a href={getLoginUrl()}
+                <button
+                  onClick={() => { const clerk = require('@clerk/react').useClerk(); clerk.openSignIn(); }}
                   className="inline-flex items-center gap-3 px-8 py-3 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-display text-sm tracking-widest uppercase">
                   Produce Here
                   <span>→</span>
-                </a>
+                </button>
               )}
             </div>
           </div>

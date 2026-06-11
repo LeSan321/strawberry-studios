@@ -17,6 +17,7 @@
     "@aws-sdk/s3-request-presigner": "^3.693.0",
     "@clerk/backend": "^3.6.1",
     "@clerk/express": "^2.1.25",
+    "@clerk/react": "^6.9.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",

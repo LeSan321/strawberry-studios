@@ -1,7 +1,5 @@
-import { getLoginUrl } from "@/const";
-import { trpc } from "@/lib/trpc";
-import { TRPCClientError } from "@trpc/client";
-import { useCallback, useEffect, useMemo } from "react";
+import { useClerk, useUser } from "@clerk/react";
+import { useCallback, useMemo } from "react";
 
 type UseAuthOptions = {
   redirectOnUnauthenticated?: boolean;
@@ -9,76 +7,50 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
-    options ?? {};
-  const utils = trpc.useUtils();
+  const { redirectOnUnauthenticated = false } = options ?? {};
+  const { user: clerkUser, isLoaded } = useUser();
+  const { signOut } = useClerk();
 
-  const meQuery = trpc.auth.me.useQuery(undefined, {
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
-
-  const logoutMutation = trpc.auth.logout.useMutation({
-    onSuccess: () => {
-      utils.auth.me.setData(undefined, null);
-    },
-  });
+  // Map Clerk user to our user format
+  const user = useMemo(() => {
+    if (!clerkUser) return null;
+    return {
+      id: parseInt(clerkUser.id, 10) || 0, // Fallback if parsing fails
+      openId: clerkUser.id,
+      name: clerkUser.firstName || clerkUser.emailAddresses[0]?.emailAddress || clerkUser.id,
+      email: clerkUser.emailAddresses[0]?.emailAddress || null,
+      loginMethod: "clerk",
+      role: "user" as const,
+      createdAt: clerkUser.createdAt || new Date(),
+      updatedAt: clerkUser.updatedAt || new Date(),
+      lastSignedIn: new Date(),
+    };
+  }, [clerkUser]);
 
   const logout = useCallback(async () => {
     try {
-      await logoutMutation.mutateAsync();
-    } catch (error: unknown) {
-      if (
-        error instanceof TRPCClientError &&
-        error.data?.code === "UNAUTHORIZED"
-      ) {
-        return;
-      }
+      await signOut();
+    } catch (error) {
+      console.error("[Auth] Sign out failed:", error);
       throw error;
-    } finally {
-      utils.auth.me.setData(undefined, null);
-      await utils.auth.me.invalidate();
     }
-  }, [logoutMutation, utils]);
+  }, [signOut]);
 
   const state = useMemo(() => {
-    localStorage.setItem(
-      "manus-runtime-user-info",
-      JSON.stringify(meQuery.data)
-    );
     return {
-      user: meQuery.data ?? null,
-      loading: meQuery.isLoading || logoutMutation.isPending,
-      error: meQuery.error ?? logoutMutation.error ?? null,
-      isAuthenticated: Boolean(meQuery.data),
+      user,
+      loading: !isLoaded,
+      error: null,
+      isAuthenticated: Boolean(clerkUser) && isLoaded,
     };
-  }, [
-    meQuery.data,
-    meQuery.error,
-    meQuery.isLoading,
-    logoutMutation.error,
-    logoutMutation.isPending,
-  ]);
+  }, [user, isLoaded, clerkUser]);
 
-  useEffect(() => {
-    if (!redirectOnUnauthenticated) return;
-    if (meQuery.isLoading || logoutMutation.isPending) return;
-    if (state.user) return;
-    if (typeof window === "undefined") return;
-    if (window.location.pathname === redirectPath) return;
-
-    window.location.href = redirectPath
-  }, [
-    redirectOnUnauthenticated,
-    redirectPath,
-    logoutMutation.isPending,
-    meQuery.isLoading,
-    state.user,
-  ]);
+  // Note: redirectOnUnauthenticated is deprecated with Clerk modal
+  // The app should use <SignedOut> component or check isAuthenticated instead
 
   return {
     ...state,
-    refresh: () => meQuery.refetch(),
+    refresh: () => Promise.resolve(), // Clerk handles this automatically
     logout,
   };
 }
