@@ -356,10 +356,11 @@ export default function Home() {
               Begin Production
             </Link>
           ) : (
-            <a href={getLoginUrl()}
+            <button
+              onClick={() => { const { useClerk } = require('@clerk/react'); const { openSignIn } = useClerk(); openSignIn(); }}
               className="inline-flex items-center gap-3 px-12 py-5 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-primary">
               Begin Production
-            </a>
+            </button>
           )}
         </div>
       </section>

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Link, useLocation, useParams } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+import { SignInButton } from "@/components/SignInButton";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -205,9 +205,7 @@ export default function CreateConcert() {
         <div className="text-center">
           <p className="font-display text-2xl text-foreground mb-4">Sign In Required</p>
           <p className="text-muted-foreground mb-8">You must be signed in to produce a concert.</p>
-          <a href={getLoginUrl()} className="px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase">
-            Sign In
-          </a>
+          <SignInButton className="px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase" />
         </div>
       </div>
     );

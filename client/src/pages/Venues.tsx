@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+import { SignInButton } from "@/components/SignInButton";
 
 const VENUES = [
   {
@@ -72,10 +72,7 @@ export default function Venues() {
               </Link>
             </>
           ) : (
-            <a href={getLoginUrl()}
-              className="px-5 py-2 text-sm tracking-widest uppercase font-medium border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-              Enter
-            </a>
+            <SignInButton />
           )}
         </div>
       </nav>
@@ -154,11 +151,12 @@ export default function Venues() {
                         Produce Here →
                       </Link>
                     ) : (
-                      <a href={getLoginUrl()}
+                      <button
+                        onClick={() => { const { useClerk } = require('@clerk/react'); const { openSignIn } = useClerk(); openSignIn(); }}
                         className="inline-flex items-center gap-3 px-6 py-3 border font-display text-sm tracking-widest uppercase transition-all duration-300"
                         style={{ borderColor: venue.accentColor, color: venue.accentColor }}>
                         Sign In to Produce →
-                      </a>
+                      </button>
                     )
                   )}
                 </div>
