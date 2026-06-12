@@ -16,6 +16,8 @@ import {
   getDefaultCreatorFrequency,
   listCreatorFrequencies,
 } from "../db";
+import { generateImage } from "../_core/imageGeneration";
+import { buildCoverArtPrompt, extractLyricPhrases } from "../coverArt/promptBuilder";
 import type { CreatorFrequency } from "../../drizzle/schema";
 
 // ─── Vocabulary term schema ───────────────────────────────────────────────────
@@ -352,4 +354,70 @@ export const frequencyRouter = router({
       createdAt: f.createdAt,
     }));
   }),
+
+  /**
+   * generateCoverArt — Generate cover art for a track using the creator's frequency.
+   * Called by Riff via tRPC with Clerk Bearer token.
+   * Returns { imageUrl }
+   */
+  generateCoverArt: protectedProcedure
+    .input(z.object({
+      lyrics: z.string().min(1).max(5000),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { lyrics } = input;
+
+      console.log(`[generateCoverArt] Starting for user ${ctx.user.id}, lyrics length: ${lyrics.length}`);
+
+      const frequency = await getDefaultCreatorFrequency(ctx.user.id);
+      if (!frequency) {
+        throw new Error("User has no frequency configured");
+      }
+
+      const vocab = typeof frequency.vocabularyJson === "string"
+        ? JSON.parse(frequency.vocabularyJson)
+        : frequency.vocabularyJson;
+
+      if (!vocab) {
+        throw new Error("Invalid vocabulary configuration");
+      }
+
+      // Normalize vocabulary
+      const normalizedVocab = {
+        environment: vocab.environment || [],
+        emotionalRegister: vocab.emotionalRegister || [],
+        arcTerms: vocab.arcTerms || [],
+        forbiddenTerms: vocab.forbiddenTerms || [],
+        relationshipGeometry: vocab.relationshipGeometry || [],
+        colorLight: vocab.colorLight || [],
+      };
+
+      const lyricPhrases = await extractLyricPhrases(lyrics);
+      console.log(`[generateCoverArt] Extracted ${lyricPhrases.length} lyric phrases`);
+
+      const arcTypeToPosition: Record<string, string> = {
+        expansive_mythic: "gathering",
+        witnessing_lateral: "arriving",
+        intimate_relational: "open",
+        sustained_ambient: "gathering",
+        erosive_revelatory: "arriving",
+        cyclical_return: "open",
+      };
+      const arcPosition = arcTypeToPosition[frequency.arcType] ?? "open";
+
+      const promptOutput = buildCoverArtPrompt({
+        vocabulary: normalizedVocab,
+        arcPosition: arcPosition as any,
+        lyricPhrases,
+        synthesisFingerprint: frequency.synthesisFingerprint || "",
+      });
+
+      const prompt = promptOutput.prompt;
+      console.log(`[generateCoverArt] Built prompt, length: ${prompt.length}`);
+
+      const { url: imageUrl } = await generateImage({ prompt });
+      console.log(`[generateCoverArt] Image generated: ${imageUrl}`);
+
+      return { imageUrl };
+    }),
 });
