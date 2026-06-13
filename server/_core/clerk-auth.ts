@@ -7,12 +7,15 @@ import { ENV } from "./env";
 // Clerk's @clerk/express reads CLERK_PUBLISHABLE_KEY (no VITE_ prefix) from env.
 // Studios stores it as VITE_CLERK_PUBLISHABLE_KEY (for Vite frontend access).
 // We must alias it so the Clerk SDK can find it at the standard env var name.
-if (ENV.clerkPublishableKey && !process.env.CLERK_PUBLISHABLE_KEY) {
-  process.env.CLERK_PUBLISHABLE_KEY = ENV.clerkPublishableKey;
-}
-if (ENV.clerkSecretKey && !process.env.CLERK_SECRET_KEY) {
-  process.env.CLERK_SECRET_KEY = ENV.clerkSecretKey;
-}
+// NOTE: ENV is a static object frozen at import time. Always read directly from
+// process.env for Clerk keys to ensure Railway-injected values are picked up.
+const clerkPublishableKey = () =>
+  process.env.CLERK_PUBLISHABLE_KEY ||
+  process.env.VITE_CLERK_PUBLISHABLE_KEY ||
+  ENV.clerkPublishableKey;
+const clerkSecretKey = () =>
+  process.env.CLERK_SECRET_KEY ||
+  ENV.clerkSecretKey;
 
 /**
  * Clerk authentication middleware for Express.
@@ -20,17 +23,23 @@ if (ENV.clerkSecretKey && !process.env.CLERK_SECRET_KEY) {
  * If Clerk keys are not configured, returns a no-op middleware.
  */
 export function getClerkMiddleware() {
+  const secretKey = clerkSecretKey();
+  const publishableKey = clerkPublishableKey();
+
   // If Clerk keys are not configured, return a no-op middleware
-  if (!ENV.clerkSecretKey || !ENV.clerkPublishableKey) {
+  if (!secretKey || !publishableKey) {
     console.warn("[Clerk] Publishable or secret key missing. Clerk auth disabled.");
+    console.warn("[Clerk] CLERK_SECRET_KEY set:", !!process.env.CLERK_SECRET_KEY);
+    console.warn("[Clerk] CLERK_PUBLISHABLE_KEY set:", !!process.env.CLERK_PUBLISHABLE_KEY);
+    console.warn("[Clerk] VITE_CLERK_PUBLISHABLE_KEY set:", !!process.env.VITE_CLERK_PUBLISHABLE_KEY);
     return (_req: any, _res: any, next: any) => next();
   }
 
-  console.log("[Clerk] Initializing middleware with publishable key:", ENV.clerkPublishableKey.substring(0, 20) + "...");
+  console.log("[Clerk] Initializing middleware with publishable key:", publishableKey.substring(0, 20) + "...");
 
   return clerkMiddleware({
-    secretKey: ENV.clerkSecretKey,
-    publishableKey: ENV.clerkPublishableKey,
+    secretKey,
+    publishableKey,
   });
 }
 
@@ -87,14 +96,16 @@ export async function verifyBearerToken(authHeader: string): Promise<string | nu
     const sessionToken = authHeader.slice(7); // Remove "Bearer " prefix
     console.log(`[Clerk] verifyBearerToken: verifying token (first 20 chars): ${sessionToken.substring(0, 20)}...`);
     
-    if (!ENV.clerkSecretKey) {
+    const secretKey = clerkSecretKey();
+    if (!secretKey) {
       console.error("[Clerk] verifyBearerToken: CLERK_SECRET_KEY is not set");
+      console.error("[Clerk] process.env.CLERK_SECRET_KEY:", !!process.env.CLERK_SECRET_KEY);
+      console.error("[Clerk] ENV.clerkSecretKey:", !!ENV.clerkSecretKey);
       return null;
     }
-
     // Verify the token with Clerk
     const decoded = await verifyToken(sessionToken, {
-      secretKey: ENV.clerkSecretKey,
+      secretKey,
     });
     
     if (!decoded || !decoded.sub) {
