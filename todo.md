@@ -445,3 +445,31 @@
 - [x] FIX: Lowered MAX_CHARS from 1400 → 980 (20-char safety margin below Runway's 1000-char limit)
 - [x] Updated all 1400-char assertions in promptBuilder.test.ts and arcModulationMatrix.test.ts to 980
 - [x] 268/268 tests passing
+
+## Clerk Authentication Migration — COMPLETE ✅
+
+### Backend
+- [x] Install @clerk/express and @clerk/backend
+- [x] Create server/_core/clerk-auth.ts — verifyBearerToken(), getClerkMiddleware(), authenticateRequest()
+- [x] Update server/_core/env.ts — add clerkSecretKey and clerkPublishableKey
+- [x] Update server/_core/context.ts — use Clerk token verification instead of Manus OAuth
+- [x] Update server/_core/index.ts — replace Manus OAuth middleware with Clerk middleware
+- [x] Update server/db.ts — upsertUser() returns the user object
+- [x] Rewrite server/bridgeRoutes.ts — Clerk Bearer token auth, no shadow user mapping
+- [x] Add frequency.generateCoverArt tRPC mutation (for Riff server-to-server calls)
+
+### Frontend
+- [x] Install @clerk/react
+- [x] Update client/src/main.tsx — ClerkProvider, tRPC client sends Clerk Bearer tokens
+- [x] Update client/src/_core/hooks/useAuth.ts — uses Clerk hooks (useUser, useClerk)
+- [x] Update client/src/const.ts — remove Manus OAuth, add Clerk helpers
+- [x] Create client/src/components/SignInButton.tsx — Clerk modal sign-in
+- [x] Update all pages (Home, Venues, Library, CreateConcert, DashboardLayout) to use SignInButton
+
+### Bug Fix — Clerk Publishable Key Missing (Root Cause of "Please login (10001)")
+- [x] ROOT CAUSE: @clerk/express reads CLERK_PUBLISHABLE_KEY (no VITE_ prefix) from env; Studios only had VITE_CLERK_PUBLISHABLE_KEY; clerkMiddleware threw "Publishable key is missing" on every request; getAuth(req).userId returned null; all protected procedures returned "Please login (10001)"
+- [x] FIX: Added env alias in clerk-auth.ts — sets process.env.CLERK_PUBLISHABLE_KEY from ENV.clerkPublishableKey if not already set
+- [x] FIX: Added CLERK_PUBLISHABLE_KEY secret via webdev_request_secrets (same value as VITE_CLERK_PUBLISHABLE_KEY)
+- [x] FIX: Added detailed logging to verifyBearerToken for easier future debugging
+- [x] VERIFIED: Server now logs "[Clerk] Initializing middleware with publishable key: pk_test_aW50ZWdyYWwt..." on startup
+- [x] Write clerk-keys.test.ts — 5 tests validating both CLERK_PUBLISHABLE_KEY and VITE_CLERK_PUBLISHABLE_KEY are set and match

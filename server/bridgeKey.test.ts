@@ -1,42 +1,54 @@
 import { describe, it, expect } from "vitest";
 
-describe("BRIDGE_API_KEY secret", () => {
-  it("should be set in the environment", () => {
-    const key = process.env.BRIDGE_API_KEY;
-    expect(key).toBeTruthy();
-    expect(typeof key).toBe("string");
-    expect((key as string).length).toBeGreaterThanOrEqual(32);
-  });
-
-  it("should reject requests with no x-bridge-key header", async () => {
+/**
+ * Bridge authentication tests.
+ * The bridge now uses Clerk Bearer tokens (not the old x-bridge-key header).
+ * These tests verify that the bridge endpoints correctly reject unauthenticated requests.
+ */
+describe("Bridge authentication (Clerk Bearer)", () => {
+  it("should reject /api/bridge/ping with no Authorization header", async () => {
     const response = await fetch(
-      "http://localhost:3000/api/bridge/frequency/999",
+      "http://localhost:3000/api/bridge/ping",
       { method: "GET" }
     );
     expect(response.status).toBe(401);
   });
 
-  it("should reject requests with wrong x-bridge-key header", async () => {
+  it("should reject /api/bridge/ping with wrong Authorization header", async () => {
     const response = await fetch(
-      "http://localhost:3000/api/bridge/frequency/999",
+      "http://localhost:3000/api/bridge/ping",
       {
         method: "GET",
-        headers: { "x-bridge-key": "wrong-key-value" },
+        headers: { "Authorization": "Bearer invalid-token-value" },
       }
     );
     expect(response.status).toBe(401);
   });
 
-  it("should accept requests with correct x-bridge-key header", async () => {
-    const key = process.env.BRIDGE_API_KEY!;
+  it("should reject /api/bridge/cover-art/generate with no Authorization header", async () => {
     const response = await fetch(
-      "http://localhost:3000/api/bridge/frequency/999",
+      "http://localhost:3000/api/bridge/cover-art/generate",
       {
-        method: "GET",
-        headers: { "x-bridge-key": key },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lyrics: "test lyrics" }),
       }
     );
-    // 200 means auth passed and user lookup completed (returns null frequency if not found)
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(401);
+  });
+
+  it("should reject /api/bridge/cover-art/generate with wrong Authorization header", async () => {
+    const response = await fetch(
+      "http://localhost:3000/api/bridge/cover-art/generate",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer invalid-token-value",
+        },
+        body: JSON.stringify({ lyrics: "test lyrics" }),
+      }
+    );
+    expect(response.status).toBe(401);
   });
 });

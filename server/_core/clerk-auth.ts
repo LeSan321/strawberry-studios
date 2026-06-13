@@ -4,6 +4,16 @@ import type { User } from "../../drizzle/schema";
 import * as db from "../db";
 import { ENV } from "./env";
 
+// Clerk's @clerk/express reads CLERK_PUBLISHABLE_KEY (no VITE_ prefix) from env.
+// Studios stores it as VITE_CLERK_PUBLISHABLE_KEY (for Vite frontend access).
+// We must alias it so the Clerk SDK can find it at the standard env var name.
+if (ENV.clerkPublishableKey && !process.env.CLERK_PUBLISHABLE_KEY) {
+  process.env.CLERK_PUBLISHABLE_KEY = ENV.clerkPublishableKey;
+}
+if (ENV.clerkSecretKey && !process.env.CLERK_SECRET_KEY) {
+  process.env.CLERK_SECRET_KEY = ENV.clerkSecretKey;
+}
+
 /**
  * Clerk authentication middleware for Express.
  * Validates Bearer tokens from Clerk and populates req.auth.
@@ -15,6 +25,8 @@ export function getClerkMiddleware() {
     console.warn("[Clerk] Publishable or secret key missing. Clerk auth disabled.");
     return (_req: any, _res: any, next: any) => next();
   }
+
+  console.log("[Clerk] Initializing middleware with publishable key:", ENV.clerkPublishableKey.substring(0, 20) + "...");
 
   return clerkMiddleware({
     secretKey: ENV.clerkSecretKey,
@@ -68,11 +80,18 @@ export async function authenticateRequest(req: Request): Promise<User | null> {
 export async function verifyBearerToken(authHeader: string): Promise<string | null> {
   try {
     if (!authHeader.startsWith("Bearer ")) {
+      console.warn("[Clerk] verifyBearerToken: Authorization header does not start with 'Bearer '");
       return null;
     }
 
     const sessionToken = authHeader.slice(7); // Remove "Bearer " prefix
+    console.log(`[Clerk] verifyBearerToken: verifying token (first 20 chars): ${sessionToken.substring(0, 20)}...`);
     
+    if (!ENV.clerkSecretKey) {
+      console.error("[Clerk] verifyBearerToken: CLERK_SECRET_KEY is not set");
+      return null;
+    }
+
     // Verify the token with Clerk
     const decoded = await verifyToken(sessionToken, {
       secretKey: ENV.clerkSecretKey,
@@ -87,6 +106,11 @@ export async function verifyBearerToken(authHeader: string): Promise<string | nu
     return decoded.sub;
   } catch (error) {
     console.error("[Clerk] Bearer token verification failed:", error);
+    // Log the specific error reason to help diagnose
+    if (error instanceof Error) {
+      console.error("[Clerk] Error message:", error.message);
+      console.error("[Clerk] Error name:", error.name);
+    }
     return null;
   }
 }
