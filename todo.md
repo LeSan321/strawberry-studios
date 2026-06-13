@@ -473,3 +473,9 @@
 - [x] FIX: Added detailed logging to verifyBearerToken for easier future debugging
 - [x] VERIFIED: Server now logs "[Clerk] Initializing middleware with publishable key: pk_test_aW50ZWdyYWwt..." on startup
 - [x] Write clerk-keys.test.ts — 5 tests validating both CLERK_PUBLISHABLE_KEY and VITE_CLERK_PUBLISHABLE_KEY are set and match
+
+## Missing Frequency Bridge Endpoints (Riff server-to-server) — IN PROGRESS
+
+- [x] Add GET /api/bridge/frequency/default — returns { hasFrequency, frequency | null }
+- [x] Add POST /api/bridge/frequency/synthesize — runs LLM synthesis, returns SynthesisResult
+- [x] Add POST /api/bridge/frequency/save — saves frequency to DB, returns { ok, frequencyId }
