@@ -7,10 +7,18 @@ import { ENV } from "./env";
 /**
  * Clerk authentication middleware for Express.
  * Validates Bearer tokens from Clerk and populates req.auth.
+ * If Clerk keys are not configured, returns a no-op middleware.
  */
 export function getClerkMiddleware() {
+  // If Clerk keys are not configured, return a no-op middleware
+  if (!ENV.clerkSecretKey || !ENV.clerkPublishableKey) {
+    console.warn("[Clerk] Publishable or secret key missing. Clerk auth disabled.");
+    return (_req: any, _res: any, next: any) => next();
+  }
+
   return clerkMiddleware({
     secretKey: ENV.clerkSecretKey,
+    publishableKey: ENV.clerkPublishableKey,
   });
 }
 
