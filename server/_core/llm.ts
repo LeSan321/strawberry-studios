@@ -1,4 +1,10 @@
-import { ENV } from "./env";
+import Anthropic from "@anthropic-ai/sdk";
+
+// ---------------------------------------------------------------------------
+// Types — kept identical to the original OpenAI-compatible interface so that
+// all existing call sites (frequency.synthesize, extractLyricPhrases, etc.)
+// continue to work without modification.
+// ---------------------------------------------------------------------------
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -19,7 +25,7 @@ export type FileContent = {
   type: "file_url";
   file_url: {
     url: string;
-    mime_type?: "audio/mpeg" | "audio/wav" | "application/pdf" | "audio/mp4" | "video/mp4" ;
+    mime_type?: "audio/mpeg" | "audio/wav" | "application/pdf" | "audio/mp4" | "video/mp4";
   };
 };
 
@@ -54,6 +60,19 @@ export type ToolChoice =
   | ToolChoicePrimitive
   | ToolChoiceByName
   | ToolChoiceExplicit;
+
+export type JsonSchema = {
+  name: string;
+  schema: Record<string, unknown>;
+  strict?: boolean;
+};
+
+export type OutputSchema = JsonSchema;
+
+export type ResponseFormat =
+  | { type: "text" }
+  | { type: "json_object" }
+  | { type: "json_schema"; json_schema: JsonSchema };
 
 export type InvokeParams = {
   messages: Message[];
@@ -97,236 +116,206 @@ export type InvokeResult = {
   };
 };
 
-export type JsonSchema = {
-  name: string;
-  schema: Record<string, unknown>;
-  strict?: boolean;
-};
+// ---------------------------------------------------------------------------
+// Model — Claude Sonnet 4 for all tasks
+// ---------------------------------------------------------------------------
+const CLAUDE_MODEL = "claude-sonnet-4-5";
 
-export type OutputSchema = JsonSchema;
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-export type ResponseFormat =
-  | { type: "text" }
-  | { type: "json_object" }
-  | { type: "json_schema"; json_schema: JsonSchema };
-
-const ensureArray = (
-  value: MessageContent | MessageContent[]
-): MessageContent[] => (Array.isArray(value) ? value : [value]);
-
-const normalizeContentPart = (
-  part: MessageContent
-): TextContent | ImageContent | FileContent => {
-  if (typeof part === "string") {
-    return { type: "text", text: part };
-  }
-
-  if (part.type === "text") {
-    return part;
-  }
-
-  if (part.type === "image_url") {
-    return part;
-  }
-
-  if (part.type === "file_url") {
-    return part;
-  }
-
-  throw new Error("Unsupported message content part");
-};
-
-const normalizeMessage = (message: Message) => {
-  const { role, name, tool_call_id } = message;
-
-  if (role === "tool" || role === "function") {
-    const content = ensureArray(message.content)
-      .map(part => (typeof part === "string" ? part : JSON.stringify(part)))
-      .join("\n");
-
-    return {
-      role,
-      name,
-      tool_call_id,
-      content,
-    };
-  }
-
-  const contentParts = ensureArray(message.content).map(normalizeContentPart);
-
-  // If there's only text content, collapse to a single string for compatibility
-  if (contentParts.length === 1 && contentParts[0].type === "text") {
-    return {
-      role,
-      name,
-      content: contentParts[0].text,
-    };
-  }
-
-  return {
-    role,
-    name,
-    content: contentParts,
-  };
-};
-
-const normalizeToolChoice = (
-  toolChoice: ToolChoice | undefined,
-  tools: Tool[] | undefined
-): "none" | "auto" | ToolChoiceExplicit | undefined => {
-  if (!toolChoice) return undefined;
-
-  if (toolChoice === "none" || toolChoice === "auto") {
-    return toolChoice;
-  }
-
-  if (toolChoice === "required") {
-    if (!tools || tools.length === 0) {
-      throw new Error(
-        "tool_choice 'required' was provided but no tools were configured"
-      );
-    }
-
-    if (tools.length > 1) {
-      throw new Error(
-        "tool_choice 'required' needs a single tool or specify the tool name explicitly"
-      );
-    }
-
-    return {
-      type: "function",
-      function: { name: tools[0].function.name },
-    };
-  }
-
-  if ("name" in toolChoice) {
-    return {
-      type: "function",
-      function: { name: toolChoice.name },
-    };
-  }
-
-  return toolChoice;
-};
-
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
-
-const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
-};
-
-const normalizeResponseFormat = ({
-  responseFormat,
-  response_format,
-  outputSchema,
-  output_schema,
-}: {
-  responseFormat?: ResponseFormat;
-  response_format?: ResponseFormat;
-  outputSchema?: OutputSchema;
-  output_schema?: OutputSchema;
-}):
-  | { type: "json_schema"; json_schema: JsonSchema }
-  | { type: "text" }
-  | { type: "json_object" }
-  | undefined => {
-  const explicitFormat = responseFormat || response_format;
-  if (explicitFormat) {
-    if (
-      explicitFormat.type === "json_schema" &&
-      !explicitFormat.json_schema?.schema
-    ) {
-      throw new Error(
-        "responseFormat json_schema requires a defined schema object"
-      );
-    }
-    return explicitFormat;
-  }
-
-  const schema = outputSchema || output_schema;
-  if (!schema) return undefined;
-
-  if (!schema.name || !schema.schema) {
-    throw new Error("outputSchema requires both name and schema");
-  }
-
-  return {
-    type: "json_schema",
-    json_schema: {
-      name: schema.name,
-      schema: schema.schema,
-      ...(typeof schema.strict === "boolean" ? { strict: schema.strict } : {}),
-    },
-  };
-};
-
-export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
-
-  const {
-    messages,
-    tools,
-    toolChoice,
-    tool_choice,
-    outputSchema,
-    output_schema,
-    responseFormat,
-    response_format,
-  } = params;
-
-  const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
-    messages: messages.map(normalizeMessage),
-  };
-
-  if (tools && tools.length > 0) {
-    payload.tools = tools;
-  }
-
-  const normalizedToolChoice = normalizeToolChoice(
-    toolChoice || tool_choice,
-    tools
-  );
-  if (normalizedToolChoice) {
-    payload.tool_choice = normalizedToolChoice;
-  }
-
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
-  }
-
-  const normalizedResponseFormat = normalizeResponseFormat({
-    responseFormat,
-    response_format,
-    outputSchema,
-    output_schema,
-  });
-
-  if (normalizedResponseFormat) {
-    payload.response_format = normalizedResponseFormat;
-  }
-
-  const response = await fetch(resolveApiUrl(), {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
+const getAnthropicClient = (): Anthropic => {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
     throw new Error(
-      `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
+      "ANTHROPIC_API_KEY is not set. Add it to Railway environment variables."
     );
   }
+  return new Anthropic({ apiKey });
+};
 
-  return (await response.json()) as InvokeResult;
+/** Extract the plain text from a content part */
+const contentPartToText = (part: MessageContent): string => {
+  if (typeof part === "string") return part;
+  if (part.type === "text") return part.text;
+  // image_url and file_url are not supported in text extraction
+  return "";
+};
+
+/** Flatten MessageContent | MessageContent[] to a single string */
+const flattenContent = (content: MessageContent | MessageContent[]): string => {
+  if (Array.isArray(content)) {
+    return content.map(contentPartToText).join("\n").trim();
+  }
+  return contentPartToText(content);
+};
+
+/**
+ * Convert our generic Message[] to Anthropic's format.
+ * - system messages are extracted separately
+ * - tool/function roles are mapped to "user" with a text block
+ */
+const splitMessages = (
+  messages: Message[]
+): { system: string; anthropicMessages: Anthropic.MessageParam[] } => {
+  const systemParts: string[] = [];
+  const anthropicMessages: Anthropic.MessageParam[] = [];
+
+  for (const msg of messages) {
+    if (msg.role === "system") {
+      systemParts.push(flattenContent(msg.content));
+      continue;
+    }
+
+    if (msg.role === "tool" || msg.role === "function") {
+      // Represent tool results as a user message
+      anthropicMessages.push({
+        role: "user",
+        content: flattenContent(msg.content),
+      });
+      continue;
+    }
+
+    const role = msg.role === "assistant" ? "assistant" : "user";
+    anthropicMessages.push({
+      role,
+      content: flattenContent(msg.content),
+    });
+  }
+
+  return { system: systemParts.join("\n\n"), anthropicMessages };
+};
+
+/**
+ * When response_format / outputSchema requests JSON, we append an instruction
+ * to the system prompt so Claude returns valid JSON matching the schema.
+ */
+const buildJsonInstruction = (
+  params: Pick<
+    InvokeParams,
+    "responseFormat" | "response_format" | "outputSchema" | "output_schema"
+  >
+): string => {
+  const fmt = params.responseFormat || params.response_format;
+  const schema = params.outputSchema || params.output_schema;
+
+  if (fmt?.type === "json_schema" && fmt.json_schema?.schema) {
+    return `\n\nRespond with valid JSON only — no markdown fences, no explanation. The JSON must match this schema:\n${JSON.stringify(fmt.json_schema.schema, null, 2)}`;
+  }
+
+  if (fmt?.type === "json_object") {
+    return "\n\nRespond with valid JSON only — no markdown fences, no explanation.";
+  }
+
+  if (schema?.schema) {
+    return `\n\nRespond with valid JSON only — no markdown fences, no explanation. The JSON must match this schema:\n${JSON.stringify(schema.schema, null, 2)}`;
+  }
+
+  return "";
+};
+
+// ---------------------------------------------------------------------------
+// Main export
+// ---------------------------------------------------------------------------
+
+export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
+  const client = getAnthropicClient();
+
+  const maxTokens =
+    params.maxTokens || params.max_tokens || 4096;
+
+  const { system, anthropicMessages } = splitMessages(params.messages);
+
+  const jsonInstruction = buildJsonInstruction(params);
+  const fullSystem = (system + jsonInstruction).trim();
+
+  const requestParams: Anthropic.MessageCreateParamsNonStreaming = {
+    model: CLAUDE_MODEL,
+    max_tokens: maxTokens,
+    messages: anthropicMessages,
+    ...(fullSystem ? { system: fullSystem } : {}),
+  };
+
+  // Tool support — convert our Tool[] to Anthropic's tool format
+  if (params.tools && params.tools.length > 0) {
+    requestParams.tools = params.tools.map((t) => ({
+      name: t.function.name,
+      description: t.function.description || "",
+      input_schema: (t.function.parameters || {
+        type: "object",
+        properties: {},
+      }) as Anthropic.Tool["input_schema"],
+    }));
+
+    const tc = params.toolChoice || params.tool_choice;
+    if (tc) {
+      if (tc === "none") {
+        requestParams.tool_choice = { type: "auto" }; // Anthropic has no "none"; use auto
+      } else if (tc === "auto") {
+        requestParams.tool_choice = { type: "auto" };
+      } else if (tc === "required") {
+        requestParams.tool_choice = { type: "any" };
+      } else if ("name" in tc) {
+        requestParams.tool_choice = { type: "tool", name: tc.name };
+      } else if ("function" in tc) {
+        requestParams.tool_choice = { type: "tool", name: tc.function.name };
+      }
+    }
+  }
+
+  const response = await client.messages.create(requestParams);
+
+  // ---------------------------------------------------------------------------
+  // Map Anthropic response → InvokeResult (OpenAI-compatible shape)
+  // ---------------------------------------------------------------------------
+  const textContent = response.content
+    .filter((b): b is Anthropic.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("");
+
+  const toolUseBlocks = response.content.filter(
+    (b): b is Anthropic.ToolUseBlock => b.type === "tool_use"
+  );
+
+  const toolCalls: ToolCall[] | undefined =
+    toolUseBlocks.length > 0
+      ? toolUseBlocks.map((b) => ({
+          id: b.id,
+          type: "function" as const,
+          function: {
+            name: b.name,
+            arguments: JSON.stringify(b.input),
+          },
+        }))
+      : undefined;
+
+  const finishReasonMap: Record<string, string> = {
+    end_turn: "stop",
+    max_tokens: "length",
+    tool_use: "tool_calls",
+    stop_sequence: "stop",
+  };
+
+  return {
+    id: response.id,
+    created: Math.floor(Date.now() / 1000),
+    model: response.model,
+    choices: [
+      {
+        index: 0,
+        message: {
+          role: "assistant",
+          content: textContent,
+          ...(toolCalls ? { tool_calls: toolCalls } : {}),
+        },
+        finish_reason: finishReasonMap[response.stop_reason ?? "end_turn"] ?? "stop",
+      },
+    ],
+    usage: {
+      prompt_tokens: response.usage.input_tokens,
+      completion_tokens: response.usage.output_tokens,
+      total_tokens: response.usage.input_tokens + response.usage.output_tokens,
+    },
+  };
 }

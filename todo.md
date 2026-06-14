@@ -479,3 +479,13 @@
 - [x] Add GET /api/bridge/frequency/default — returns { hasFrequency, frequency | null }
 - [x] Add POST /api/bridge/frequency/synthesize — runs LLM synthesis, returns SynthesisResult
 - [x] Add POST /api/bridge/frequency/save — saves frequency to DB, returns { ok, frequencyId }
+
+## Anthropic Claude Migration
+
+- [x] Install @anthropic-ai/sdk package
+- [x] Add ANTHROPIC_API_KEY secret to project and Railway
+- [x] Rewrite server/_core/llm.ts to use Claude Sonnet 4 via Anthropic SDK
+- [x] Migrate frequency.synthesize to use new invokeLLM (Claude Sonnet 4)
+- [x] Migrate extractLyricPhrases in promptBuilder.ts to use new invokeLLM (Claude Sonnet 4)
+- [x] Audit all other invokeLLM call sites and verify compatibility
+- [x] Run full test suite and confirm all pass

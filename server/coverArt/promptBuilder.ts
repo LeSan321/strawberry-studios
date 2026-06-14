@@ -522,12 +522,12 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
 export async function extractLyricPhrases(lyrics: string): Promise<string[]> {
   if (!lyrics || lyrics.trim().length < 10) return [];
 
-  // ── OpenAI path (primary) ─────────────────────────────────────────────────
-  // Uses GPT-4o-mini via OpenAI API directly, bypassing the Manus Forge quota.
-  // Falls back to raw lyrics snippet if the API call fails for any reason.
-  const { ENV } = await import("../_core/env");
+  // ── Claude path (primary) ────────────────────────────────────────────────
+  // Uses Claude Sonnet 4 via invokeLLM. Falls back to empty array if the
+  // API call fails for any reason (avoids Runway content filter issues).
+  const { invokeLLM } = await import("../_core/llm");
 
-  if (ENV.openAiApiKey) {
+  if (process.env.ANTHROPIC_API_KEY) {
     try {
       const systemPrompt = `You are a music-to-visual translator for album cover photography. Your job is to read song lyrics and produce 2–3 short, concrete, photographable scene descriptors that capture the emotional world of the song.
 
@@ -547,42 +547,27 @@ Examples of GOOD translations:
 
 Return ONLY a JSON object with a "phrases" array. No explanation.`;
 
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${ENV.openAiApiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: systemPrompt },
-            {
-              role: "user",
-              content: `Translate these lyrics into 2–3 concrete photographic scene descriptors for an album cover:\n\n${lyrics.slice(0, 2000)}`,
-            },
-          ],
-          max_tokens: 200,
-          temperature: 0.4,
-        }),
+      const response = await invokeLLM({
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content: `Translate these lyrics into 2–3 concrete photographic scene descriptors for an album cover:\n\n${lyrics.slice(0, 2000)}`,
+          },
+        ],
+        maxTokens: 300,
+        responseFormat: { type: "json_object" },
       });
 
-      if (!res.ok) {
-        const errBody = await res.text();
-        throw new Error(`OpenAI API error ${res.status}: ${errBody}`);
-      }
-
-      const json = (await res.json()) as {
-        choices: Array<{ message: { content: string } }>;
-      };
-      const content = json.choices?.[0]?.message?.content ?? "";
+      const content = typeof response.choices[0].message.content === "string"
+        ? response.choices[0].message.content
+        : "";
       const parsed = JSON.parse(content) as { phrases: string[] };
       const phrases = (parsed.phrases ?? []).slice(0, 3).filter((p) => p.trim().length > 0);
-      console.log(`[coverArtPromptBuilder] OpenAI lyric extraction succeeded, count=${phrases.length}`);
+      console.log(`[coverArtPromptBuilder] Claude lyric extraction succeeded, count=${phrases.length}`);
       return phrases;
     } catch (err) {
-      console.warn("[coverArtPromptBuilder] OpenAI lyric extraction failed, falling back to raw lyrics:", err);
+      console.warn("[coverArtPromptBuilder] Claude lyric extraction failed, falling back to empty phrases:", err);
     }
   }
 
