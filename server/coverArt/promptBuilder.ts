@@ -587,12 +587,14 @@ Return ONLY a JSON object with a "phrases" array. No explanation.`;
   }
 
   // ── Raw lyrics fallback ───────────────────────────────────────────────────
-  // When the LLM is unavailable, pass the first 200 chars of raw lyrics
-  // directly as a single phrase. This ensures the lyrics always reach the
-  // prompt builder even without the translation step.
-  console.log("[coverArtPromptBuilder] Using raw lyrics fallback (no OpenAI key or LLM unavailable)");
-  const rawSnippet = lyrics.trim().slice(0, 200).replace(/\n+/g, ", ");
-  return [rawSnippet];
+  // When the LLM is unavailable, return an empty array rather than passing raw
+  // lyric text to the image model. Raw lyrics frequently contain words like
+  // "fire", "burning", "smoke", "blood", "death" that are perfectly normal in
+  // song writing but trigger Runway's content filter and cause immediate FAILED
+  // tasks. The vocabulary/frequency data is already safe photographable language
+  // and will carry the prompt on its own when lyrics cannot be translated.
+  console.log("[coverArtPromptBuilder] Using raw lyrics fallback (no OpenAI key or LLM unavailable) — returning empty phrases to avoid content filter");
+  return [];
 }
 
 // ─── Vocabulary Resolver ──────────────────────────────────────────────────────

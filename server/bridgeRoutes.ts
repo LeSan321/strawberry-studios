@@ -436,8 +436,9 @@ export function registerBridgeRoutes(app: Express): void {
       // Studios just returns the generated image URL
       res.json({ imageUrl });
     } catch (err) {
-      console.error("[generateCoverArt] Exception:", err);
-      res.status(500).json({ error: "Cover art generation failed" });
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("[generateCoverArt] Exception:", message, err);
+      res.status(500).json({ error: "Cover art generation failed", detail: message });
     }
   });
 }
