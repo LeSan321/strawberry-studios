@@ -255,7 +255,9 @@ export const frequencyRouter = router({
         throw new Error("LLM returned no content");
       }
 
-      const parsed = JSON.parse(content) as {
+      // Strip markdown code fences in case Claude wraps the response despite instructions
+      const cleanContent = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+      const parsed = JSON.parse(cleanContent) as {
         reflection: string;
         suggestedName: string;
         arcType: string;
