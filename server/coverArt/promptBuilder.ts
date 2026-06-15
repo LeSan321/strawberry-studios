@@ -559,9 +559,11 @@ Return ONLY a JSON object with a "phrases" array. No explanation.`;
         responseFormat: { type: "json_object" },
       });
 
-      const content = typeof response.choices[0].message.content === "string"
+      const rawContent = typeof response.choices[0].message.content === "string"
         ? response.choices[0].message.content
         : "";
+      // Strip markdown code fences — Claude occasionally wraps JSON in ```json ... ``` blocks
+      const content = rawContent.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
       const parsed = JSON.parse(content) as { phrases: string[] };
       const phrases = (parsed.phrases ?? []).slice(0, 3).filter((p) => p.trim().length > 0);
       console.log(`[coverArtPromptBuilder] Claude lyric extraction succeeded, count=${phrases.length}`);
