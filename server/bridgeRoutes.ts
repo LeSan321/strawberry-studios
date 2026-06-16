@@ -213,6 +213,7 @@ const FREQUENCY_SYNTHESIS_SCHEMA = {
 
 const GenerateCoverArtSchema = z.object({
   lyrics: z.string(),
+  songTitle: z.string().optional(),
   steeringNote: z.string().optional(),
   genre: z.string().optional(),
   moodTags: z.array(z.string()).optional(),
@@ -385,9 +386,9 @@ export function registerBridgeRoutes(app: Express): void {
         res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });
         return;
       }
-      const { lyrics, steeringNote, genre, moodTags } = parsed.data;
+      const { lyrics, songTitle, steeringNote, genre, moodTags } = parsed.data;
 
-      console.log(`[generateCoverArt] Starting bridge call with lyrics length: ${lyrics.length}, genre: ${genre ?? 'none'}, moodTags: ${moodTags?.join(',') ?? 'none'}`);
+      console.log(`[generateCoverArt] Starting bridge call with lyrics length: ${lyrics.length}, genre: ${genre ?? 'none'}, moodTags: ${moodTags?.join(',') ?? 'none'}, songTitle: ${songTitle ?? 'none'}`);
 
       const studiosUserId = await resolveStudiosUserId(clerkUserId);
 
@@ -414,6 +415,7 @@ export function registerBridgeRoutes(app: Express): void {
       // Falls back to the fragment assembler if Claude is unavailable.
       const { prompt, method: promptMethod } = await writeCinematicPrompt({
         lyrics,
+        songTitle: songTitle ?? null,
         genre: genre ?? null,
         moodTags: moodTags ?? null,
         steeringNote: steeringNote ?? null,

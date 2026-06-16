@@ -525,6 +525,7 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
  */
 export async function writeCinematicPrompt(params: {
   lyrics: string;
+  songTitle: string | null;
   genre: string | null;
   moodTags: string[] | null;
   steeringNote: string | null;
@@ -533,10 +534,14 @@ export async function writeCinematicPrompt(params: {
   arcPosition: ArcPosition;
   vocabSource: "personal" | "platform_default";
 }): Promise<{ prompt: string; method: "claude" | "fragment" }> {
-  const { lyrics, genre, moodTags, steeringNote, vocabulary, synthesisFingerprint, arcPosition, vocabSource } = params;
+  const { lyrics, songTitle, genre, moodTags, steeringNote, vocabulary, synthesisFingerprint, arcPosition, vocabSource } = params;
 
   // Build the creative brief for Claude
   const briefParts: string[] = [];
+
+  if (songTitle?.trim()) {
+    briefParts.push(`SONG TITLE: ${songTitle.trim()} — if the title names specific people, a duo, a group, or implies plurality, honour that as a strong signal about who is in the scene`);
+  }
 
   if (steeringNote?.trim()) {
     briefParts.push(`CREATOR ART DIRECTION (highest priority — honor this above all else): ${steeringNote.trim()}`);
@@ -574,13 +579,21 @@ export async function writeCinematicPrompt(params: {
     briefParts.push(`AVOID: ${forbiddenTerms.join(", ")}`);
   }
 
-  // Arc position as a brief cinematic direction
+  // Arc position as a brief cinematic direction — no singular "figure" language, scale only
   const arcBrief: Record<ArcPosition, string> = {
-    gathering: "intimate scale, compressed and close, emotional intensity in the foreground",
-    arriving: "threshold moment, mid-distance, world opening up, something is about to change",
-    open: "wide scale, figure in vast environment, expansive and free",
+    gathering: "intimate scale, compressed and close, emotional intensity in the foreground — the world is tight around the subject(s)",
+    arriving: "threshold scale, mid-distance, the world is opening up — something is about to change, the edge of a new space",
+    open: "expansive scale, vast environment, wide and free — subject(s) exist within a world larger than themselves",
   };
   briefParts.push(`CINEMATIC SCALE: ${arcBrief[arcPosition]}`);
+
+  // Dynamic moment requirement — the most emotionally charged instant
+  if (lyrics?.trim() || moodTags?.length) {
+    const momentHint = genre?.toLowerCase().match(/ambient|drone|classical|folk|acoustic/) 
+      ? "a breath held, a hand extended, light breaking through, a door opening, the instant before or after a quiet revelation"
+      : "a strike, a collision, a release, a confrontation, a transformation, the instant of maximum kinetic energy";
+    briefParts.push(`ACTION REQUIREMENT: Identify the single most emotionally charged instant implied by the lyrics or mood — which may be subtle or explosive depending on the genre (for quieter genres: ${momentHint.split(", a ")[0]}; for energetic genres: a strike, a release, a confrontation). Build the scene around THAT INSTANT — mid-motion, not before or after it. Every subject in the scene must be DOING something TO, WITH, or IN RESPONSE TO something else in the frame.`);
+  }
 
   const systemPrompt = `You are a world-class album cover art director with deep knowledge of music photography, cinematic composition, and visual storytelling across all genres.
 
@@ -590,9 +603,11 @@ Rules:
 - Write 120–180 words describing ONE coherent scene with foreground, midground, and background
 - The scene must have compositional depth — multiple visual layers, not a single figure on a plain background
 - Honor the song's genre and world completely — if it is cyber-western, the scene is cyber-western; if it is folk, the scene is folk; if it is electronic, the scene is electronic
+- The scene may include one person, multiple people, a crowd, or no people at all — let the song title, lyrics, and genre determine this, not a default toward solitude
 - Translate lyrics into VISUAL scenes — do not quote lyrics literally, render their world
 - Include specific visual details: materials, light sources, colors, textures, weather, time of day
 - The image must feel like a STORY MOMENT, not a portrait or a product shot
+- ACTIVE VERB REQUIREMENT: Every subject in the scene must be doing something TO, WITH, or IN RESPONSE TO something else in the frame — firing, rearing, reaching, recoiling, breaking through, colliding with, dissolving into, racing toward. Avoid composing a scene where the subject and environment are simply co-present (a figure standing beside an object near a landscape feature). Describe what is happening between them, not just what is present. Self-test: if you removed every verb from your description and were left with only nouns and adjectives, would the scene still make sense? If yes, rewrite it — you have written an inventory, not a moment.
 - End with: "Square 1:1 composition. Cinematic photography. Album cover aesthetic. No text, no logos, no watermarks."
 - Return ONLY the prompt text — no explanation, no preamble, no quotes around it`;
 

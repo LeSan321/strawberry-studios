@@ -499,3 +499,12 @@
 - [x] Remove lyricPhrases extraction step from bridge route (now handled inside writeCinematicPrompt fallback)
 - [x] Add promptMethod to _debug response
 - [x] 273/274 tests passing (1 expected sandbox failure: Anthropic geo-block)
+
+## Phase V: Cover Art Prompt Quality — Active Verb & Subject Fixes — COMPLETE ✅
+- [x] Add ACTIVE VERB REQUIREMENT to system prompt — subjects must be doing something TO/WITH/IN RESPONSE TO something else; includes self-test rule
+- [x] Add subject-count flexibility rule — scene may include one person, multiple people, a crowd, or no people; let song title/lyrics/genre decide, not a default toward solitude
+- [x] Add ACTION REQUIREMENT to user brief — identify the single most emotionally charged instant; genre-sensitive (subtle for ambient/folk, explosive for rock/electronic)
+- [x] Add songTitle to GenerateCoverArtSchema — Riff can now pass song title to Studios bridge
+- [x] Pass songTitle through to writeCinematicPrompt — Claude receives title with instruction to honour named characters or implied plurality
+- [x] Rewrite arc position language — removed singular "figure" reference; scale-only language using "subject(s)" throughout
+- [x] 273/274 tests passing (1 expected sandbox failure: Anthropic geo-block)
