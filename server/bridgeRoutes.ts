@@ -22,7 +22,7 @@ import {
   getDefaultCreatorFrequency,
   saveCreatorFrequency,
 } from "./db";
-import { buildCoverArtPrompt, extractLyricPhrases, type VocabularyJson, type VocabularyTerm, type ArcPosition } from "./coverArt/promptBuilder";
+import { buildCoverArtPrompt, extractLyricPhrases, resolveVocabulary, type VocabularyJson, type VocabularyTerm, type ArcPosition } from "./coverArt/promptBuilder";
 import { generateImage } from "./_core/imageGeneration";
 import { users } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -214,6 +214,8 @@ const FREQUENCY_SYNTHESIS_SCHEMA = {
 const GenerateCoverArtSchema = z.object({
   lyrics: z.string(),
   steeringNote: z.string().optional(),
+  genre: z.string().optional(),
+  moodTags: z.array(z.string()).optional(),
 });
 
 // ─── Bridge Routes ────────────────────────────────────────────────────────────
@@ -383,58 +385,68 @@ export function registerBridgeRoutes(app: Express): void {
         res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });
         return;
       }
-      const { lyrics, steeringNote } = parsed.data;
+      const { lyrics, steeringNote, genre, moodTags } = parsed.data;
 
-      console.log(`[generateCoverArt] Starting bridge call with lyrics length: ${lyrics.length}`);
+      console.log(`[generateCoverArt] Starting bridge call with lyrics length: ${lyrics.length}, genre: ${genre ?? 'none'}, moodTags: ${moodTags?.join(',') ?? 'none'}`);
 
       const studiosUserId = await resolveStudiosUserId(clerkUserId);
+
+      // Resolve vocabulary — use personal frequency if available, fall back to platform default
+      const { vocabulary: resolvedVocab, source: vocabSource, frequencyName } = await resolveVocabulary(studiosUserId);
+      const normalizedVocab = normalizeVocabulary(resolvedVocab as unknown as Record<string, unknown>);
+
+      // Get frequency for arc type (only needed for arc position mapping)
       const frequency = await getDefaultCreatorFrequency(studiosUserId);
-
-      if (!frequency) {
-        res.status(400).json({ error: "User has no frequency configured" });
-        return;
-      }
-
-      const vocab = parseVocabJson(frequency.vocabularyJson);
-      if (!vocab) {
-        res.status(400).json({ error: "Invalid vocabulary configuration" });
-        return;
-      }
-
-      const normalizedVocab = normalizeVocabulary(vocab);
 
       const lyricPhrases = await extractLyricPhrases(lyrics);
       console.log(`[generateCoverArt] Extracted ${lyricPhrases.length} lyric phrases`);
 
       // Map arcType to arcPosition for the prompt builder
+      // When no frequency exists, use 'open' as the default — most neutral and energetic
       const arcTypeToPosition: Record<string, ArcPosition> = {
-        expansive_mythic: "gathering",
+        expansive_mythic: "open",
         witnessing_lateral: "arriving",
         intimate_relational: "open",
-        sustained_ambient: "gathering",
+        sustained_ambient: "arriving",
         erosive_revelatory: "arriving",
         cyclical_return: "open",
       };
-      const arcPosition = arcTypeToPosition[frequency.arcType] ?? "open";
+      const arcPosition = frequency ? (arcTypeToPosition[frequency.arcType] ?? "open") : "open";
 
       const promptOutput = buildCoverArtPrompt({
         vocabulary: normalizedVocab,
         arcPosition,
         lyricPhrases,
-        synthesisFingerprint: frequency.synthesisFingerprint,
+        synthesisFingerprint: frequency?.synthesisFingerprint ?? undefined,
         steeringNote: steeringNote ?? undefined,
+        genre: genre ?? undefined,
+        moodTags: moodTags ?? undefined,
       });
 
       const prompt = promptOutput.prompt;
       console.log(`[generateCoverArt] Built prompt, length: ${prompt.length}`);
+      console.log(`[generateCoverArt] Prompt preview: ${prompt.slice(0, 300)}`);
 
       const { url: imageUrl } = await generateImage({ prompt });
 
       console.log(`[generateCoverArt] Image generated: ${imageUrl}`);
 
-      // Riff handles storage of the cover art URL on their side
-      // Studios just returns the generated image URL
-      res.json({ imageUrl });
+      // Return image URL with debug info for diagnosis
+      res.json({
+        imageUrl,
+        _debug: {
+          vocabSource,
+          frequencyName: frequencyName ?? null,
+          arcPosition,
+          lyricsReceived: lyrics.length > 0 ? lyrics.slice(0, 100) + (lyrics.length > 100 ? '...' : '') : null,
+          lyricPhrasesExtracted: lyricPhrases,
+          genreReceived: genre ?? null,
+          moodTagsReceived: moodTags ?? null,
+          promptUsed: prompt,
+          promptLength: prompt.length,
+          layers: promptOutput.layers,
+        },
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.error("[generateCoverArt] Exception:", message, err);

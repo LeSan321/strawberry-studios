@@ -13,40 +13,40 @@ import { ENV } from "./_core/env";
 
 // ─── Platform Default Vocabulary ─────────────────────────────────────────────
 // The fallback vocabulary for creators who have not completed Find Your Frequency.
-// Philosophy: honest, earned, present-tense — no false comfort, no false darkness.
+// Philosophy: energetic, scene-specific, genre-neutral — no lone figures, no stock photo grammar.
+// Updated v2: replaced philosophical/somber defaults with action-oriented, multi-layer scene direction.
 
 const PLATFORM_DEFAULT_VOCABULARY = {
   environment: [
-    { term: "earned light", instruction: "Light that has been through something — available light, source traceable, warmth that comes from somewhere real" },
-    { term: "honest materials", instruction: "Surfaces and textures that are what they appear to be — no decorative fakery, no stock-image polish" },
-    { term: "world as it actually is", instruction: "The real world, not a stylized version of it — specific, particular, not generic" },
-    { term: "no decorative emptiness", instruction: "Empty space is intentional and earned, not used as aesthetic filler" },
+    { term: "specific real location", instruction: "A concrete identifiable place — a bar, a highway, a stage, a rooftop, a field — not a vague atmospheric backdrop" },
+    { term: "world in motion", instruction: "Something is happening in this environment — wind, crowd, weather, machinery, traffic — the world is alive and active" },
+    { term: "texture and material", instruction: "Surfaces have grain, wear, and history — leather, concrete, wood, chrome, fabric — visible and tactile" },
+    { term: "depth with layers", instruction: "Foreground, midground, and background all contain information — the world extends beyond the subject" },
   ],
   emotionalRegister: [
-    { term: "present tense", instruction: "The image is happening now — not nostalgic, not anticipatory, but in the moment of the thing" },
-    { term: "neither triumphant nor defeated", instruction: "The emotional register is honest — not forced positivity, not performed darkness" },
-    { term: "the thing itself", instruction: "Represent the subject directly — not a symbol of the thing, not a metaphor for the thing, the thing" },
+    { term: "intensity present", instruction: "The image has emotional charge — something is at stake, something is being felt, not neutral or passive" },
+    { term: "figures engaged not posed", instruction: "People in the image are doing something, feeling something, moving — not standing still for the camera" },
+    { term: "energy readable", instruction: "The emotional state of the scene is immediately legible — joy, defiance, longing, triumph, rawness — not ambiguous or flat" },
   ],
   arcTerms: [
-    { term: "through not away from", instruction: "Movement is forward into the experience, not around or away from it" },
-    { term: "forward motion implied", instruction: "The image suggests continuation — something is in process, not concluded" },
-    { term: "not yet resolved but not abandoned", instruction: "The tension is present and held — neither forced to resolution nor left in despair" },
+    { term: "forward momentum", instruction: "The image implies movement or progression — something is in motion, building, or breaking through" },
+    { term: "scene mid-event", instruction: "Capture the image at the peak moment — not before, not after, but during the thing" },
+    { term: "kinetic composition", instruction: "Dynamic framing, implied motion, or diagonal energy lines — the image does not sit still" },
   ],
   forbiddenTerms: [
-    { term: "no false comfort", instruction: "Do not soften the image with unearned warmth or reassurance — let the image be what it is" },
-    { term: "no false darkness", instruction: "Do not impose aesthetic gloom — darkness should be present only if it is true to the subject" },
-    { term: "no stock imagery grammar", instruction: "Avoid the visual clichés of commercial photography — no perfect lighting, no posed naturalness" },
-    { term: "no generic beauty", instruction: "Beauty should be specific and earned — not the default beautiful of a template" },
+    { term: "no generic stock photo", instruction: "Avoid the visual grammar of commercial photography — no perfect lighting, no posed naturalness, no model-agency faces" },
+    { term: "no isolated figure on plain background", instruction: "The subject must exist in a real, specific environment — not floating on a gradient or empty backdrop" },
+    { term: "no solitary sadness as default", instruction: "Do not default to lone figure, downcast gaze, or melancholy framing unless the song specifically calls for it" },
+    { term: "no generic beauty", instruction: "Beauty must be specific and earned — not the default beautiful of a template or stock library" },
   ],
   colorLight: [
-    { term: "available light", instruction: "Use the light that is actually there — window light, practical sources, natural light at its real temperature" },
-    { term: "source traceable", instruction: "Every light source should be identifiable — where is it coming from, what is it" },
-    { term: "no theatrical lighting", instruction: "Avoid dramatic rim lights, colored gels, or lighting that announces itself as cinematic" },
-    { term: "warmth earned not imposed", instruction: "Warm tones are present when the scene earns them — not applied as a filter over everything" },
+    { term: "high contrast with direction", instruction: "Strong directional light with clear shadows — not flat, not overexposed, not diffused into blandness" },
+    { term: "practical light sources", instruction: "Neon signs, stage lights, headlights, fire, windows — light that comes from somewhere real and visible in the frame" },
+    { term: "color serves the genre", instruction: "The color palette should feel native to the music's world — warm and dusty for roots, cool and electric for electronic, saturated and raw for rock" },
   ],
   relationshipGeometry: [
-    { term: "subject in context", instruction: "The subject exists in a real environment — not isolated on a plain background, not floating" },
-    { term: "scale honest", instruction: "The subject is the size it actually is in the world — not heroically enlarged, not diminished" },
+    { term: "subject owns the frame", instruction: "The primary subject is clearly the center of gravity — composition leads the eye to them without ambiguity" },
+    { term: "environment as character", instruction: "The location is not just backdrop — it has personality, history, and relationship to the subject" },
   ],
 };
 

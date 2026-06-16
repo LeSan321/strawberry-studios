@@ -412,7 +412,12 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   if (resolvedSteeringNote) {
     segments.push(resolvedSteeringNote);
   }
-
+  // Layer 0b: Genre anchor — placed early so the image model knows the visual world
+  // before reading lyric scenes or vocabulary. Genre sets the aesthetic register
+  // (e.g. "rockabilly experimental" tells Runway this is not a pop or folk image).
+  if (productionContext) {
+    segments.push(productionContext);
+  }
   // Layer 1: Lyric anchors — most song-specific material
   if (resolvedLyricPhrases.length > 0) {
     segments.push(resolvedLyricPhrases.join(", "));
@@ -463,8 +468,9 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   // Layer 7: Forbidden terms
   if (forbiddenTerms.length > 0) segments.push(forbiddenTerms.join(", "));
 
-  // Layer 8: Genre context (lowest weight)
-  if (productionContext) segments.push(productionContext);
+  // Layer 8: Genre context — now placed at Layer 0b (near top) for visual world anchoring
+  // Kept here as a comment to preserve layer numbering documentation.
+  // if (productionContext) segments.push(productionContext); // moved to Layer 0b
 
   segments.push(QUALITY_TAIL);
 
@@ -529,21 +535,22 @@ export async function extractLyricPhrases(lyrics: string): Promise<string[]> {
 
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      const systemPrompt = `You are a music-to-visual translator for album cover photography. Your job is to read song lyrics and produce 2–3 short, concrete, photographable scene descriptors that capture the emotional world of the song.
+      const systemPrompt = `You are a music-to-visual translator for album cover art. Your job is to read song lyrics and produce 2–3 concrete, vivid scene descriptors that capture the specific visual world of the song.
 
 Critical rules:
 - DO NOT extract metaphors verbatim. "Fire in my veins" is NOT a visual descriptor — it will generate a fantasy figure with literal fire.
-- DO NOT use abstract emotional language. "Wild heart beats" is NOT photographable.
-- TRANSLATE the emotion and imagery into real-world, physical scenes a photographer could actually shoot.
-- Each descriptor should be 4–8 words: a subject + physical context (e.g. "dusty boots on a dirt road", "leather jacket on a bar stool", "hands gripping a steering wheel at night")
-- Think: what physical objects, places, textures, and light conditions embody this song?
-- Avoid: glowing orbs, radial bursts, fantasy landscapes, literal fire/lightning, sci-fi elements, circular motifs
-- Genre matters: a rock song should feel like a photograph from that world (bar, stage, highway, desert), not a fantasy painting
+- DO NOT use abstract emotional language. "Wild heart beats" is NOT a scene.
+- DO translate the song's specific world into concrete visual scenes — objects, places, textures, light conditions, and genre-specific imagery.
+- HONOR the song's genre and world. If the song is cyber-western, the scene should feel cyber-western. If it is sci-fi, the scene should feel sci-fi. If it is folk, the scene should feel folk. DO NOT flatten genre-specific imagery into generic photography.
+- Each descriptor should be 5–10 words: a subject + physical context + genre atmosphere
+- Avoid: literal fire/lightning as the primary subject, floating glowing orbs, pure abstract shapes
+- Genre-specific imagery IS allowed and encouraged: robotic horses, neon saloons, chrome machinery, circuit-board landscapes, space stations, mythic creatures — if the song's world contains them, the image should too.
 
 Examples of GOOD translations:
-- Lyrics "fire in my veins / racing through the night" → ["headlights on empty highway at 2am", "hands on steering wheel, dashboard glow", "leather jacket, wind-blown hair"]
-- Lyrics "beyond the canyon wall / the river runs free" → ["red rock canyon at golden hour", "river stones and rushing water", "lone figure on canyon rim"]
-- Lyrics "a good old horse / steady on the trail" → ["horse and rider on dusty trail", "worn saddle leather in afternoon sun", "hoofprints in dry earth"]
+- Cyber-western lyrics "six-shooter microchip / chrome mare revs her scream" → ["chrome robotic horse rearing on silicon terrain", "cowboy silhouette in glowing server room corridor", "neon desert highway with circuit-board cacti"]
+- Roots lyrics "beyond the canyon wall / the river runs free" → ["red rock canyon at golden hour", "river stones and rushing water in warm light", "dusty trail winding into open desert"]
+- Electronic lyrics "fire in my veins / racing through the night" → ["hands on steering wheel, dashboard glow at 2am", "neon-lit highway through rain-slicked streets", "leather jacket, wind-blown hair, speed blur"]
+- Folk lyrics "a good old horse / steady on the trail" → ["horse and rider on dusty trail at dusk", "worn saddle leather in afternoon sun", "hoofprints in dry red earth"]
 
 Return ONLY a JSON object with a "phrases" array. No explanation.`;
 
