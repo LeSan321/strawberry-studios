@@ -489,3 +489,13 @@
 - [x] Migrate extractLyricPhrases in promptBuilder.ts to use new invokeLLM (Claude Sonnet 4)
 - [x] Audit all other invokeLLM call sites and verify compatibility
 - [x] Run full test suite and confirm all pass
+
+## Phase U: Claude Cinematic Prompt Writer — COMPLETE ✅
+- [x] Add `writeCinematicPrompt()` to server/coverArt/promptBuilder.ts — Claude writes a unified 120–180 word cinematic scene description instead of assembling keyword fragments
+- [x] Claude receives full creative brief: lyrics, genre, moodTags, steeringNote, synthesisFingerprint, vocabulary terms (distilled), forbidden terms, arc position
+- [x] Fallback: if Claude fails, falls back to extractLyricPhrases() + buildCoverArtPrompt() (fragment assembler)
+- [x] Returns { prompt, method: "claude" | "fragment" } — method exposed in bridge _debug response
+- [x] Update bridgeRoutes.ts POST /api/bridge/cover-art/generate to call writeCinematicPrompt instead of the fragment assembler pipeline
+- [x] Remove lyricPhrases extraction step from bridge route (now handled inside writeCinematicPrompt fallback)
+- [x] Add promptMethod to _debug response
+- [x] 273/274 tests passing (1 expected sandbox failure: Anthropic geo-block)

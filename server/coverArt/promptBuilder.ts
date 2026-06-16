@@ -508,6 +508,132 @@ export function buildCoverArtPrompt(input: CoverArtPromptInput): CoverArtPromptO
   };
 }
 
+// ─── Claude Cinematic Prompt Writer ─────────────────────────────────────────
+/**
+ * Write a unified cinematic scene description for Runway using Claude.
+ *
+ * This is the primary path. Instead of assembling a prompt from disconnected
+ * fragments (lyric phrases + vocabulary terms + arc directives), Claude receives
+ * all the creative data as a brief and writes a single coherent scene description
+ * of 150–200 words that Runway can render as a compositionally complex image.
+ *
+ * The vocabulary, arc modulation, and mood tags become inputs to Claude's
+ * creative brief — not fragments appended to the end of a prompt.
+ *
+ * Falls back to the fragment assembler (buildCoverArtPrompt) if Claude is
+ * unavailable or the call fails.
+ */
+export async function writeCinematicPrompt(params: {
+  lyrics: string;
+  genre: string | null;
+  moodTags: string[] | null;
+  steeringNote: string | null;
+  vocabulary: VocabularyJson;
+  synthesisFingerprint: string | null;
+  arcPosition: ArcPosition;
+  vocabSource: "personal" | "platform_default";
+}): Promise<{ prompt: string; method: "claude" | "fragment" }> {
+  const { lyrics, genre, moodTags, steeringNote, vocabulary, synthesisFingerprint, arcPosition, vocabSource } = params;
+
+  // Build the creative brief for Claude
+  const briefParts: string[] = [];
+
+  if (steeringNote?.trim()) {
+    briefParts.push(`CREATOR ART DIRECTION (highest priority — honor this above all else): ${steeringNote.trim()}`);
+  }
+
+  if (genre?.trim()) {
+    briefParts.push(`GENRE: ${genre.trim()}`);
+  }
+
+  if (moodTags && moodTags.length > 0) {
+    briefParts.push(`MOOD TAGS: ${moodTags.join(", ")}`);
+  }
+
+  if (lyrics?.trim()) {
+    briefParts.push(`LYRICS:\n${lyrics.slice(0, 2000)}`);
+  }
+
+  if (synthesisFingerprint?.trim()) {
+    briefParts.push(`CREATOR'S VISUAL WORLD (from their Frequency synthesis — use this to understand their aesthetic):\n${synthesisFingerprint.slice(0, 400)}`);
+  }
+
+  // Distill vocabulary into a brief — use the most evocative terms
+  const vocabTerms: string[] = [
+    ...vocabulary.environment.slice(0, 3).map(t => t.term),
+    ...vocabulary.emotionalRegister.slice(0, 2).map(t => t.term),
+    ...vocabulary.colorLight.slice(0, 2).map(t => t.term),
+    ...vocabulary.arcTerms.slice(0, 2).map(t => t.term),
+  ];
+  if (vocabTerms.length > 0) {
+    briefParts.push(`VISUAL VOCABULARY (${vocabSource === "personal" ? "creator's personal aesthetic" : "platform aesthetic"} — weave these into the scene, do not list them): ${vocabTerms.join(", ")}`);
+  }
+
+  const forbiddenTerms = vocabulary.forbiddenTerms.slice(0, 4).map(t => t.term);
+  if (forbiddenTerms.length > 0) {
+    briefParts.push(`AVOID: ${forbiddenTerms.join(", ")}`);
+  }
+
+  // Arc position as a brief cinematic direction
+  const arcBrief: Record<ArcPosition, string> = {
+    gathering: "intimate scale, compressed and close, emotional intensity in the foreground",
+    arriving: "threshold moment, mid-distance, world opening up, something is about to change",
+    open: "wide scale, figure in vast environment, expansive and free",
+  };
+  briefParts.push(`CINEMATIC SCALE: ${arcBrief[arcPosition]}`);
+
+  const systemPrompt = `You are a world-class album cover art director with deep knowledge of music photography, cinematic composition, and visual storytelling across all genres.
+
+Your task: Write a Runway image generation prompt for an album cover. The prompt must be a single unified cinematic scene description — NOT a list of keywords or fragments.
+
+Rules:
+- Write 120–180 words describing ONE coherent scene with foreground, midground, and background
+- The scene must have compositional depth — multiple visual layers, not a single figure on a plain background
+- Honor the song's genre and world completely — if it is cyber-western, the scene is cyber-western; if it is folk, the scene is folk; if it is electronic, the scene is electronic
+- Translate lyrics into VISUAL scenes — do not quote lyrics literally, render their world
+- Include specific visual details: materials, light sources, colors, textures, weather, time of day
+- The image must feel like a STORY MOMENT, not a portrait or a product shot
+- End with: "Square 1:1 composition. Cinematic photography. Album cover aesthetic. No text, no logos, no watermarks."
+- Return ONLY the prompt text — no explanation, no preamble, no quotes around it`;
+
+  try {
+    const { invokeLLM } = await import("../_core/llm");
+    const response = await invokeLLM({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Write the album cover prompt for this song:\n\n${briefParts.join("\n\n")}` },
+      ],
+      maxTokens: 400,
+    });
+    const raw = typeof response.choices[0].message.content === "string"
+      ? response.choices[0].message.content.trim()
+      : "";
+    // Strip any accidental markdown fences
+    const cleaned = raw.replace(/^```[\w]*\s*/i, "").replace(/\s*```$/i, "").trim();
+    if (cleaned.length > 50) {
+      // Truncate to Runway's 1000-char limit
+      const truncated = cleaned.length > 980 ? cleaned.slice(0, 977) + "..." : cleaned;
+      console.log(`[writeCinematicPrompt] Claude wrote prompt, length: ${truncated.length}`);
+      return { prompt: truncated, method: "claude" };
+    }
+    throw new Error("Claude returned empty or too-short prompt");
+  } catch (err) {
+    console.warn("[writeCinematicPrompt] Claude prompt writing failed, falling back to fragment assembler:", err instanceof Error ? err.message : String(err));
+    // Fall back to the fragment assembler
+    const lyricPhrases = await extractLyricPhrases(lyrics);
+    const output = buildCoverArtPrompt({
+      vocabulary,
+      arcPosition,
+      lyricPhrases,
+      synthesisFingerprint: synthesisFingerprint ?? undefined,
+      steeringNote: steeringNote ?? undefined,
+      genre: genre ?? undefined,
+      moodTags: moodTags ?? undefined,
+    });
+    return { prompt: output.prompt, method: "fragment" };
+  }
+}
+
 // ─── Lyrics Pre-Processing ────────────────────────────────────────────────────
 
 /**

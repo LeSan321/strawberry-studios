@@ -22,7 +22,7 @@ import {
   getDefaultCreatorFrequency,
   saveCreatorFrequency,
 } from "./db";
-import { buildCoverArtPrompt, extractLyricPhrases, resolveVocabulary, type VocabularyJson, type VocabularyTerm, type ArcPosition } from "./coverArt/promptBuilder";
+import { buildCoverArtPrompt, extractLyricPhrases, writeCinematicPrompt, resolveVocabulary, type VocabularyJson, type VocabularyTerm, type ArcPosition } from "./coverArt/promptBuilder";
 import { generateImage } from "./_core/imageGeneration";
 import { users } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -398,9 +398,6 @@ export function registerBridgeRoutes(app: Express): void {
       // Get frequency for arc type (only needed for arc position mapping)
       const frequency = await getDefaultCreatorFrequency(studiosUserId);
 
-      const lyricPhrases = await extractLyricPhrases(lyrics);
-      console.log(`[generateCoverArt] Extracted ${lyricPhrases.length} lyric phrases`);
-
       // Map arcType to arcPosition for the prompt builder
       // When no frequency exists, use 'open' as the default — most neutral and energetic
       const arcTypeToPosition: Record<string, ArcPosition> = {
@@ -413,18 +410,20 @@ export function registerBridgeRoutes(app: Express): void {
       };
       const arcPosition = frequency ? (arcTypeToPosition[frequency.arcType] ?? "open") : "open";
 
-      const promptOutput = buildCoverArtPrompt({
+      // Use Claude to write a unified cinematic scene description.
+      // Falls back to the fragment assembler if Claude is unavailable.
+      const { prompt, method: promptMethod } = await writeCinematicPrompt({
+        lyrics,
+        genre: genre ?? null,
+        moodTags: moodTags ?? null,
+        steeringNote: steeringNote ?? null,
         vocabulary: normalizedVocab,
+        synthesisFingerprint: frequency?.synthesisFingerprint ?? null,
         arcPosition,
-        lyricPhrases,
-        synthesisFingerprint: frequency?.synthesisFingerprint ?? undefined,
-        steeringNote: steeringNote ?? undefined,
-        genre: genre ?? undefined,
-        moodTags: moodTags ?? undefined,
+        vocabSource,
       });
 
-      const prompt = promptOutput.prompt;
-      console.log(`[generateCoverArt] Built prompt, length: ${prompt.length}`);
+      console.log(`[generateCoverArt] Prompt method: ${promptMethod}, length: ${prompt.length}`);
       console.log(`[generateCoverArt] Prompt preview: ${prompt.slice(0, 300)}`);
 
       const { url: imageUrl } = await generateImage({ prompt });
@@ -438,13 +437,12 @@ export function registerBridgeRoutes(app: Express): void {
           vocabSource,
           frequencyName: frequencyName ?? null,
           arcPosition,
+          promptMethod,
           lyricsReceived: lyrics.length > 0 ? lyrics.slice(0, 100) + (lyrics.length > 100 ? '...' : '') : null,
-          lyricPhrasesExtracted: lyricPhrases,
           genreReceived: genre ?? null,
           moodTagsReceived: moodTags ?? null,
           promptUsed: prompt,
           promptLength: prompt.length,
-          layers: promptOutput.layers,
         },
       });
     } catch (err) {
