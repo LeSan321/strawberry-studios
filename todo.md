@@ -508,3 +508,12 @@
 - [x] Pass songTitle through to writeCinematicPrompt — Claude receives title with instruction to honour named characters or implied plurality
 - [x] Rewrite arc position language — removed singular "figure" reference; scale-only language using "subject(s)" throughout
 - [x] 273/274 tests passing (1 expected sandbox failure: Anthropic geo-block)
+
+## Phase W: fal.ai Flux Pro 1.1 Image Provider
+
+- [x] fal.ai Flux Pro 1.1 adapter added to imageGeneration.ts
+- [x] Provider priority: fal.ai → Runway → Forge (last resort)
+- [x] IMAGE_PROVIDER env var override supported ("fal" | "runway" | "forge")
+- [x] FAL_KEY secret stored in Railway environment
+- [x] Vitest test for fal.ai key validation and endpoint reachability (server/imageGeneration.fal.test.ts)
+- [x] 276/277 tests passing (1 Anthropic sandbox key issue — does not affect Railway)

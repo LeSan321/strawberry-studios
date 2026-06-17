@@ -1,15 +1,18 @@
 /**
  * Image generation helper
  *
- * Primary provider: Runway ML Gen-4 Image (text_to_image)
- *   - POST /v1/text_to_image → { id }
- *   - Poll GET /v1/tasks/{id} → { status, output: [url] }
- *   - Uses ratio 1024:1024 (square, ideal for album cover art)
- *   - Requires RUNWAY_API_KEY env var
+ * Provider priority:
+ *   1. fal.ai Flux Pro 1.1 (primary)  — requires FAL_KEY env var
+ *   2. Runway ML Gen-4 Image (fallback) — requires RUNWAY_API_KEY env var
+ *   3. Manus built-in Forge ImageService (last resort)
  *
- * Fallback provider: Manus built-in Forge ImageService
- *   - Used if RUNWAY_API_KEY is not set or Runway fails
- *   - Returns base64 image, uploaded to S3
+ * Override via IMAGE_PROVIDER env var: "fal" | "runway" | "forge"
+ *
+ * fal.ai Flux Pro 1.1:
+ *   - POST https://fal.run/fal-ai/flux-pro/v1.1
+ *   - Returns { images: [{ url }] } synchronously (no polling needed)
+ *   - image_size: "square_hd" (1024×1024) — ideal for album cover art
+ *   - Requires FAL_KEY env var
  *
  * Example usage:
  *   const { url } = await generateImage({ prompt: "A serene landscape" });
@@ -29,6 +32,51 @@ export type GenerateImageOptions = {
 export type GenerateImageResponse = {
   url?: string;
 };
+
+// ─── fal.ai Flux Pro 1.1 ─────────────────────────────────────────────────────
+
+const FAL_FLUX_PRO_URL = "https://fal.run/fal-ai/flux-pro/v1.1";
+
+async function generateImageViaFal(options: GenerateImageOptions): Promise<GenerateImageResponse> {
+  const apiKey = process.env.FAL_KEY;
+  if (!apiKey) {
+    throw new Error("FAL_KEY is not configured");
+  }
+
+  const res = await fetch(FAL_FLUX_PRO_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Key ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      prompt: options.prompt,
+      image_size: "square_hd",   // 1024×1024 — ideal for album cover art
+      num_images: 1,
+      safety_tolerance: "2",     // balanced: blocks explicit content, allows creative/artistic
+      output_format: "jpeg",
+    }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`fal.ai Flux submit failed (${res.status} ${res.statusText})${detail ? `: ${detail}` : ""}`);
+  }
+
+  const result = (await res.json()) as {
+    images?: Array<{ url: string; width: number; height: number; content_type: string }>;
+    image?: { url: string };
+  };
+
+  // fal.ai returns { images: [{ url }] }
+  const imageUrl = result.images?.[0]?.url ?? result.image?.url;
+  if (!imageUrl) {
+    throw new Error(`fal.ai Flux returned no image URL. Response: ${JSON.stringify(result)}`);
+  }
+
+  console.log(`[imageGeneration] fal.ai Flux Pro 1.1 succeeded: ${imageUrl}`);
+  return { url: imageUrl };
+}
 
 // ─── Runway ML Gen-4 Image ────────────────────────────────────────────────────
 
@@ -156,14 +204,31 @@ async function generateImageViaForge(options: GenerateImageOptions): Promise<Gen
 export async function generateImage(
   options: GenerateImageOptions
 ): Promise<GenerateImageResponse> {
-  const hasRunway = !!process.env.RUNWAY_API_KEY;
+  // Allow explicit override via IMAGE_PROVIDER env var
+  const provider = process.env.IMAGE_PROVIDER?.toLowerCase();
 
-  if (hasRunway) {
-    console.log("[imageGeneration] Using Runway ML gen4_image");
+  if (provider === "runway") {
+    console.log("[imageGeneration] Using Runway ML gen4_image (IMAGE_PROVIDER=runway)");
     return generateImageViaRunway(options);
   }
 
-  // Fallback to Forge
-  console.log("[imageGeneration] RUNWAY_API_KEY not set — falling back to Forge");
+  if (provider === "forge") {
+    console.log("[imageGeneration] Using Forge (IMAGE_PROVIDER=forge)");
+    return generateImageViaForge(options);
+  }
+
+  // Default: fal.ai Flux Pro 1.1 → Runway → Forge
+  if (process.env.FAL_KEY) {
+    console.log("[imageGeneration] Using fal.ai Flux Pro 1.1");
+    return generateImageViaFal(options);
+  }
+
+  if (process.env.RUNWAY_API_KEY) {
+    console.log("[imageGeneration] FAL_KEY not set — falling back to Runway ML gen4_image");
+    return generateImageViaRunway(options);
+  }
+
+  // Last resort: Forge
+  console.log("[imageGeneration] No image provider keys set — falling back to Forge");
   return generateImageViaForge(options);
 }
