@@ -103,9 +103,14 @@ export async function verifyBearerToken(authHeader: string): Promise<string | nu
       console.error("[Clerk] ENV.clerkSecretKey:", !!ENV.clerkSecretKey);
       return null;
     }
-    // Verify the token with Clerk
+    // Verify the token with Clerk.
+    // publishableKey is required so Clerk can derive the correct JWK endpoint.
+    // Without it, Clerk infers the JWK URL from the token issuer claim and can
+    // crash with SyntaxError: Unexpected end of data after a cold-start / cache clear.
+    const publishableKey = clerkPublishableKey();
     const decoded = await verifyToken(sessionToken, {
       secretKey,
+      ...(publishableKey ? { publishableKey } : {}),
     });
     
     if (!decoded || !decoded.sub) {

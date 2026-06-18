@@ -37,8 +37,11 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
-  // Clerk authentication middleware
-  app.use(getClerkMiddleware());
+  // Clerk authentication middleware — skip bridge routes (they handle auth via verifyBearerToken)
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/bridge/")) return next();
+    return getClerkMiddleware()(req, res, next);
+  });
   // Audio file upload
   registerAudioUploadRoute(app);
   // Campaign PDF download
