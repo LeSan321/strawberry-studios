@@ -295,10 +295,15 @@ export function registerBridgeRoutes(app: Express): void {
           },
         },
       });
-      const content = response.choices[0]?.message?.content;
-      if (!content || typeof content !== "string") {
+      const rawContent = response.choices[0]?.message?.content;
+      if (!rawContent || typeof rawContent !== "string") {
         throw new Error("LLM returned no content");
       }
+      // Strip markdown code fences if the model wraps JSON in ```json ... ```
+      const content = rawContent
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```\s*$/, "")
+        .trim();
       const result = JSON.parse(content) as {
         reflection: string;
         suggestedName: string;
