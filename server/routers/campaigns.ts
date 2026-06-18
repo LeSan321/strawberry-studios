@@ -293,7 +293,12 @@ Generate the complete Director's Package as a JSON object. Every field is requir
         });
 
         const rawContent = response.choices[0]?.message?.content;
-        const content = typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent);
+        if (!rawContent) throw new Error("No response from Expert Council");
+        // Strip markdown code fences — Claude occasionally wraps JSON in ```json ... ``` blocks despite instructions
+        const content = (typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent))
+          .replace(/^```(?:json)?\s*/i, "")
+          .replace(/\s*```\s*$/i, "")
+          .trim();
         if (!content) throw new Error("No response from Expert Council");
 
         const pkg = JSON.parse(content) as DirectorsPackage;

@@ -257,8 +257,13 @@ Apply the Cinématique prompt system: fabric physics directives, Kelvin temperat
     }
   });
 
-  const content = response.choices[0].message.content;
-  const parsed = JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+  const rawContent = response.choices[0].message.content;
+  // Strip markdown code fences — Claude occasionally wraps JSON in ```json ... ``` blocks despite instructions
+  const content = (typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent))
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```\s*$/i, "")
+    .trim();
+  const parsed = JSON.parse(content);
 
   const directorsPackage = {
     version: "1.0",
