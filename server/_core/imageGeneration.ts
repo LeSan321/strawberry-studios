@@ -8,6 +8,11 @@
  *
  * Override via IMAGE_PROVIDER env var: "fal" | "runway" | "forge"
  *
+ * ALL providers: after generation, the ephemeral provider URL is immediately
+ * downloaded and re-uploaded to permanent S3 storage via storagePut().
+ * The returned { url } is always a permanent, non-expiring URL.
+ * This prevents Runway/fal.ai JWT-signed CloudFront URLs from expiring in the DB.
+ *
  * fal.ai Flux Pro 1.1:
  *   - POST https://fal.run/fal-ai/flux-pro/v1.1
  *   - Returns { images: [{ url }] } synchronously (no polling needed)
@@ -32,6 +37,33 @@ export type GenerateImageOptions = {
 export type GenerateImageResponse = {
   url?: string;
 };
+
+// ─── Permanent URL helper ─────────────────────────────────────────────────────
+
+/**
+ * Download an image from an ephemeral provider URL and re-upload to permanent S3.
+ * Returns the permanent URL. Falls back to the original URL if upload fails
+ * (so generation still succeeds even if storage is temporarily unavailable).
+ */
+async function makePermanent(ephemeralUrl: string, provider: string): Promise<string> {
+  try {
+    const res = await fetch(ephemeralUrl);
+    if (!res.ok) {
+      throw new Error(`Failed to download image from ${provider}: ${res.status} ${res.statusText}`);
+    }
+    const contentType = res.headers.get("content-type") ?? "image/jpeg";
+    const ext = contentType.includes("png") ? "png" : "jpg";
+    const buffer = Buffer.from(await res.arrayBuffer());
+    const key = `cover-art/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { url } = await storagePut(key, buffer, contentType);
+    console.log(`[imageGeneration] Permanent S3 upload succeeded: ${url}`);
+    return url;
+  } catch (err) {
+    console.error(`[imageGeneration] WARNING: permanent S3 upload failed, returning ephemeral URL. Error: ${err}`);
+    // Graceful degradation — return the original URL so generation still succeeds
+    return ephemeralUrl;
+  }
+}
 
 // ─── fal.ai Flux Pro 1.1 ─────────────────────────────────────────────────────
 
@@ -75,7 +107,8 @@ async function generateImageViaFal(options: GenerateImageOptions): Promise<Gener
   }
 
   console.log(`[imageGeneration] fal.ai Flux Pro 1.1 succeeded: ${imageUrl}`);
-  return { url: imageUrl };
+  const permanentUrl = await makePermanent(imageUrl, "fal.ai");
+  return { url: permanentUrl };
 }
 
 // ─── Runway ML Gen-4 Image ────────────────────────────────────────────────────
@@ -146,7 +179,8 @@ async function generateImageViaRunway(options: GenerateImageOptions): Promise<Ge
         throw new Error("Runway task succeeded but output array is empty");
       }
       console.log(`[imageGeneration] Runway task ${taskId} succeeded: ${imageUrl}`);
-      return { url: imageUrl };
+      const permanentUrl = await makePermanent(imageUrl, "Runway");
+      return { url: permanentUrl };
     }
 
     if (task.status === "FAILED" || task.status === "CANCELLED") {
@@ -195,7 +229,8 @@ async function generateImageViaForge(options: GenerateImageOptions): Promise<Gen
     image: { b64Json: string; mimeType: string };
   };
   const buffer = Buffer.from(result.image.b64Json, "base64");
-  const { url } = await storagePut(`generated/${Date.now()}.png`, buffer, result.image.mimeType);
+  // Forge already returns bytes — upload directly to permanent S3
+  const { url } = await storagePut(`cover-art/${Date.now()}-${Math.random().toString(36).slice(2)}.png`, buffer, result.image.mimeType);
   return { url };
 }
 
