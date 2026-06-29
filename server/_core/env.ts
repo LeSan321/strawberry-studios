@@ -10,4 +10,5 @@ export const ENV = {
   openAiApiKey: process.env.OPENAI_API_KEY ?? "",
   clerkPublishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY ?? "",
   clerkSecretKey: process.env.CLERK_SECRET_KEY ?? "",
+  iaBridgeSecret: process.env.IA_BRIDGE_SECRET ?? "",
 };

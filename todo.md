@@ -517,3 +517,24 @@
 - [x] FAL_KEY secret stored in Railway environment
 - [x] Vitest test for fal.ai key validation and endpoint reachability (server/imageGeneration.fal.test.ts)
 - [x] 276/277 tests passing (1 Anthropic sandbox key issue — does not affect Railway)
+
+## Phase X: Inverted Algorithm Bridge — generate-from-signal Endpoint — COMPLETE ✅
+
+- [x] Add `IA_BRIDGE_SECRET` to server/_core/env.ts (iaBridgeSecret)
+- [x] Add `verifyIABridgeAuth()` — checks x-ia-key header against IA_BRIDGE_SECRET env var
+- [x] Add `deriveArcType()` — derives arc type from contrast + luminance + temperature axes (exported for testing)
+- [x] Add `namedSignalToVocabulary()` — translates Named Signal 5-axis vector to VocabularyJson using Cinématique Bible hue zones and axis mappings (exported for testing)
+- [x] Add `ArcType` type export to bridgeRoutes.ts
+- [x] Add POST /api/bridge/cover-art/generate-from-signal route handler
+  - [x] Shared secret auth (x-ia-key header, no Clerk required)
+  - [x] Zod schema validation: signal (5 axes), optional vocabulary, optional steeringNote, optional arcType override, imageType enum
+  - [x] If vocabulary provided by IA, use directly (skip translation)
+  - [x] If no vocabulary, call namedSignalToVocabulary(signal)
+  - [x] Derive arc type from signal (or use override)
+  - [x] Build imageType-aware steering note (door / landscape / fog_still framing directives)
+  - [x] Call writeCinematicPrompt() with translated vocabulary and arc position
+  - [x] Call generateImage() → permanent S3 URL
+  - [x] Return { imageUrl, arcType, vocabulary, _debug }
+- [x] Add IA_BRIDGE_SECRET secret via webdev_request_secrets
+- [x] Write server/generateFromSignal.test.ts — 28 tests covering deriveArcType (8), namedSignalToVocabulary (19), route auth/validation (5)
+- [x] 304/305 tests passing (1 pre-existing Anthropic sandbox geo-block failure)
