@@ -469,3 +469,196 @@ export const coverArtAdaptiveWeights = mysqlTable("cover_art_adaptive_weights", 
 
 export type CoverArtAdaptiveWeight = typeof coverArtAdaptiveWeights.$inferSelect;
 export type InsertCoverArtAdaptiveWeight = typeof coverArtAdaptiveWeights.$inferInsert;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Music Video Generation Pipeline
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Music videos — the top-level production record for a full music video.
+ * Tracks the entire pipeline from ingest through delivery.
+ */
+export const musicVideos = mysqlTable("music_videos", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  audioTrackId: int("audioTrackId"),
+  title: varchar("title", { length: 255 }).notNull(),
+  artistName: varchar("artistName", { length: 255 }),
+  /** Full song lyrics (used for shot planning and lip sync selection) */
+  lyrics: text("lyrics"),
+  /** Free-text genre and visual style description (genre-agnostic) */
+  genreDescription: text("genreDescription"),
+  /** Total song duration in seconds (from audio analysis or user input) */
+  durationSeconds: int("durationSeconds"),
+  /**
+   * Pipeline status state machine:
+   * draft → analyzing_audio → planning → awaiting_review → generating_shots
+   *   → lip_syncing → assembling → complete | failed
+   */
+  status: mysqlEnum("musicVideoStatus", [
+    "draft",
+    "analyzing_audio",
+    "planning",
+    "awaiting_review",
+    "generating_shots",
+    "lip_syncing",
+    "assembling",
+    "complete",
+    "failed",
+  ]).default("draft").notNull(),
+  /** Shot plan JSON — array of planned shots before generation */
+  storyboardJson: json("storyboardJson"),
+  /** Error message if pipeline failed */
+  errorMessage: text("errorMessage"),
+  /** Final rendered video — S3 URL */
+  finalVideoUrl: text("finalVideoUrl"),
+  /** Final rendered video — S3 key */
+  finalVideoKey: varchar("finalVideoKey", { length: 512 }),
+  /** Kdenlive-editable .mlt project file — S3 URL */
+  projectFileUrl: text("projectFileUrl"),
+  /** Kdenlive-editable .mlt project file — S3 key */
+  projectFileKey: varchar("projectFileKey", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  /** UTC timestamp when the final video was delivered */
+  finalizedAt: timestamp("finalizedAt"),
+});
+
+export type MusicVideo = typeof musicVideos.$inferSelect;
+export type InsertMusicVideo = typeof musicVideos.$inferInsert;
+
+/**
+ * Music video characters — named characters with a single reference image.
+ * The reference image is reused as the Runway image-to-video anchor frame
+ * for every shot that includes this character, ensuring visual consistency.
+ */
+export const musicVideoCharacters = mysqlTable("music_video_characters", {
+  id: int("id").autoincrement().primaryKey(),
+  musicVideoId: int("musicVideoId").notNull(),
+  userId: int("userId").notNull(),
+  /** Character name as used in shot descriptions and lip sync selection */
+  name: varchar("name", { length: 128 }).notNull(),
+  /** Optional free-text description (wardrobe, appearance notes) */
+  description: text("description"),
+  /** S3 URL of the uploaded reference image */
+  referenceImageUrl: text("referenceImageUrl"),
+  /** S3 key of the uploaded reference image */
+  referenceImageKey: varchar("referenceImageKey", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type MusicVideoCharacter = typeof musicVideoCharacters.$inferSelect;
+export type InsertMusicVideoCharacter = typeof musicVideoCharacters.$inferInsert;
+
+/**
+ * Music video shots — one row per planned/generated shot.
+ * Tracks the full lifecycle: planned → queued → generating → complete,
+ * plus an optional lip sync pass for flagged shots.
+ */
+export const musicVideoShots = mysqlTable("music_video_shots", {
+  id: int("id").autoincrement().primaryKey(),
+  musicVideoId: int("musicVideoId").notNull(),
+  /** Zero-based display order */
+  shotIndex: int("shotIndex").notNull(),
+  /** Song section this shot covers */
+  segmentType: mysqlEnum("segmentType", [
+    "intro",
+    "verse",
+    "chorus",
+    "bridge",
+    "outro",
+    "instrumental",
+    "other",
+  ]).notNull().default("verse"),
+  /** Start time in the song (seconds) */
+  startTimeSeconds: int("startTimeSeconds").notNull().default(0),
+  /** Target clip duration in seconds (5 or 10 for Runway) */
+  targetDurationSeconds: int("targetDurationSeconds").notNull().default(5),
+  /** Cinematic scene description (written by shot planner) */
+  description: text("description"),
+  /** Camera movement directive (e.g. "slow push in", "handheld drift") */
+  cameraMovement: varchar("cameraMovement", { length: 128 }),
+  /** Lighting note (e.g. "golden hour backlight", "neon underlight") */
+  lightingNote: text("lightingNote"),
+  /** JSON array of character IDs appearing in this shot */
+  characterIds: json("characterIds").$type<number[]>(),
+  /** Whether this shot requires lip sync processing */
+  needsLipSync: boolean("needsLipSync").default(false).notNull(),
+  /** Transition from the previous shot */
+  transitionIn: mysqlEnum("transitionIn", ["cut", "dissolve", "luma"]).default("cut").notNull(),
+  /** Video generation provider (currently always "runway") */
+  provider: varchar("provider", { length: 64 }).default("runway"),
+  /** Actual provider clip duration (5 or 10) */
+  providerDurationSeconds: int("providerDurationSeconds"),
+  /** The exact prompt sent to the video generation API */
+  videoPrompt: text("videoPrompt"),
+  /** Video generation status */
+  videoStatus: mysqlEnum("shotVideoStatus", [
+    "pending",
+    "queued",
+    "generating",
+    "complete",
+    "failed",
+  ]).default("pending").notNull(),
+  /** S3 URL of the generated clip */
+  videoUrl: text("videoUrl"),
+  /** External job ID from Runway (for polling) */
+  videoJobId: varchar("videoJobId", { length: 255 }),
+  /** Video generation error message */
+  videoError: text("videoError"),
+  /** Generation progress percentage (0–100) */
+  progress: int("progress").default(0),
+  /** Lip sync status */
+  lipSyncStatus: mysqlEnum("lipSyncStatus", [
+    "not_needed",
+    "pending",
+    "complete",
+    "failed",
+  ]).default("not_needed").notNull(),
+  /** S3 URL of the lip-synced clip (replaces videoUrl in assembly) */
+  lipSyncedVideoUrl: text("lipSyncedVideoUrl"),
+  /** Sync Labs job ID */
+  lipSyncJobId: varchar("lipSyncJobId", { length: 255 }),
+  /** Lip sync error message */
+  lipSyncError: text("lipSyncError"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MusicVideoShot = typeof musicVideoShots.$inferSelect;
+export type InsertMusicVideoShot = typeof musicVideoShots.$inferInsert;
+
+/**
+ * Music video audio structure — results of the librosa audio analysis.
+ * One row per music video; upserted when analysis completes.
+ */
+export const musicVideoAudioStructure = mysqlTable("music_video_audio_structure", {
+  id: int("id").autoincrement().primaryKey(),
+  musicVideoId: int("musicVideoId").notNull().unique(),
+  /** Estimated tempo in BPM */
+  tempoBpm: int("tempoBpm"),
+  /** Beat grid JSON — array of beat timestamps in seconds */
+  beatGridJson: json("beatGridJson").$type<number[]>(),
+  /**
+   * Sections JSON — array of detected song sections:
+   * [{ label: string, startSeconds: number, endSeconds: number }]
+   */
+  sectionsJson: json("sectionsJson").$type<Array<{
+    label: string;
+    startSeconds: number;
+    endSeconds: number;
+  }>>(),
+  /**
+   * Energy envelope JSON — RMS energy sampled at 1s intervals:
+   * [{ timeSeconds: number, rms: number }]
+   */
+  energyEnvelopeJson: json("energyEnvelopeJson").$type<Array<{
+    timeSeconds: number;
+    rms: number;
+  }>>(),
+  /** UTC timestamp when analysis completed */
+  analyzedAt: timestamp("analyzedAt").defaultNow().notNull(),
+});
+
+export type MusicVideoAudioStructure = typeof musicVideoAudioStructure.$inferSelect;
+export type InsertMusicVideoAudioStructure = typeof musicVideoAudioStructure.$inferInsert;

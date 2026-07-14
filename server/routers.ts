@@ -11,6 +11,7 @@ import { buildCinématiqueVideoPrompt } from "./cinematiquePromptBuilder";
 import { campaignsRouter } from "./routers/campaigns";
 import { coverArtRouter } from "./routers/coverArt";
 import { frequencyRouter } from "./routers/frequency";
+import { musicVideoRouter } from "./routers/musicVideo";
 import {
   createConcert,
   getConcertsByUser,
@@ -705,6 +706,7 @@ export const appRouter = router({
   campaigns: campaignsRouter,
   coverArt: coverArtRouter,
   frequency: frequencyRouter,
+  musicVideo: musicVideoRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -12,6 +12,7 @@ import PresetLibrary from "./pages/PresetLibrary";
 import ConcertTicket from "./pages/ConcertTicket";
 import Campaigns from "./pages/Campaigns";
 import FindYourFrequency from "./pages/FindYourFrequency";
+import MusicVideos from "./pages/MusicVideos";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <Route path={"/concert/:slug"} component={ConcertTicket} />
       <Route path={"/campaigns"} component={Campaigns} />
       <Route path={"/frequency"} component={FindYourFrequency} />
+      <Route path={"/music-videos"} component={MusicVideos} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

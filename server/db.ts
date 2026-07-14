@@ -16,6 +16,10 @@ import {
   platformDefaultVocabulary,
   coverArtGenerationLogs,
   coverArtAdaptiveWeights,
+  musicVideos,
+  musicVideoCharacters,
+  musicVideoShots,
+  musicVideoAudioStructure,
   users,
   type Campaign,
   type CampaignMoodBoardImage,
@@ -30,6 +34,12 @@ import {
   type InsertCoverArtGenerationLog,
   type CoverArtGenerationLog,
   type CoverArtAdaptiveWeight,
+  type MusicVideo,
+  type InsertMusicVideo,
+  type MusicVideoCharacter,
+  type InsertMusicVideoCharacter,
+  type MusicVideoShot,
+  type InsertMusicVideoShot,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -660,4 +670,128 @@ export async function upsertCoverArtAdaptiveWeights(
           totalGenerations = VALUES(totalGenerations),
           lastAdaptedAt = VALUES(lastAdaptedAt)`
   );
+}
+
+// ─── Music Videos ─────────────────────────────────────────────────────────────
+
+export async function createMusicVideo(data: InsertMusicVideo): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(musicVideos).values(data);
+  return (result as any)[0].insertId;
+}
+
+export async function getMusicVideoById(id: number): Promise<MusicVideo | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(musicVideos).where(eq(musicVideos.id, id)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function getMusicVideosByUser(userId: number): Promise<MusicVideo[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(musicVideos).where(eq(musicVideos.userId, userId)).orderBy(desc(musicVideos.createdAt));
+}
+
+export async function updateMusicVideo(
+  id: number,
+  data: Partial<InsertMusicVideo>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot update music video: database not available"); return; }
+  await db.update(musicVideos).set(data).where(eq(musicVideos.id, id));
+}
+
+export async function deleteMusicVideo(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot delete music video: database not available"); return; }
+  // Delete shots and characters first (no FK constraints, but keep it clean)
+  await db.delete(musicVideoShots).where(eq(musicVideoShots.musicVideoId, id));
+  await db.delete(musicVideoCharacters).where(eq(musicVideoCharacters.musicVideoId, id));
+  await db.delete(musicVideoAudioStructure).where(eq(musicVideoAudioStructure.musicVideoId, id));
+  await db.delete(musicVideos).where(eq(musicVideos.id, id));
+}
+
+// ─── Music Video Characters ───────────────────────────────────────────────────
+
+export async function createMusicVideoCharacter(
+  data: InsertMusicVideoCharacter
+): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(musicVideoCharacters).values(data);
+  return (result as any)[0].insertId;
+}
+
+export async function getMusicVideoCharacters(
+  musicVideoId: number
+): Promise<MusicVideoCharacter[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(musicVideoCharacters)
+    .where(eq(musicVideoCharacters.musicVideoId, musicVideoId))
+    .orderBy(musicVideoCharacters.createdAt);
+}
+
+export async function updateMusicVideoCharacter(
+  id: number,
+  data: Partial<InsertMusicVideoCharacter>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot update character: database not available"); return; }
+  await db.update(musicVideoCharacters).set(data).where(eq(musicVideoCharacters.id, id));
+}
+
+export async function deleteMusicVideoCharacter(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot delete character: database not available"); return; }
+  await db.delete(musicVideoCharacters).where(eq(musicVideoCharacters.id, id));
+}
+
+// ─── Music Video Shots ────────────────────────────────────────────────────────
+
+export async function createMusicVideoShot(
+  data: InsertMusicVideoShot
+): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(musicVideoShots).values(data);
+  return (result as any)[0].insertId;
+}
+
+export async function getMusicVideoShots(
+  musicVideoId: number
+): Promise<MusicVideoShot[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(musicVideoShots)
+    .where(eq(musicVideoShots.musicVideoId, musicVideoId))
+    .orderBy(musicVideoShots.shotIndex);
+}
+
+export async function getMusicVideoShotById(id: number): Promise<MusicVideoShot | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(musicVideoShots).where(eq(musicVideoShots.id, id)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function updateMusicVideoShot(
+  id: number,
+  data: Partial<InsertMusicVideoShot>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot update shot: database not available"); return; }
+  await db.update(musicVideoShots).set(data).where(eq(musicVideoShots.id, id));
+}
+
+export async function deleteAllMusicVideoShots(musicVideoId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot delete shots: database not available"); return; }
+  await db.delete(musicVideoShots).where(eq(musicVideoShots.musicVideoId, musicVideoId));
 }

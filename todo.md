@@ -538,3 +538,23 @@
 - [x] Add IA_BRIDGE_SECRET secret via webdev_request_secrets
 - [x] Write server/generateFromSignal.test.ts — 28 tests covering deriveArcType (8), namedSignalToVocabulary (19), route auth/validation (5)
 - [x] 304/305 tests passing (1 pre-existing Anthropic sandbox geo-block failure)
+
+## Music Video Generation Pipeline — Phase 1: Backend
+
+- [x] Database migration — music_videos, music_video_shots, music_video_characters, music_video_audio_structure tables
+- [x] Dockerfile — add Python 3 + librosa + ffmpeg to Railway build image (ffmpeg replaces melt for assembly)
+- [x] Audio analyzer — Python subprocess service (librosa): BPM, beat grid, section boundaries, energy curve, spectral centroid
+- [x] Shot planner — genre-agnostic Claude-based segment planner, reads Cinématique Bible vocabulary
+- [x] Review gate tRPC procedure — return storyboard for user approval, accept edits (musicVideo.approve)
+- [x] Shot generation orchestration — wraps existing videoGeneration.ts, one Runway job per shot (shotOrchestrator.ts)
+- [x] Assembler — ffmpeg concat + MLT project file for Kdenlive, MP4 + .mlt delivered via S3
+- [ ] Sync Labs lip sync integration — optional per-shot flag, REST API wrapper (deferred to Phase 2)
+- [x] Music Videos UI tab — /music-videos route, new video form, storyboard review, progress view, delivery download
+- [x] Tests for all new server modules (12 tests, musicVideo.test.ts)
+- [x] Checkpoint saved
+
+## Music Video Generation Pipeline — Future: Director Interface
+
+- [ ] Video Director LLM agent — conversational brief builder, reads all bibles
+- [ ] myfrequency.id packet consumer — visual + musical frequency layers as Director input
+- [ ] Design Director as proper downstream consumer of myfrequency.id packet system (not one-off integration)
