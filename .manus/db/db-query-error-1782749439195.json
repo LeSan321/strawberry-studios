@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT \n  cs.id,\n  cs.shotNumber,\n  cs.videoUrl,\n  cs.videoPrompt,\n  cs.videoStatus,\n  c.name AS campaign_name,\n  c.genre\nFROM campaign_shots cs\nJOIN campaigns c ON cs.campaignId = c.id\nWHERE cs.videoUrl IS NOT NULL\n  AND cs.videoStatus = 'complete'\nORDER BY c.id, cs.shotNumber;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute \nSELECT \n  cs.id,\n  cs.shotNumber,\n  cs.videoUrl,\n  cs.videoPrompt,\n  cs.videoStatus,\n  c.name AS campaign_name,\n  c.genre\nFROM campaign_shots cs\nJOIN campaigns c ON cs.campaignId = c.id\nWHERE cs.videoUrl IS NOT NULL\n  AND cs.videoStatus = 'complete'\nORDER BY c.id, cs.shotNumber;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'c.name' in 'field list'"
+  ]
+}

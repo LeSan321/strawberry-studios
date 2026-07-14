@@ -1,0 +1,9 @@
+{
+  "query": "\nSELECT id, videoUrl, videoPrompt, videoStatus, createdAt\nFROM concerts\nWHERE videoUrl IS NOT NULL\n  AND (\n    LOWER(videoPrompt) LIKE '%fog%'\n    OR LOWER(videoUrl) LIKE '%fog%'\n  )\nORDER BY createdAt DESC\nLIMIT 20;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute \nSELECT id, videoUrl, videoPrompt, videoStatus, createdAt\nFROM concerts\nWHERE videoUrl IS NOT NULL\n  AND (\n    LOWER(videoPrompt) LIKE '%fog%'\n    OR LOWER(videoUrl) LIKE '%fog%'\n  )\nORDER BY createdAt DESC\nLIMIT 20;\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 274
+}

@@ -1,0 +1,186 @@
+{
+  "query": "\nSELECT \n  cs.id,\n  cs.shotNumber,\n  cs.videoUrl,\n  cs.videoStatus,\n  c.title AS campaign_title,\n  c.genre\nFROM campaign_shots cs\nJOIN campaigns c ON cs.campaignId = c.id\nWHERE cs.videoUrl IS NOT NULL\n  AND cs.videoStatus = 'complete'\nORDER BY c.id, cs.shotNumber;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute \nSELECT \n  cs.id,\n  cs.shotNumber,\n  cs.videoUrl,\n  cs.videoStatus,\n  c.title AS campaign_title,\n  c.genre\nFROM campaign_shots cs\nJOIN campaigns c ON cs.campaignId = c.id\nWHERE cs.videoUrl IS NOT NULL\n  AND cs.videoStatus = 'complete'\nORDER BY c.id, cs.shotNumber;\n",
+  "rows": [
+    {
+      "id": "1",
+      "shotNumber": "1",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot1-1779136803027.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "2",
+      "shotNumber": "2",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot2-1779136804204.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "3",
+      "shotNumber": "3",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot3-1779136806205.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "4",
+      "shotNumber": "4",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot4-1779136807468.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "5",
+      "shotNumber": "5",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot5-1779136808553.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "30001",
+      "shotNumber": "1",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot1-1779144381382.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 2",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "30002",
+      "shotNumber": "2",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot2-1779144382118.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 2",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "30003",
+      "shotNumber": "3",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot3-1779144381929.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 2",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "30004",
+      "shotNumber": "4",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot4-1779144381721.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 2",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "30005",
+      "shotNumber": "5",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot5-1779144384276.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 2",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "60001",
+      "shotNumber": "1",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/60001-shot1-1779151388392.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 3",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "60002",
+      "shotNumber": "2",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/60001-shot2-1779151736757.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 3",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "90001",
+      "shotNumber": "1",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot1-1779156055844.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 4",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "90002",
+      "shotNumber": "2",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot2-1779155957936.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 4",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "90003",
+      "shotNumber": "3",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot3-1779156270821.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 4",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "90004",
+      "shotNumber": "4",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot4-1779156371441.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 4",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "90005",
+      "shotNumber": "5",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot5-1779156475005.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 4",
+      "genre": "psychedelic_vaporwave"
+    },
+    {
+      "id": "120001",
+      "shotNumber": "1",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot1-1779215492702.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 5",
+      "genre": "punk_rock"
+    },
+    {
+      "id": "120002",
+      "shotNumber": "2",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot2-1779216325583.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 5",
+      "genre": "punk_rock"
+    },
+    {
+      "id": "120003",
+      "shotNumber": "3",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot3-1779215933506.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 5",
+      "genre": "punk_rock"
+    },
+    {
+      "id": "120004",
+      "shotNumber": "4",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot4-1779216055861.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 5",
+      "genre": "punk_rock"
+    },
+    {
+      "id": "120005",
+      "shotNumber": "5",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot5-1779216643425.mp4",
+      "videoStatus": "complete",
+      "campaign_title": "Sonic Insurrection 5",
+      "genre": "punk_rock"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tshotNumber\tvideoUrl\tvideoStatus\tcampaign_title\tgenre\n1\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot1-1779136803027.mp4\tcomplete\tSonic Insurrection\tpsychedelic_vaporwave\n2\t2\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot2-1779136804204.mp4\tcomplete\tSonic Insurrection\tpsychedelic_vaporwave\n3\t3\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot3-1779136806205.mp4\tcomplete\tSonic Insurrection\tpsychedelic_vaporwave\n4\t4\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot4-1779136807468.mp4\tcomplete\tSonic Insurrection\tpsychedelic_vaporwave\n5\t5\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/1-shot5-1779136808553.mp4\tcomplete\tSonic Insurrection\tpsychedelic_vaporwave\n30001\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot1-1779144381382.mp4\tcomplete\tSonic Insurrection 2\tpsychedelic_vaporwave\n30002\t2\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot2-1779144382118.mp4\tcomplete\tSonic Insurrection 2\tpsychedelic_vaporwave\n30003\t3\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot3-1779144381929.mp4\tcomplete\tSonic Insurrection 2\tpsychedelic_vaporwave\n30004\t4\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot4-1779144381721.mp4\tcomplete\tSonic Insurrection 2\tpsychedelic_vaporwave\n30005\t5\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/30001-shot5-1779144384276.mp4\tcomplete\tSonic Insurrection 2\tpsychedelic_vaporwave\n60001\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/60001-shot1-1779151388392.mp4\tcomplete\tSonic Insurrection 3\tpsychedelic_vaporwave\n60002\t2\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/60001-shot2-1779151736757.mp4\tcomplete\tSonic Insurrection 3\tpsychedelic_vaporwave\n90001\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot1-1779156055844.mp4\tcomplete\tSonic Insurrection 4\tpsychedelic_vaporwave\n90002\t2\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot2-1779155957936.mp4\tcomplete\tSonic Insurrection 4\tpsychedelic_vaporwave\n90003\t3\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot3-1779156270821.mp4\tcomplete\tSonic Insurrection 4\tpsychedelic_vaporwave\n90004\t4\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot4-1779156371441.mp4\tcomplete\tSonic Insurrection 4\tpsychedelic_vaporwave\n90005\t5\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/90001-shot5-1779156475005.mp4\tcomplete\tSonic Insurrection 4\tpsychedelic_vaporwave\n120001\t1\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot1-1779215492702.mp4\tcomplete\tSonic Insurrection 5\tpunk_rock\n120002\t2\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot2-1779216325583.mp4\tcomplete\tSonic Insurrection 5\tpunk_rock\n120003\t3\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot3-1779215933506.mp4\tcomplete\tSonic Insurrection 5\tpunk_rock\n120004\t4\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot4-1779216055861.mp4\tcomplete\tSonic Insurrection 5\tpunk_rock\n120005\t5\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663331665311/WKX2kfVZUM23yKDCoTqGRN/campaign-shots/120001-shot5-1779216643425.mp4\tcomplete\tSonic Insurrection 5\tpunk_rock\n",
+  "stderr": "",
+  "execution_time_ms": 272
+}

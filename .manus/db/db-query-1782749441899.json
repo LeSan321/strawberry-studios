@@ -1,0 +1,210 @@
+{
+  "query": "DESCRIBE campaigns;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute DESCRIBE campaigns;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "userId",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "audioTrackId",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "title",
+      "Type": "varchar(255)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "artistName",
+      "Type": "varchar(255)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "genre",
+      "Type": "enum('psychedelic_vaporwave','noir_jazz','indie_folk','hip_hop','electronic','punk_rock','soul_rnb','country','experimental')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "noir_jazz",
+      "Extra": ""
+    },
+    {
+      "Field": "durationMode",
+      "Type": "enum('15s','30s','60s','full_song')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "30s",
+      "Extra": ""
+    },
+    {
+      "Field": "campaignGoal",
+      "Type": "enum('awareness','engagement','conversion','artist_brand')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "awareness",
+      "Extra": ""
+    },
+    {
+      "Field": "brief",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "characterNotes",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "status",
+      "Type": "enum('draft','generating_package','package_ready','generating_shots','complete','failed')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "draft",
+      "Extra": ""
+    },
+    {
+      "Field": "directorsPackage",
+      "Type": "json",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "campaignPrompt",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "shareSlug",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "UNI",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "isPublic",
+      "Type": "tinyint(1)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Field": "moodBoardPrimaryImageUrl",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "arcPosition",
+      "Type": "enum('gathering','arriving','open')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "arriving",
+      "Extra": ""
+    },
+    {
+      "Field": "frequencyId",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "coverArtUrl",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "coverArtSource",
+      "Type": "enum('generated','uploaded','none')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "none",
+      "Extra": ""
+    },
+    {
+      "Field": "coverArtGeneratedAt",
+      "Type": "bigint",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "coverArtRegenerationsUsed",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "lastUsedLifeSignalIds",
+      "Type": "json",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nuserId\tint\tNO\t\tNULL\t\naudioTrackId\tint\tYES\t\tNULL\t\ntitle\tvarchar(255)\tNO\t\tNULL\t\nartistName\tvarchar(255)\tYES\t\tNULL\t\ngenre\tenum('psychedelic_vaporwave','noir_jazz','indie_folk','hip_hop','electronic','punk_rock','soul_rnb','country','experimental')\tNO\t\tnoir_jazz\t\ndurationMode\tenum('15s','30s','60s','full_song')\tNO\t\t30s\t\ncampaignGoal\tenum('awareness','engagement','conversion','artist_brand')\tNO\t\tawareness\t\nbrief\ttext\tYES\t\tNULL\t\ncharacterNotes\ttext\tYES\t\tNULL\t\nstatus\tenum('draft','generating_package','package_ready','generating_shots','complete','failed')\tNO\t\tdraft\t\ndirectorsPackage\tjson\tYES\t\tNULL\t\ncampaignPrompt\ttext\tYES\t\tNULL\t\nshareSlug\tvarchar(64)\tYES\tUNI\tNULL\t\nisPublic\ttinyint(1)\tYES\t\t0\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nmoodBoardPrimaryImageUrl\ttext\tYES\t\tNULL\t\narcPosition\tenum('gathering','arriving','open')\tNO\t\tarriving\t\nfrequencyId\tint\tYES\t\tNULL\t\ncoverArtUrl\ttext\tYES\t\tNULL\t\ncoverArtSource\tenum('generated','uploaded','none')\tNO\t\tnone\t\ncoverArtGeneratedAt\tbigint\tYES\t\tNULL\t\ncoverArtRegenerationsUsed\tint\tNO\t\t0\t\nlastUsedLifeSignalIds\tjson\tYES\t\tNULL\t\n",
+  "stderr": "",
+  "execution_time_ms": 260
+}

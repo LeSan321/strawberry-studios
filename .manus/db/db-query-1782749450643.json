@@ -1,0 +1,9 @@
+{
+  "query": "\nSELECT cs.id, cs.shotNumber, cs.videoUrl, cs.videoStatus, c.title, c.genre, c.brief\nFROM campaign_shots cs\nJOIN campaigns c ON cs.campaignId = c.id\nWHERE cs.videoUrl IS NOT NULL\n  AND cs.videoStatus = 'complete'\n  AND (LOWER(c.title) LIKE '%fog%' OR LOWER(c.brief) LIKE '%fog%' OR LOWER(c.genre) = 'experimental')\nORDER BY c.id, cs.shotNumber;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute \nSELECT cs.id, cs.shotNumber, cs.videoUrl, cs.videoStatus, c.title, c.genre, c.brief\nFROM campaign_shots cs\nJOIN campaigns c ON cs.campaignId = c.id\nWHERE cs.videoUrl IS NOT NULL\n  AND cs.videoStatus = 'complete'\n  AND (LOWER(c.title) LIKE '%fog%' OR LOWER(c.brief) LIKE '%fog%' OR LOWER(c.genre) = 'experimental')\nORDER BY c.id, cs.shotNumber;\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 265
+}

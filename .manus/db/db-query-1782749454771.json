@@ -1,0 +1,40 @@
+{
+  "query": "\nSELECT DISTINCT c.id, c.title, c.genre, COUNT(cs.id) as shot_count\nFROM campaigns c\nJOIN campaign_shots cs ON cs.campaignId = c.id\nWHERE cs.videoStatus = 'complete' AND cs.videoUrl IS NOT NULL\nGROUP BY c.id, c.title, c.genre\nORDER BY c.id;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2NoQxNASu25QqFj.3c7bc1be8a03 --database WKX2kfVZUM23yKDCoTqGRN --execute \nSELECT DISTINCT c.id, c.title, c.genre, COUNT(cs.id) as shot_count\nFROM campaigns c\nJOIN campaign_shots cs ON cs.campaignId = c.id\nWHERE cs.videoStatus = 'complete' AND cs.videoUrl IS NOT NULL\nGROUP BY c.id, c.title, c.genre\nORDER BY c.id;\n",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Sonic Insurrection",
+      "genre": "psychedelic_vaporwave",
+      "shot_count": "5"
+    },
+    {
+      "id": "30001",
+      "title": "Sonic Insurrection 2",
+      "genre": "psychedelic_vaporwave",
+      "shot_count": "5"
+    },
+    {
+      "id": "60001",
+      "title": "Sonic Insurrection 3",
+      "genre": "psychedelic_vaporwave",
+      "shot_count": "2"
+    },
+    {
+      "id": "90001",
+      "title": "Sonic Insurrection 4",
+      "genre": "psychedelic_vaporwave",
+      "shot_count": "5"
+    },
+    {
+      "id": "120001",
+      "title": "Sonic Insurrection 5",
+      "genre": "punk_rock",
+      "shot_count": "5"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tgenre\tshot_count\n1\tSonic Insurrection\tpsychedelic_vaporwave\t5\n30001\tSonic Insurrection 2\tpsychedelic_vaporwave\t5\n60001\tSonic Insurrection 3\tpsychedelic_vaporwave\t2\n90001\tSonic Insurrection 4\tpsychedelic_vaporwave\t5\n120001\tSonic Insurrection 5\tpunk_rock\t5\n",
+  "stderr": "",
+  "execution_time_ms": 269
+}
