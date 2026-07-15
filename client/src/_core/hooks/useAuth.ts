@@ -1,4 +1,5 @@
 import { useContext, useCallback, useMemo } from "react";
+import { useLocation } from "wouter";
 import { ClerkInstanceContext } from "@clerk/shared/react";
 import { useClerk, useUser } from "@clerk/react";
 
@@ -19,19 +20,35 @@ export function useIsInsideClerkProvider(): boolean {
 // Safe wrappers — return no-ops when outside ClerkProvider (sandbox preview)
 // ---------------------------------------------------------------------------
 
-const NO_OP_OPEN_SIGN_IN = () => {};
 const NO_OP_SIGN_OUT = async () => {};
 
 /**
  * Safe version of useClerk().
- * Returns a no-op `openSignIn` and `signOut` when there is no ClerkProvider.
+ * On production (inside ClerkProvider): opens the Clerk sign-in modal.
+ * On sandbox preview (no ClerkProvider): navigates to /login instead.
  */
 export function useClerkSafe() {
   const insideClerk = useIsInsideClerkProvider();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const clerk = insideClerk ? useClerk() : null;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [, navigate] = useLocation();
+
+  const openSignIn = useCallback(
+    (opts?: Parameters<NonNullable<typeof clerk>["openSignIn"]>[0]) => {
+      if (clerk) {
+        clerk.openSignIn(opts ?? {});
+      } else {
+        // Fallback: navigate to the /login page on non-Clerk domains
+        navigate("/login");
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [clerk, navigate]
+  );
+
   return {
-    openSignIn: clerk?.openSignIn ?? NO_OP_OPEN_SIGN_IN,
+    openSignIn,
     signOut: clerk?.signOut ?? NO_OP_SIGN_OUT,
     clerk,
   };
