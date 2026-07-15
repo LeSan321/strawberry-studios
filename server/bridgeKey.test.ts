@@ -1,6 +1,17 @@
 import { describe, it, expect } from "vitest";
 
 /**
+ * STUDIOS_BRIDGE_KEY secret validation
+ */
+describe("STUDIOS_BRIDGE_KEY secret", () => {
+  it("is set and has expected length (64 hex chars)", () => {
+    const key = process.env.STUDIOS_BRIDGE_KEY ?? "";
+    expect(key.length).toBe(64);
+    expect(/^[0-9a-f]+$/i.test(key)).toBe(true);
+  });
+});
+
+/**
  * Bridge authentication tests.
  * The bridge now uses Clerk Bearer tokens (not the old x-bridge-key header).
  * These tests verify that the bridge endpoints correctly reject unauthenticated requests.

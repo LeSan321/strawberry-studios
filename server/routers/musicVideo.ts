@@ -79,10 +79,10 @@ export const musicVideoRouter = router({
     .mutation(async ({ ctx, input }) => {
       // If a Riff track is specified, resolve its audioUrl via the bridge
       let resolvedAudioUrl = input.audioUrl ?? null;
-      if (input.riffTrackId && ctx.clerkToken) {
+      if (input.riffTrackId && ctx.user.openId) {
         try {
           const { resolveRiffTrackAudio } = await import("../riffBridge");
-          const resolved = await resolveRiffTrackAudio(ctx.clerkToken, input.riffTrackId);
+          const resolved = await resolveRiffTrackAudio(ctx.user.openId, input.riffTrackId);
           if (resolved) {
             resolvedAudioUrl = resolved.audioUrl;
             // Auto-fill duration and genre if not provided
@@ -126,12 +126,12 @@ export const musicVideoRouter = router({
 
   // ── Get Riff tracks (for track selector in new video form) ──────────────────
   getRiffTracks: protectedProcedure.query(async ({ ctx }) => {
-    if (!ctx.clerkToken) {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "No Clerk token available" });
+    if (!ctx.user.openId) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "User openId not available" });
     }
     try {
       const { getRiffTracks } = await import("../riffBridge");
-      const tracks = await getRiffTracks(ctx.clerkToken);
+      const tracks = await getRiffTracks(ctx.user.openId);
       return { tracks };
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

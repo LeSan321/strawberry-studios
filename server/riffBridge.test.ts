@@ -2,6 +2,7 @@
  * riffBridge.test.ts
  * ==================
  * Tests for the Riff → Studios bridge helper.
+ * Auth: x-bridge-key + ?openId (not Clerk Bearer — separate Clerk instances).
  * Uses vi.mock to avoid real HTTP calls.
  */
 
@@ -17,6 +18,7 @@ vi.stubGlobal("fetch", mockFetch);
 vi.mock("./_core/env", () => ({
   ENV: {
     riffBaseUrl: "https://strawberryriff.com",
+    studiosBridgeKey: "test-bridge-key-abc123",
   },
 }));
 
@@ -51,11 +53,35 @@ const MOCK_TRACKS = [
   },
 ];
 
+const TEST_OPEN_ID = "user_2abc123def456";
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe("getRiffTracks", () => {
   beforeEach(() => {
     mockFetch.mockReset();
+  });
+
+  it("calls bridge with x-bridge-key header and openId query param", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ tracks: MOCK_TRACKS }),
+    });
+
+    await getRiffTracks(TEST_OPEN_ID);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      `https://strawberryriff.com/api/bridge/tracks?openId=${TEST_OPEN_ID}`,
+      expect.objectContaining({
+        method: "GET",
+        headers: expect.objectContaining({
+          "x-bridge-key": "test-bridge-key-abc123",
+        }),
+      })
+    );
+    // Must NOT send a Clerk Bearer token (separate Clerk instances)
+    const callHeaders = mockFetch.mock.calls[0][1].headers as Record<string, string>;
+    expect(callHeaders["Authorization"]).toBeUndefined();
   });
 
   it("returns tracks array on 200 response", async () => {
@@ -64,17 +90,7 @@ describe("getRiffTracks", () => {
       json: async () => ({ tracks: MOCK_TRACKS }),
     });
 
-    const tracks = await getRiffTracks("test-clerk-token");
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      "https://strawberryriff.com/api/bridge/tracks",
-      expect.objectContaining({
-        method: "GET",
-        headers: expect.objectContaining({
-          Authorization: "Bearer test-clerk-token",
-        }),
-      })
-    );
+    const tracks = await getRiffTracks(TEST_OPEN_ID);
     expect(tracks).toHaveLength(2);
     expect(tracks[0].title).toBe("Slow Burn");
     expect(tracks[1].genre).toBe("electronic");
@@ -86,7 +102,7 @@ describe("getRiffTracks", () => {
       json: async () => ({}),
     });
 
-    const tracks = await getRiffTracks("test-clerk-token");
+    const tracks = await getRiffTracks(TEST_OPEN_ID);
     expect(tracks).toEqual([]);
   });
 
@@ -97,12 +113,12 @@ describe("getRiffTracks", () => {
       text: async () => "Unauthorized",
     });
 
-    await expect(getRiffTracks("bad-token")).rejects.toThrow("401");
+    await expect(getRiffTracks(TEST_OPEN_ID)).rejects.toThrow("401");
   });
 
   it("throws on network error", async () => {
     mockFetch.mockRejectedValueOnce(new Error("Network failure"));
-    await expect(getRiffTracks("test-token")).rejects.toThrow("Network failure");
+    await expect(getRiffTracks(TEST_OPEN_ID)).rejects.toThrow("Network failure");
   });
 });
 
@@ -117,7 +133,7 @@ describe("resolveRiffTrackAudio", () => {
       json: async () => ({ tracks: MOCK_TRACKS }),
     });
 
-    const result = await resolveRiffTrackAudio("test-token", 1);
+    const result = await resolveRiffTrackAudio(TEST_OPEN_ID, 1);
     expect(result).not.toBeNull();
     expect(result!.audioUrl).toBe("https://s3.example.com/tracks/slow-burn.mp3");
     expect(result!.title).toBe("Slow Burn");
@@ -131,7 +147,7 @@ describe("resolveRiffTrackAudio", () => {
       json: async () => ({ tracks: MOCK_TRACKS }),
     });
 
-    const result = await resolveRiffTrackAudio("test-token", 999);
+    const result = await resolveRiffTrackAudio(TEST_OPEN_ID, 999);
     expect(result).toBeNull();
   });
 
@@ -141,7 +157,7 @@ describe("resolveRiffTrackAudio", () => {
       json: async () => ({ tracks: [] }),
     });
 
-    const result = await resolveRiffTrackAudio("test-token", 1);
+    const result = await resolveRiffTrackAudio(TEST_OPEN_ID, 1);
     expect(result).toBeNull();
   });
 });

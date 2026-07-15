@@ -12,4 +12,5 @@ export const ENV = {
   clerkSecretKey: process.env.CLERK_SECRET_KEY ?? "",
   iaBridgeSecret: process.env.IA_BRIDGE_SECRET ?? "",
   riffBaseUrl: process.env.RIFF_BASE_URL ?? "https://strawberryriff.com",
+  studiosBridgeKey: process.env.STUDIOS_BRIDGE_KEY ?? "",
 };
