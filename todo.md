@@ -572,7 +572,7 @@
 ### Music Video Form Updates
 - [x] Replace raw audioUrl text input with Riff track selector dropdown (populated from musicVideo.getRiffTracks)
 - [x] Add "Use My Frequency" toggle with description tooltip
-- [ ] Add ?trackId=&source=riff query param handling for Riff deep-links (deferred — Riff platinum tier not yet built)
+- [x] Add ?trackId=&source=riff query param handling for Riff deep-links — auto-opens form, pre-selects track, cleans URL
 - [x] Fallback: direct URL input mode for tracks not in Riff
 
 ### Visual Timeline UI

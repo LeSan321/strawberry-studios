@@ -7,7 +7,8 @@
  *   3. Project detail — audio timeline, storyboard review gate, generation progress, delivery
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -106,11 +107,19 @@ function formatDuration(seconds: number | null | undefined): string {
 
 // ─── New Video Form ───────────────────────────────────────────────────────────
 
-function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
+function NewVideoForm({
+  onCreated,
+  prefilledTrackId,
+}: {
+  onCreated: (id: number) => void;
+  prefilledTrackId?: number | null;
+}) {
   const [title, setTitle] = useState("");
   const [artistName, setArtistName] = useState("");
   const [audioMode, setAudioMode] = useState<"riff" | "url">("riff");
-  const [selectedRiffTrackId, setSelectedRiffTrackId] = useState<number | null>(null);
+  const [selectedRiffTrackId, setSelectedRiffTrackId] = useState<number | null>(
+    prefilledTrackId ?? null
+  );
   const [audioUrl, setAudioUrl] = useState("");
   const [useMyFrequency, setUseMyFrequency] = useState(true);
   const [lyrics, setLyrics] = useState("");
@@ -124,6 +133,20 @@ function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
     });
 
   const riffTracks = riffTracksData?.tracks ?? [];
+
+  // When tracks load and a prefilled track ID was passed, auto-fill title from the track
+  useEffect(() => {
+    if (prefilledTrackId && riffTracks.length > 0) {
+      const track = riffTracks.find((t) => t.id === prefilledTrackId);
+      if (track) {
+        if (!title) setTitle(track.title);
+        if (!artistName && track.artist) setArtistName(track.artist);
+        if (!genreDescription && track.genre) setGenreDescription(track.genre);
+        setSelectedRiffTrackId(track.id);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefilledTrackId, riffTracks.length]);
 
   const utils = trpc.useUtils();
   const createMutation = trpc.musicVideo.create.useMutation({
@@ -924,6 +947,26 @@ export default function MusicVideos() {
   const { user } = useAuth();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
+  const [deepLinkTrackId, setDeepLinkTrackId] = useState<number | null>(null);
+  const [, navigate] = useLocation();
+
+  // Handle ?trackId=<id>&source=riff deep-links from Riff
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const trackId = params.get("trackId");
+    const source = params.get("source");
+    if (trackId && source === "riff") {
+      const id = parseInt(trackId, 10);
+      if (!isNaN(id)) {
+        setDeepLinkTrackId(id);
+        setShowNewForm(true);
+        // Clean the query params from the URL without a page reload
+        navigate("/music-videos", { replace: true });
+      }
+    }
+  // Run once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { data: projects, isLoading } = trpc.musicVideo.list.useQuery(undefined, {
     enabled: !!user,
@@ -1003,8 +1046,10 @@ export default function MusicVideos() {
                 <DialogTitle>New Music Video</DialogTitle>
               </DialogHeader>
               <NewVideoForm
+                prefilledTrackId={deepLinkTrackId}
                 onCreated={(id) => {
                   setShowNewForm(false);
+                  setDeepLinkTrackId(null);
                   setSelectedId(id);
                 }}
               />
