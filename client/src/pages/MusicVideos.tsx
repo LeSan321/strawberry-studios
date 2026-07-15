@@ -3,11 +3,11 @@
  * =====================================================
  * Three views in one page:
  *   1. List view — all music video projects for the user
- *   2. New video form — create a project and kick off analysis + planning
- *   3. Project detail — storyboard review gate, generation progress, delivery
+ *   2. New video form — Riff track selector + frequency toggle + create & plan
+ *   3. Project detail — audio timeline, storyboard review gate, generation progress, delivery
  */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -16,8 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -37,6 +38,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AudioTimeline } from "@/components/AudioTimeline";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,34 +109,32 @@ function formatDuration(seconds: number | null | undefined): string {
 function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
   const [title, setTitle] = useState("");
   const [artistName, setArtistName] = useState("");
+  const [audioMode, setAudioMode] = useState<"riff" | "url">("riff");
+  const [selectedRiffTrackId, setSelectedRiffTrackId] = useState<number | null>(null);
   const [audioUrl, setAudioUrl] = useState("");
+  const [useMyFrequency, setUseMyFrequency] = useState(true);
   const [lyrics, setLyrics] = useState("");
   const [genreDescription, setGenreDescription] = useState("");
 
+  // Fetch Riff tracks for the selector
+  const { data: riffTracksData, isLoading: riffTracksLoading, error: riffTracksError } =
+    trpc.musicVideo.getRiffTracks.useQuery(undefined, {
+      retry: false,
+      staleTime: 60_000,
+    });
+
+  const riffTracks = riffTracksData?.tracks ?? [];
+
   const utils = trpc.useUtils();
   const createMutation = trpc.musicVideo.create.useMutation({
-    onSuccess: async (data) => {
-      await utils.musicVideo.list.invalidate();
-      onCreated(data.id);
-    },
-    onError: (err) => {
-      toast.error(`Failed to create project: ${err.message}`);
-    },
+    onError: (err) => toast.error(`Failed to create project: ${err.message}`),
   });
-
   const analyzeMutation = trpc.musicVideo.analyze.useMutation({
-    onError: (err) => {
-      toast.error(`Audio analysis failed: ${err.message}`);
-    },
+    onError: (err) => toast.error(`Audio analysis failed: ${err.message}`),
   });
-
   const planMutation = trpc.musicVideo.plan.useMutation({
-    onSuccess: () => {
-      utils.musicVideo.list.invalidate();
-    },
-    onError: (err) => {
-      toast.error(`Shot planning failed: ${err.message}`);
-    },
+    onSuccess: () => utils.musicVideo.list.invalidate(),
+    onError: (err) => toast.error(`Shot planning failed: ${err.message}`),
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,32 +144,43 @@ function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
       return;
     }
 
+    // Determine audio source
+    const selectedTrack = riffTracks.find((t) => t.id === selectedRiffTrackId);
+    const hasRiffTrack = audioMode === "riff" && selectedRiffTrackId !== null;
+    const hasDirectUrl = audioMode === "url" && audioUrl.trim().length > 0;
+
     try {
-      // Step 1: Create the project
-      const { id } = await createMutation.mutateAsync({
+      // Step 1: Create project (bridge resolves audioUrl server-side if riffTrackId is set)
+      const result = await createMutation.mutateAsync({
         title: title.trim(),
         artistName: artistName.trim() || undefined,
+        riffTrackId: hasRiffTrack ? selectedRiffTrackId! : undefined,
+        riffTrackTitle: hasRiffTrack && selectedTrack ? selectedTrack.title : undefined,
+        audioUrl: hasDirectUrl ? audioUrl.trim() : undefined,
+        useMyFrequency,
         lyrics: lyrics.trim() || undefined,
-        genreDescription: genreDescription.trim() || undefined,
+        genreDescription: genreDescription.trim() ||
+          (hasRiffTrack && selectedTrack ? selectedTrack.genre : undefined),
+        durationSeconds: hasRiffTrack && selectedTrack ? selectedTrack.duration : undefined,
       });
 
+      const { id, resolvedAudioUrl } = result;
       toast.info("Project created. Starting audio analysis…");
 
-      // Step 2: Analyze audio (if URL provided)
-      if (audioUrl.trim()) {
-        await analyzeMutation.mutateAsync({
-          musicVideoId: id,
-          audioUrl: audioUrl.trim(),
-        });
+      // Step 2: Analyze audio
+      const effectiveAudioUrl = resolvedAudioUrl ?? (hasDirectUrl ? audioUrl.trim() : null);
+      if (effectiveAudioUrl) {
+        await analyzeMutation.mutateAsync({ musicVideoId: id, audioUrl: effectiveAudioUrl });
         toast.info("Audio analyzed. Planning shots…");
 
         // Step 3: Plan shots
         await planMutation.mutateAsync({ musicVideoId: id });
         toast.success("Shot plan ready for review!");
       } else {
-        toast.success("Project created. Add an audio URL to continue.");
+        toast.success("Project created. Select a track or add an audio URL to continue.");
       }
 
+      await utils.musicVideo.list.invalidate();
       onCreated(id);
     } catch {
       // Errors handled by individual mutation onError handlers
@@ -170,12 +188,11 @@ function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
   };
 
   const isLoading =
-    createMutation.isPending ||
-    analyzeMutation.isPending ||
-    planMutation.isPending;
+    createMutation.isPending || analyzeMutation.isPending || planMutation.isPending;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Title */}
       <div className="space-y-1.5">
         <Label htmlFor="mv-title">Song Title *</Label>
         <Input
@@ -188,6 +205,7 @@ function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
         />
       </div>
 
+      {/* Artist */}
       <div className="space-y-1.5">
         <Label htmlFor="mv-artist">Artist Name</Label>
         <Input
@@ -200,26 +218,149 @@ function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
         />
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="mv-audio">
-          Audio URL{" "}
-          <span className="text-muted-foreground text-xs">(S3 or direct link — mp3, wav, m4a)</span>
-        </Label>
-        <Input
-          id="mv-audio"
-          value={audioUrl}
-          onChange={(e) => setAudioUrl(e.target.value)}
-          placeholder="https://…"
-          type="url"
+      {/* Audio source toggle */}
+      <div className="space-y-3">
+        <Label>Audio Source</Label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setAudioMode("riff")}
+            className={`flex-1 py-2 px-3 rounded text-sm transition-colors ${
+              audioMode === "riff"
+                ? "bg-primary text-primary-foreground"
+                : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+            }`}
+            disabled={isLoading}
+          >
+            🍓 From Riff Library
+          </button>
+          <button
+            type="button"
+            onClick={() => setAudioMode("url")}
+            className={`flex-1 py-2 px-3 rounded text-sm transition-colors ${
+              audioMode === "url"
+                ? "bg-primary text-primary-foreground"
+                : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+            }`}
+            disabled={isLoading}
+          >
+            Direct URL
+          </button>
+        </div>
+
+        {audioMode === "riff" && (
+          <div className="space-y-1.5">
+            {riffTracksLoading ? (
+              <div className="flex items-center gap-2 text-sm text-zinc-500 py-2">
+                <span className="h-3 w-3 rounded-full border-2 border-zinc-500/30 border-t-zinc-500 animate-spin" />
+                Loading your Riff library…
+              </div>
+            ) : riffTracksError || riffTracksData?.error ? (
+              <div className="text-xs text-amber-400 bg-amber-950/30 border border-amber-900/40 rounded p-2">
+                Could not load Riff library. You can still use a direct URL below.
+              </div>
+            ) : riffTracks.length === 0 ? (
+              <div className="text-xs text-zinc-500 bg-zinc-900/50 border border-zinc-800 rounded p-3">
+                No tracks in your Riff library yet.{" "}
+                <a
+                  href="https://strawberryriff.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Create or upload a track on Riff
+                </a>{" "}
+                to use it here.
+              </div>
+            ) : (
+              <Select
+                value={selectedRiffTrackId?.toString() ?? ""}
+                onValueChange={(v) => setSelectedRiffTrackId(Number(v))}
+                disabled={isLoading}
+              >
+                <SelectTrigger className="bg-zinc-900 border-zinc-700">
+                  <SelectValue placeholder="Select a track from your Riff library…" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-700">
+                  {riffTracks.map((track) => (
+                    <SelectItem key={track.id} value={track.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        {track.coverArtUrl && (
+                          <img
+                            src={track.coverArtUrl}
+                            alt=""
+                            className="w-6 h-6 rounded object-cover shrink-0"
+                          />
+                        )}
+                        <span className="truncate">{track.title}</span>
+                        {track.genre && (
+                          <span className="text-xs text-zinc-500 shrink-0">{track.genre}</span>
+                        )}
+                        {track.duration > 0 && (
+                          <span className="text-xs text-zinc-600 shrink-0 font-mono">
+                            {formatDuration(track.duration)}
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        )}
+
+        {audioMode === "url" && (
+          <div className="space-y-1.5">
+            <Input
+              id="mv-audio"
+              value={audioUrl}
+              onChange={(e) => setAudioUrl(e.target.value)}
+              placeholder="https://… (mp3, wav, m4a)"
+              type="url"
+              disabled={isLoading}
+              className="bg-zinc-900 border-zinc-700"
+            />
+            <p className="text-xs text-zinc-600">
+              Tip: You can also upload a track on{" "}
+              <a
+                href="https://strawberryriff.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                Riff
+              </a>{" "}
+              and select it from your library above.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Use My Frequency toggle */}
+      <div className="flex items-start justify-between gap-4 p-3 bg-zinc-900/60 border border-zinc-800 rounded-lg">
+        <div className="space-y-0.5">
+          <Label htmlFor="mv-frequency" className="text-sm cursor-pointer">
+            Use My Frequency
+          </Label>
+          <p className="text-xs text-zinc-500">
+            Pull your visual language from Riff to steer the shot planner — colour palette, texture vocabulary, emotional arc.
+          </p>
+        </div>
+        <Switch
+          id="mv-frequency"
+          checked={useMyFrequency}
+          onCheckedChange={setUseMyFrequency}
           disabled={isLoading}
-          className="bg-zinc-900 border-zinc-700"
+          className="shrink-0 mt-0.5"
         />
       </div>
 
+      {/* Genre description */}
       <div className="space-y-1.5">
         <Label htmlFor="mv-genre">
-          Genre & Visual World{" "}
-          <span className="text-muted-foreground text-xs">(describe the visual feel, not just the genre)</span>
+          Visual World{" "}
+          <span className="text-muted-foreground text-xs">(optional — describe the feel, not just the genre)</span>
         </Label>
         <Input
           id="mv-genre"
@@ -231,6 +372,7 @@ function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
         />
       </div>
 
+      {/* Lyrics */}
       <div className="space-y-1.5">
         <Label htmlFor="mv-lyrics">
           Lyrics{" "}
@@ -241,7 +383,7 @@ function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
           value={lyrics}
           onChange={(e) => setLyrics(e.target.value)}
           placeholder="Paste full lyrics here…"
-          rows={6}
+          rows={5}
           disabled={isLoading}
           className="bg-zinc-900 border-zinc-700 resize-none"
         />
@@ -274,6 +416,7 @@ function NewVideoForm({ onCreated }: { onCreated: (id: number) => void }) {
 function ShotCard({
   shot,
   musicVideoId,
+  isHighlighted,
   onUpdated,
 }: {
   shot: {
@@ -293,6 +436,7 @@ function ShotCard({
     videoError: string | null;
   };
   musicVideoId: number;
+  isHighlighted?: boolean;
   onUpdated: () => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -321,7 +465,14 @@ function ShotCard({
   const isFailed = shot.videoStatus === "failed";
 
   return (
-    <div className="border border-zinc-800 rounded-lg p-4 space-y-3 bg-zinc-950/50">
+    <div
+      id={`shot-${shot.shotIndex}`}
+      className={`border rounded-lg p-4 space-y-3 transition-all ${
+        isHighlighted
+          ? "border-amber-600/60 bg-amber-950/20"
+          : "border-zinc-800 bg-zinc-950/50"
+      }`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-mono text-zinc-500">#{shot.shotIndex + 1}</span>
@@ -443,21 +594,25 @@ function ProjectDetail({
   projectId: number;
   onBack: () => void;
 }) {
+  const [highlightedShotIndex, setHighlightedShotIndex] = useState<number | null>(null);
   const utils = trpc.useUtils();
+
   const { data: project, isLoading, refetch } = trpc.musicVideo.get.useQuery(
     { id: projectId },
-    { refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      if (
-        status === "analyzing_audio" ||
-        status === "planning" ||
-        status === "generating_shots" ||
-        status === "assembling"
-      ) {
-        return 4000; // Poll every 4s during active pipeline stages
-      }
-      return false;
-    }}
+    {
+      refetchInterval: (query) => {
+        const status = query.state.data?.status;
+        if (
+          status === "analyzing_audio" ||
+          status === "planning" ||
+          status === "generating_shots" ||
+          status === "assembling"
+        ) {
+          return 4000;
+        }
+        return false;
+      },
+    }
   );
 
   const approveMutation = trpc.musicVideo.approve.useMutation({
@@ -492,6 +647,42 @@ function ProjectDetail({
     },
     onError: (err) => toast.error(`Delete failed: ${err.message}`),
   });
+
+  // Adapt server audio structure to AudioTimeline prop shape
+  const timelineAudioStructure = useMemo(() => {
+    const as = project?.audioStructure;
+    if (!as) return null;
+    return {
+      bpm: as.tempoBpm ?? 0,
+      beatTimestamps: as.beatGrid ?? [],
+      sections: (as.sections ?? []).map((s: { label: string; startSeconds: number; endSeconds: number }) => ({
+        label: s.label,
+        startSeconds: s.startSeconds,
+        endSeconds: s.endSeconds,
+      })),
+      energyCurve: (as.energyEnvelope ?? []).map((p: { rms: number }) => p.rms),
+      energyWindowSeconds: 0.5,
+      durationSeconds: project?.durationSeconds ?? 0,
+    };
+  }, [project?.audioStructure, project?.durationSeconds]);
+
+  const timelineShots = useMemo(() => {
+    return (project?.shots ?? []).map((s) => ({
+      shotIndex: s.shotIndex,
+      description: s.description ?? "",
+      startTimeSeconds: s.startTimeSeconds,
+      targetDurationSeconds: s.targetDurationSeconds,
+      videoStatus: s.videoStatus,
+      sectionLabel: s.segmentType,
+    }));
+  }, [project?.shots]);
+
+  const handleTimelineShotClick = (shotIndex: number) => {
+    setHighlightedShotIndex(shotIndex);
+    // Scroll to the shot card
+    const el = document.getElementById(`shot-${shotIndex}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   if (isLoading) {
     return (
@@ -531,6 +722,11 @@ function ProjectDetail({
           <h2 className="text-xl font-display text-foreground">{project.title}</h2>
           {project.artistName && (
             <p className="text-sm text-zinc-400 mt-0.5">{project.artistName}</p>
+          )}
+          {(project as any).riffTrackTitle && (
+            <p className="text-xs text-zinc-600 mt-0.5">
+              🍓 Riff track: {(project as any).riffTrackTitle}
+            </p>
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -586,6 +782,21 @@ function ProjectDetail({
         </div>
       )}
 
+      {/* ── Audio Timeline ── */}
+      {timelineAudioStructure && shots.length > 0 && (
+        <Card className="border-zinc-800 bg-zinc-950/60">
+          <CardContent className="pt-5 pb-4 px-5">
+            <AudioTimeline
+              audioStructure={timelineAudioStructure}
+              shots={timelineShots}
+              totalDurationSeconds={project.durationSeconds ?? timelineAudioStructure.durationSeconds}
+              onShotClick={handleTimelineShotClick}
+              selectedShotIndex={highlightedShotIndex}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Pipeline status messages */}
       {(status === "analyzing_audio" || status === "planning") && (
         <div className="flex items-center gap-3 p-4 bg-amber-950/30 border border-amber-900/50 rounded-lg">
@@ -617,52 +828,60 @@ function ProjectDetail({
       )}
 
       {/* Review gate — storyboard */}
-      {(status === "awaiting_review" || status === "generating_shots" || status === "assembling" || status === "complete") && shots.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-zinc-300 uppercase tracking-wider">
-              Shot Plan — {totalShots} shots
-            </h3>
-            {status === "awaiting_review" && (
-              <Button
-                size="sm"
-                onClick={() => {
-                  approveMutation.mutate({ musicVideoId: projectId });
-                  // Immediately trigger generation after approval
-                  approveMutation.mutateAsync({ musicVideoId: projectId }).then(() => {
-                    generateShotsMutation.mutate({ musicVideoId: projectId });
-                  }).catch(() => {});
-                }}
-                disabled={approveMutation.isPending}
-                className="bg-violet-700 hover:bg-violet-600 text-white text-xs"
-              >
-                {approveMutation.isPending ? "Approving…" : "✓ Approve & Generate"}
-              </Button>
-            )}
-            {status === "assembling" && (
-              <Button
-                size="sm"
-                onClick={() => assembleMutation.mutate({ musicVideoId: projectId })}
-                disabled={assembleMutation.isPending}
-                className="bg-blue-700 hover:bg-blue-600 text-white text-xs"
-              >
-                {assembleMutation.isPending ? "Starting…" : "Assemble Video"}
-              </Button>
-            )}
-          </div>
+      {(status === "awaiting_review" ||
+        status === "generating_shots" ||
+        status === "assembling" ||
+        status === "complete") &&
+        shots.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-zinc-300 uppercase tracking-wider">
+                Shot Plan — {totalShots} shots
+              </h3>
+              {status === "awaiting_review" && (
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await approveMutation.mutateAsync({ musicVideoId: projectId });
+                      await generateShotsMutation.mutateAsync({ musicVideoId: projectId });
+                    } catch {
+                      // Errors handled by individual mutation onError handlers
+                    }
+                  }}
+                  disabled={approveMutation.isPending || generateShotsMutation.isPending}
+                  className="bg-violet-700 hover:bg-violet-600 text-white text-xs"
+                >
+                  {approveMutation.isPending || generateShotsMutation.isPending
+                    ? "Starting…"
+                    : "✓ Approve & Generate"}
+                </Button>
+              )}
+              {status === "assembling" && (
+                <Button
+                  size="sm"
+                  onClick={() => assembleMutation.mutate({ musicVideoId: projectId })}
+                  disabled={assembleMutation.isPending}
+                  className="bg-blue-700 hover:bg-blue-600 text-white text-xs"
+                >
+                  {assembleMutation.isPending ? "Starting…" : "Assemble Video"}
+                </Button>
+              )}
+            </div>
 
-          <div className="space-y-3">
-            {shots.map((shot) => (
-              <ShotCard
-                key={shot.id}
-                shot={shot as any}
-                musicVideoId={projectId}
-                onUpdated={refetch}
-              />
-            ))}
+            <div className="space-y-3">
+              {shots.map((shot) => (
+                <ShotCard
+                  key={shot.id}
+                  shot={shot as any}
+                  musicVideoId={projectId}
+                  isHighlighted={highlightedShotIndex === shot.shotIndex}
+                  onUpdated={refetch}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Delivery */}
       {status === "complete" && project.finalVideoUrl && (
@@ -736,8 +955,10 @@ export default function MusicVideos() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4"
-        style={{ background: "linear-gradient(to bottom, oklch(0.08 0.01 270 / 0.95), transparent)" }}>
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4"
+        style={{ background: "linear-gradient(to bottom, oklch(0.08 0.01 270 / 0.95), transparent)" }}
+      >
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
             <span className="text-primary text-2xl">✦</span>
@@ -747,10 +968,16 @@ export default function MusicVideos() {
           </Link>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/library" className="text-muted-foreground hover:text-foreground text-sm tracking-wider transition-colors uppercase font-light">
+          <Link
+            href="/library"
+            className="text-muted-foreground hover:text-foreground text-sm tracking-wider transition-colors uppercase font-light"
+          >
             Library
           </Link>
-          <Link href="/campaigns" className="text-muted-foreground hover:text-foreground text-sm tracking-wider transition-colors uppercase font-light">
+          <Link
+            href="/campaigns"
+            className="text-muted-foreground hover:text-foreground text-sm tracking-wider transition-colors uppercase font-light"
+          >
             Campaigns
           </Link>
         </div>
@@ -769,9 +996,7 @@ export default function MusicVideos() {
           </div>
           <Dialog open={showNewForm} onOpenChange={setShowNewForm}>
             <DialogTrigger asChild>
-              <Button className="shrink-0">
-                + New Video
-              </Button>
+              <Button className="shrink-0">+ New Video</Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
@@ -820,6 +1045,11 @@ export default function MusicVideos() {
                     </p>
                     {project.artistName && (
                       <p className="text-sm text-zinc-500 truncate">{project.artistName}</p>
+                    )}
+                    {(project as any).riffTrackTitle && (
+                      <p className="text-xs text-zinc-600 truncate">
+                        🍓 {(project as any).riffTrackTitle}
+                      </p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

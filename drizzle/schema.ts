@@ -482,6 +482,10 @@ export const musicVideos = mysqlTable("music_videos", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   audioTrackId: int("audioTrackId"),
+  /** Riff track ID — when the audio source is a Riff track (pulled via bridge) */
+  riffTrackId: int("riffTrackId"),
+  /** Riff track title — cached for display without a bridge round-trip */
+  riffTrackTitle: varchar("riffTrackTitle", { length: 255 }),
   title: varchar("title", { length: 255 }).notNull(),
   artistName: varchar("artistName", { length: 255 }),
   /** Full song lyrics (used for shot planning and lip sync selection) */

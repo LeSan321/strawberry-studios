@@ -11,4 +11,5 @@ export const ENV = {
   clerkPublishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY ?? "",
   clerkSecretKey: process.env.CLERK_SECRET_KEY ?? "",
   iaBridgeSecret: process.env.IA_BRIDGE_SECRET ?? "",
+  riffBaseUrl: process.env.RIFF_BASE_URL ?? "https://strawberryriff.com",
 };

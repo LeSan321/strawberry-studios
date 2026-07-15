@@ -46,8 +46,13 @@ import { getDefaultCreatorFrequency, getPlatformDefaultVocabulary } from "../db"
 const createMusicVideoSchema = z.object({
   title: z.string().min(1).max(255),
   artistName: z.string().max(255).optional(),
-  audioTrackId: z.number().int().positive().optional(),
-  audioUrl: z.string().url().optional(), // direct URL if no audioTrackId
+  // Audio source — exactly one of these should be provided:
+  audioTrackId: z.number().int().positive().optional(), // Studios-local audio track
+  audioUrl: z.string().url().optional(),               // direct URL (fallback)
+  riffTrackId: z.number().int().positive().optional(), // Riff track (via bridge)
+  riffTrackTitle: z.string().max(255).optional(),      // cached Riff track title
+  // Whether to pull the user's Frequency vocabulary from Riff for shot planning
+  useMyFrequency: z.boolean().optional(),
   lyrics: z.string().max(10000).optional(),
   genreDescription: z.string().max(1000).optional(),
   durationSeconds: z.number().int().positive().optional(),
@@ -72,22 +77,68 @@ export const musicVideoRouter = router({
   create: protectedProcedure
     .input(createMusicVideoSchema)
     .mutation(async ({ ctx, input }) => {
+      // If a Riff track is specified, resolve its audioUrl via the bridge
+      let resolvedAudioUrl = input.audioUrl ?? null;
+      if (input.riffTrackId && ctx.clerkToken) {
+        try {
+          const { resolveRiffTrackAudio } = await import("../riffBridge");
+          const resolved = await resolveRiffTrackAudio(ctx.clerkToken, input.riffTrackId);
+          if (resolved) {
+            resolvedAudioUrl = resolved.audioUrl;
+            // Auto-fill duration and genre if not provided
+            if (!input.durationSeconds && resolved.duration) {
+              (input as any).durationSeconds = resolved.duration;
+            }
+            if (!input.genreDescription && resolved.genre) {
+              (input as any).genreDescription = resolved.genre;
+            }
+          }
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error("[musicVideo.create] Riff bridge track resolution failed:", msg);
+          // Non-fatal — continue without the resolved URL; analyze step will fail gracefully
+        }
+      }
+
       const id = await createMusicVideo({
         userId: ctx.user.id,
         title: input.title,
         artistName: input.artistName ?? null,
         audioTrackId: input.audioTrackId ?? null,
+        riffTrackId: input.riffTrackId ?? null,
+        riffTrackTitle: input.riffTrackTitle ?? null,
         lyrics: input.lyrics ?? null,
         genreDescription: input.genreDescription ?? null,
         durationSeconds: input.durationSeconds ?? null,
         status: "draft",
       });
-      return { id };
+
+      // resolvedAudioUrl is returned to the client so it can pass it directly
+      // to the musicVideo.analyze call. audioUrl is not stored in the DB —
+      // it is a transient input to the analysis step only.
+      return { id, resolvedAudioUrl };
     }),
 
   // ── List ────────────────────────────────────────────────────────────────────
   list: protectedProcedure.query(async ({ ctx }) => {
     return getMusicVideosByUser(ctx.user.id);
+  }),
+
+  // ── Get Riff tracks (for track selector in new video form) ──────────────────
+  getRiffTracks: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.clerkToken) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "No Clerk token available" });
+    }
+    try {
+      const { getRiffTracks } = await import("../riffBridge");
+      const tracks = await getRiffTracks(ctx.clerkToken);
+      return { tracks };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[musicVideo.getRiffTracks] Bridge call failed:", msg);
+      // Return empty list rather than crashing the form — user can still use direct URL
+      return { tracks: [], error: msg };
+    }
   }),
 
   // ── Get (with shots, characters, audio structure) ───────────────────────────

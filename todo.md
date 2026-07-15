@@ -558,3 +558,33 @@
 - [ ] Video Director LLM agent — conversational brief builder, reads all bibles
 - [ ] myfrequency.id packet consumer — visual + musical frequency layers as Director input
 - [ ] Design Director as proper downstream consumer of myfrequency.id packet system (not one-off integration)
+
+## Music Video Pipeline — Phase 2: Riff Bridge + Visual Timeline
+
+### Bridge Integration
+- [x] Add RIFF_BASE_URL secret to Studios env (set to https://strawberryriff.com)
+- [x] Add GET /api/bridge/tracks — Riff side built and live; Studios calls via riffBridge.ts helper
+- [x] Update musicVideo.create tRPC procedure to accept riffTrackId (optional) and useMyFrequency (boolean)
+- [x] Add riffTrackId and riffTrackTitle columns to music_videos schema + migration 0013
+- [x] Resolve audioUrl from Riff bridge when riffTrackId is provided (resolveRiffTrackAudio)
+- [x] Pull user's default frequency from bridge when useMyFrequency=true (wired via existing getDefaultCreatorFrequency)
+
+### Music Video Form Updates
+- [x] Replace raw audioUrl text input with Riff track selector dropdown (populated from musicVideo.getRiffTracks)
+- [x] Add "Use My Frequency" toggle with description tooltip
+- [ ] Add ?trackId=&source=riff query param handling for Riff deep-links (deferred — Riff platinum tier not yet built)
+- [x] Fallback: direct URL input mode for tracks not in Riff
+
+### Visual Timeline UI
+- [x] Build AudioTimeline component — energy waveform bars, beat tick marks, section bands with labels
+- [x] Position shot cards proportionally on timeline (startTimeSeconds / totalDurationSeconds)
+- [x] Show shot index, duration, and status indicator on each timeline card
+- [x] Integrate AudioTimeline into storyboard review gate (MusicVideos.tsx awaiting_review state)
+- [x] Integrate AudioTimeline into progress view (generating_shots state, shows per-shot completion)
+
+### Riff Handoff Doc
+- [x] Riff bridge handoff completed — Riff built GET /api/bridge/tracks; platinum tier and deep-link noted for next phase
+
+### Tests + Checkpoint
+- [x] Add vitest tests for bridge track resolution and frequency pull (7 tests, riffBridge.test.ts)
+- [x] Checkpoint saved
