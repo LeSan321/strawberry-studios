@@ -1,12 +1,14 @@
 import { Link } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { SignInButton } from "@/components/SignInButton";
+import { useClerk } from "@clerk/react";
 
 const TAGLINE = "Where Artists Become Legends";
 const SUB_TAGLINE = "A virtual performance venue system powered by AI. Upload your track, choose your world, and step into the Velvet Strawberry Jazz Club.";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const { openSignIn } = useClerk();
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -47,10 +49,17 @@ export default function Home() {
             </Link>
           ) : null}
           {user ? (
-            <Link href="/create"
-              className="px-5 py-2 text-sm tracking-widest uppercase font-medium border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-              Produce
-            </Link>
+            <>
+              <Link href="/create"
+                className="px-5 py-2 text-sm tracking-widest uppercase font-medium border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                Produce
+              </Link>
+              <button
+                onClick={() => logout()}
+                className="text-muted-foreground hover:text-foreground text-sm tracking-wider transition-colors uppercase font-light">
+                Sign Out
+              </button>
+            </>
           ) : (
             <SignInButton />
           )}
@@ -216,7 +225,7 @@ export default function Home() {
                 </Link>
               ) : (
                 <button
-                  onClick={() => { const clerk = require('@clerk/react').useClerk(); clerk.openSignIn(); }}
+                  onClick={() => openSignIn()}
                   className="inline-flex items-center gap-3 px-8 py-3 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-display text-sm tracking-widest uppercase">
                   Produce Here
                   <span>→</span>
@@ -362,7 +371,7 @@ export default function Home() {
             </Link>
           ) : (
             <button
-              onClick={() => { const { useClerk } = require('@clerk/react'); const { openSignIn } = useClerk(); openSignIn(); }}
+              onClick={() => openSignIn()}
               className="inline-flex items-center gap-3 px-12 py-5 bg-primary text-primary-foreground font-display text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-all duration-300 glow-primary">
               Begin Production
             </button>

@@ -9,6 +9,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -945,6 +946,7 @@ function ProjectDetail({
 
 export default function MusicVideos() {
   const { user } = useAuth();
+  const { isReady, isLoading: authLoading } = useRequireAuth();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [deepLinkTrackId, setDeepLinkTrackId] = useState<number | null>(null);
@@ -971,6 +973,15 @@ export default function MusicVideos() {
   const { data: projects, isLoading } = trpc.musicVideo.list.useQuery(undefined, {
     enabled: !!user,
   });
+
+  // Show spinner while Clerk loads or redirect is in progress
+  if (!isReady) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-6 w-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+      </div>
+    );
+  }
 
   if (!user) {
     return (

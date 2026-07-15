@@ -13,6 +13,7 @@ import ConcertTicket from "./pages/ConcertTicket";
 import Campaigns from "./pages/Campaigns";
 import FindYourFrequency from "./pages/FindYourFrequency";
 import MusicVideos from "./pages/MusicVideos";
+import Login from "./pages/Login";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path={"/campaigns"} component={Campaigns} />
       <Route path={"/frequency"} component={FindYourFrequency} />
       <Route path={"/music-videos"} component={MusicVideos} />
+      <Route path={"/login"} component={Login} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

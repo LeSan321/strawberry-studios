@@ -588,3 +588,12 @@
 ### Tests + Checkpoint
 - [x] Add vitest tests for bridge track resolution and frequency pull (7 tests, riffBridge.test.ts)
 - [x] Checkpoint saved
+
+## Studios Sign-In (Clerk Frontend Auth)
+
+- [x] Add /login page with Clerk SignIn component, styled to Studios dark theme
+- [x] Auth redirect guard — unauthenticated users sent to /login?redirect=<original_url> (useRequireAuth hook)
+- [x] Deep-link preservation — after sign-in, redirect back with ?trackId=&source=riff intact
+- [x] Add Sign In button to home page nav (unauthenticated state)
+- [x] Add Sign Out to nav (authenticated state)
+- [x] Checkpoint saved
