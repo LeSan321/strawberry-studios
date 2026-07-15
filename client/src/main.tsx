@@ -38,17 +38,27 @@ queryClient.getMutationCache().subscribe(event => {
   }
 });
 
+const isStudiosDomain = () => {
+  if (typeof window === "undefined") return false;
+  const host = window.location.hostname.toLowerCase();
+  return host === "strawberryriff.studio" || host.endsWith(".strawberryriff.studio");
+};
+
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
       url: "/api/trpc",
       transformer: superjson,
       async fetch(input, init) {
-        // Get Clerk session token and add to Authorization header
-        const token = await (window as any).__clerk?.session?.getToken?.();
-        
+        let token: string | null = null;
+
+        if (isStudiosDomain()) {
+          token = await (window as any).__clerk?.session?.getToken?.() ?? null;
+        }
+
         return globalThis.fetch(input, {
           ...(init ?? {}),
+          credentials: "include",
           headers: {
             ...(init?.headers ?? {}),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -61,12 +71,22 @@ const trpcClient = trpc.createClient({
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-createRoot(document.getElementById("root")!).render(
-  <ClerkProvider publishableKey={clerkPubKey}>
+function AppProviders() {
+  return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
     </trpc.Provider>
-  </ClerkProvider>
+  );
+}
+
+createRoot(document.getElementById("root")!).render(
+  isStudiosDomain() && clerkPubKey ? (
+    <ClerkProvider publishableKey={clerkPubKey}>
+      <AppProviders />
+    </ClerkProvider>
+  ) : (
+    <AppProviders />
+  )
 );

@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useAuth, useClerkSafe } from "@/_core/hooks/useAuth";
 import { SignInButton } from "@/components/SignInButton";
 
 const VENUES = [
@@ -46,6 +46,7 @@ const VENUES = [
 
 export default function Venues() {
   const { user } = useAuth();
+  const { openSignIn } = useClerkSafe();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -152,7 +153,7 @@ export default function Venues() {
                       </Link>
                     ) : (
                       <button
-                        onClick={() => { const { useClerk } = require('@clerk/react'); const { openSignIn } = useClerk(); openSignIn(); }}
+                        onClick={() => openSignIn()}
                         className="inline-flex items-center gap-3 px-6 py-3 border font-display text-sm tracking-widest uppercase transition-all duration-300"
                         style={{ borderColor: venue.accentColor, color: venue.accentColor }}>
                         Sign In to Produce →

@@ -1,11 +1,11 @@
-import { useClerk } from "@clerk/react";
+import { useClerkSafe } from "@/_core/hooks/useAuth";
 
 interface SignInButtonProps {
   className?: string;
 }
 
 export function SignInButton({ className }: SignInButtonProps) {
-  const { openSignIn } = useClerk();
+  const { openSignIn } = useClerkSafe();
 
   return (
     <button

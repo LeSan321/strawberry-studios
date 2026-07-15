@@ -106,6 +106,9 @@
 ## Backlog — Deferred Features
 - [ ] Shot Selector UI on Generate Video flow — modal letting user pick which shot from the Director's Package to use as the video seed (primaryShotIndex param already exists in the procedure)
 - [ ] Concert Ticket Open Graph meta tags — og:title, og:description, og:image for rich social sharing previews
+- [ ] Fix Clerk production-key domain error on Manus preview domains by making frontend auth initialization domain-aware
+- [ ] Add a fallback auth path so sandbox preview can use the existing app session without Clerk initialization errors
+- [ ] Verify preview and production auth behavior after the domain-aware Clerk change
 
 ## Poe API / Veo-3.1 Integration — COMPLETE
 - [x] Build Poe API (Veo-3.1) video generation adapter in videoGeneration.ts

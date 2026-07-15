@@ -1,14 +1,13 @@
 import { Link } from "wouter";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useAuth, useClerkSafe } from "@/_core/hooks/useAuth";
 import { SignInButton } from "@/components/SignInButton";
-import { useClerk } from "@clerk/react";
 
 const TAGLINE = "Where Artists Become Legends";
 const SUB_TAGLINE = "A virtual performance venue system powered by AI. Upload your track, choose your world, and step into the Velvet Strawberry Jazz Club.";
 
 export default function Home() {
   const { user, logout } = useAuth();
-  const { openSignIn } = useClerk();
+  const { openSignIn } = useClerkSafe();
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">

@@ -13,12 +13,13 @@
 
 import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { SignIn, useUser } from "@clerk/react";
+import { SignIn } from "@clerk/react";
+import { useUserSafe } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 
 export default function Login() {
   const [, navigate] = useLocation();
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded } = useUserSafe();
 
   // Parse the redirect target from query params
   const redirectTarget = (() => {

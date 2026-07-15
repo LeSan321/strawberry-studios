@@ -34,6 +34,9 @@ importers:
       '@clerk/react':
         specifier: ^6.12.3
         version: 6.12.3(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@clerk/shared':
+        specifier: 4.25.3
+        version: 4.25.3(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.64.0(react@19.2.1))

@@ -9,10 +9,9 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useClerk } from "@clerk/react";
+import { useAuth, useClerkSafe } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -946,7 +945,7 @@ function ProjectDetail({
 
 export default function MusicVideos() {
   const { user, loading: authLoading } = useAuth();
-  const { openSignIn } = useClerk();
+  const { openSignIn } = useClerkSafe();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [deepLinkTrackId, setDeepLinkTrackId] = useState<number | null>(null);

@@ -19,6 +19,7 @@
     "@clerk/backend": "^3.11.5",
     "@clerk/express": "^2.1.41",
     "@clerk/react": "^6.12.3",
+    "@clerk/shared": "4.25.3",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
