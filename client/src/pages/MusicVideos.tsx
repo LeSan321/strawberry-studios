@@ -9,7 +9,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { useClerk } from "@clerk/react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -945,8 +945,8 @@ function ProjectDetail({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function MusicVideos() {
-  const { user } = useAuth();
-  const { isReady, isLoading: authLoading } = useRequireAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { openSignIn } = useClerk();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [deepLinkTrackId, setDeepLinkTrackId] = useState<number | null>(null);
@@ -974,8 +974,8 @@ export default function MusicVideos() {
     enabled: !!user,
   });
 
-  // Show spinner while Clerk loads or redirect is in progress
-  if (!isReady) {
+  // Show spinner while Clerk is still loading
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="h-6 w-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
@@ -983,14 +983,27 @@ export default function MusicVideos() {
     );
   }
 
+  // Not signed in — show inline prompt with Clerk modal trigger
   if (!user) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <p className="text-zinc-400">Sign in to access Music Video generation.</p>
-          <Link href="/" className="text-primary hover:underline text-sm">
-            ← Back to home
-          </Link>
+        <div className="text-center space-y-6 max-w-sm px-6">
+          <div className="text-4xl">🎬</div>
+          <h2 className="font-display text-2xl tracking-wide">Music Video Studio</h2>
+          <p className="text-zinc-400 text-sm leading-relaxed">
+            Sign in to your Strawberry Studios account to start generating music videos.
+          </p>
+          <button
+            onClick={() => openSignIn()}
+            className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground font-display text-sm tracking-widest uppercase hover:bg-primary/90 transition-all duration-300"
+          >
+            Sign In to Studios
+          </button>
+          <div>
+            <Link href="/" className="text-zinc-500 hover:text-zinc-300 text-xs">
+              ← Back to home
+            </Link>
+          </div>
         </div>
       </div>
     );
