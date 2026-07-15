@@ -8,6 +8,8 @@ import { ENV } from "./env";
 // Studios stores it as VITE_CLERK_PUBLISHABLE_KEY (for Vite frontend access).
 // We must alias it so the Clerk SDK can find it at the standard env var name.
 // NOTE: ENV is a static object frozen at import time. Always read directly from
+// Keys updated 2026-07-15: all three Clerk keys now point to the Blooming Frontier
+// (Strawberry Studios) Clerk app — clerk.strawberryriff.studio (pk_live_ / sk_live_).
 // process.env for Clerk keys to ensure Railway-injected values are picked up.
 const clerkPublishableKey = () =>
   process.env.CLERK_PUBLISHABLE_KEY ||
