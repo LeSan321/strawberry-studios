@@ -42,6 +42,14 @@ async function startServer() {
     if (req.path.startsWith("/api/bridge/")) return next();
     return getClerkMiddleware()(req, res, next);
   });
+  // Public config endpoint — serves VITE_* vars at runtime so Vite build-time
+  // injection is not required. The frontend fetches this before rendering.
+  app.get("/api/config", (_req, res) => {
+    res.json({
+      clerkPublishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY || process.env.CLERK_PUBLISHABLE_KEY || "",
+    });
+  });
+
   // Audio file upload
   registerAudioUploadRoute(app);
   // Campaign PDF download

@@ -69,8 +69,6 @@ const trpcClient = trpc.createClient({
   ],
 });
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
 function AppProviders() {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
@@ -81,12 +79,35 @@ function AppProviders() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(
-  isStudiosDomain() && clerkPubKey ? (
-    <ClerkProvider publishableKey={clerkPubKey}>
-      <AppProviders />
-    </ClerkProvider>
-  ) : (
-    <AppProviders />
-  )
-);
+async function bootstrap() {
+  // Fetch the Clerk publishable key from the server at runtime.
+  // This avoids the Vite build-time injection problem on Railway where
+  // VITE_* vars are runtime-only and not available during Docker build.
+  let clerkPubKey: string | null = null;
+
+  if (isStudiosDomain()) {
+    try {
+      const res = await fetch("/api/config");
+      if (res.ok) {
+        const cfg = await res.json();
+        clerkPubKey = cfg.clerkPublishableKey || null;
+      }
+    } catch (e) {
+      console.warn("[Config] Failed to fetch /api/config, Clerk will not be initialized:", e);
+    }
+  }
+
+  const root = document.getElementById("root")!;
+
+  if (clerkPubKey) {
+    createRoot(root).render(
+      <ClerkProvider publishableKey={clerkPubKey}>
+        <AppProviders />
+      </ClerkProvider>
+    );
+  } else {
+    createRoot(root).render(<AppProviders />);
+  }
+}
+
+bootstrap();
