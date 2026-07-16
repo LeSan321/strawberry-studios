@@ -29,8 +29,36 @@ WORKDIR /app
 # Copy all source (patches/ must be present before pnpm install)
 COPY . .
 
-# Install Node dependencies and build frontend + server
-RUN npm install -g corepack@latest && corepack pnpm install && corepack pnpm run build
+# Install Node dependencies
+RUN npm install -g corepack@latest && corepack pnpm install
+
+# ─── VITE_ build-time variables ───────────────────────────────────────────────
+# Vite bakes import.meta.env.VITE_* into the JS bundle at build time.
+# These must be available as environment variables during `pnpm build`.
+# In Railway: add each VITE_ var to the service Variables AND check
+# "Available at build time" (or pass as --build-arg in the Railway config).
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ARG VITE_APP_TITLE
+ARG VITE_APP_ID
+ARG VITE_OAUTH_PORTAL_URL
+ARG VITE_FRONTEND_FORGE_API_KEY
+ARG VITE_FRONTEND_FORGE_API_URL
+ARG VITE_ANALYTICS_ENDPOINT
+ARG VITE_ANALYTICS_WEBSITE_ID
+ARG VITE_APP_LOGO
+
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY \
+    VITE_APP_TITLE=$VITE_APP_TITLE \
+    VITE_APP_ID=$VITE_APP_ID \
+    VITE_OAUTH_PORTAL_URL=$VITE_OAUTH_PORTAL_URL \
+    VITE_FRONTEND_FORGE_API_KEY=$VITE_FRONTEND_FORGE_API_KEY \
+    VITE_FRONTEND_FORGE_API_URL=$VITE_FRONTEND_FORGE_API_URL \
+    VITE_ANALYTICS_ENDPOINT=$VITE_ANALYTICS_ENDPOINT \
+    VITE_ANALYTICS_WEBSITE_ID=$VITE_ANALYTICS_WEBSITE_ID \
+    VITE_APP_LOGO=$VITE_APP_LOGO
+
+# Build frontend + server (Vite now has access to VITE_ vars above)
+RUN corepack pnpm run build
 
 ENV NODE_ENV=production
 
